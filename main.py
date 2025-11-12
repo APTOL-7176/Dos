@@ -115,10 +115,25 @@ def main() -> int:
             if menu_result == MenuResult.QUIT:
                 break
             elif menu_result == MenuResult.NEW_GAME:
-                logger.info("새 게임 시작 (구현 예정)")
-                # TODO: 파티 구성 → 특성 선택 → 패시브 선택 → 게임 시작
-                print("\n[TODO] 파티 구성 시스템 구현 필요")
-                break
+                logger.info("새 게임 시작 - 파티 구성")
+
+                # 파티 구성
+                from src.ui.party_setup import run_party_setup
+                party = run_party_setup(display.console, display.context)
+
+                if party:
+                    logger.info(f"파티 구성 완료: {len(party)}명")
+                    for i, member in enumerate(party):
+                        logger.info(
+                            f"  {i+1}. {member.character_name} ({member.job_name})"
+                        )
+
+                    # TODO: 특성 선택 → 패시브 선택 → 게임 시작
+                    print("\n[TODO] 특성/패시브 선택 및 게임 시작 구현 필요")
+                    break
+                else:
+                    logger.info("파티 구성 취소 - 메인 메뉴로")
+                    continue
             elif menu_result == MenuResult.CONTINUE:
                 logger.info("게임 계속하기 (구현 예정)")
                 # TODO: 세이브 로드

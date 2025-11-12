@@ -49,17 +49,27 @@ class MainMenu:
         # 메뉴 결과
         self.result: MenuResult = MenuResult.NONE
 
-        # 타이틀 아스키 아트 (컬러풀)
-        self.title_art = [
-            "  ____                             __   ____  __       ____       ____           ",
-            " |  _ \\  __ ___      ___ __       / /  / ___|| |_ ___|  _ \\ __ _|  _ \\",
-            " | | | |/ _` \\ \\ /\\ / / '_ \\     / /   \\___ \\|  _/ _ \\ |_) / _` | |_) |",
-            " | |_| | (_| |\\ V  V /| | | |   / /     ___) | ||  __/  _ | (_| |  _ <",
-            " |____/ \\__,_| \\_/\\_/ |_| |_|  /_/     |____/ \\__\\___|_| \\_\\__,_|_| \\_\\",
-            "",
-            "                        ★ 별빛의 여명 ★",
-            "",
-            "            A Roguelike RPG with ATB + Brave Combat",
+        # 타이틀 텍스트 (단순)
+        self.title = "Dawn Of Stellar"
+        self.subtitle = "별빛의 여명"
+
+        # 각 글자에 적용할 색상 (무지개 그라데이션)
+        self.title_colors = [
+            (255, 100, 100),   # D - 빨강
+            (255, 180, 100),   # a - 주황
+            (255, 255, 100),   # w - 노랑
+            (100, 255, 100),   # n - 초록
+            (100, 200, 255),   # (공백) - 하늘
+            (100, 150, 255),   # O - 파랑
+            (180, 100, 255),   # f - 남색
+            (255, 100, 255),   # (공백) - 보라
+            (255, 120, 180),   # S - 분홍
+            (255, 150, 150),   # t - 연빨강
+            (255, 200, 120),   # e - 연주황
+            (255, 255, 150),   # l - 연노랑
+            (150, 255, 150),   # l - 연초록
+            (150, 220, 255),   # a - 연하늘
+            (180, 150, 255),   # r - 연보라
         ]
 
         # 메뉴 아이템 생성
@@ -164,16 +174,27 @@ class MainMenu:
         # 배경 클리어
         console.clear()
 
-        # 타이틀 렌더링 (중앙 상단)
-        title_y = 5
-        for i, line in enumerate(self.title_art):
-            title_x = (self.screen_width - len(line)) // 2
+        # 타이틀 렌더링 (중앙 상단) - 각 글자에 다른 색상 적용
+        title_y = 10
+        title_x = (self.screen_width - len(self.title)) // 2
+
+        for i, char in enumerate(self.title):
+            color = self.title_colors[i % len(self.title_colors)]
             console.print(
-                title_x,
-                title_y + i,
-                line,
-                fg=Colors.UI_TEXT_SELECTED
+                title_x + i,
+                title_y,
+                char,
+                fg=color
             )
+
+        # 서브타이틀 (별빛의 여명)
+        subtitle_x = (self.screen_width - len(self.subtitle)) // 2
+        console.print(
+            subtitle_x,
+            title_y + 2,
+            self.subtitle,
+            fg=(200, 200, 255)
+        )
 
         # 버전 정보
         version = "v5.0.0"
