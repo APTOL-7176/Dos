@@ -52,7 +52,7 @@ class InputHandler(tcod.event.EventDispatch[Optional[GameAction]]):
     def __init__(self) -> None:
         self.logger = get_logger("input")
 
-        # 키 바인딩
+        # 키 바인딩 (KeySym 사용)
         self.key_bindings: Dict[int, GameAction] = {
             # 이동 (화살표)
             tcod.event.KeySym.UP: GameAction.MOVE_UP,
@@ -71,32 +71,41 @@ class InputHandler(tcod.event.EventDispatch[Optional[GameAction]]):
             tcod.event.KeySym.KP_3: GameAction.MOVE_DOWN_RIGHT,
             tcod.event.KeySym.KP_5: GameAction.WAIT,
 
-            # 이동 (vi 키)
-            tcod.event.KeySym.k: GameAction.MOVE_UP,
-            tcod.event.KeySym.j: GameAction.MOVE_DOWN,
-            tcod.event.KeySym.h: GameAction.MOVE_LEFT,
-            tcod.event.KeySym.l: GameAction.MOVE_RIGHT,
-            tcod.event.KeySym.y: GameAction.MOVE_UP_LEFT,
-            tcod.event.KeySym.u: GameAction.MOVE_UP_RIGHT,
-            tcod.event.KeySym.b: GameAction.MOVE_DOWN_LEFT,
-            tcod.event.KeySym.n: GameAction.MOVE_DOWN_RIGHT,
-
-            # 행동
-            tcod.event.KeySym.e: GameAction.INTERACT,
-            tcod.event.KeySym.g: GameAction.PICKUP,
+            # 행동 (대문자 사용)
             tcod.event.KeySym.SPACE: GameAction.ATTACK,
             tcod.event.KeySym.PERIOD: GameAction.WAIT,
 
-            # 메뉴
-            tcod.event.KeySym.i: GameAction.OPEN_INVENTORY,
-            tcod.event.KeySym.c: GameAction.OPEN_CHARACTER,
-            tcod.event.KeySym.s: GameAction.OPEN_SKILLS,
-            tcod.event.KeySym.m: GameAction.OPEN_MAP,
-
-            # 시스템
+            # 시스템 (Z 선택, X 취소)
             tcod.event.KeySym.ESCAPE: GameAction.ESCAPE,
-            tcod.event.KeySym.q: GameAction.QUIT,
             tcod.event.KeySym.RETURN: GameAction.CONFIRM,
+        }
+
+        # 문자 키 바인딩 (소문자 ord 값)
+        self.char_bindings: Dict[str, GameAction] = {
+            # vi 키
+            'k': GameAction.MOVE_UP,
+            'j': GameAction.MOVE_DOWN,
+            'h': GameAction.MOVE_LEFT,
+            'l': GameAction.MOVE_RIGHT,
+            'y': GameAction.MOVE_UP_LEFT,
+            'u': GameAction.MOVE_UP_RIGHT,
+            'b': GameAction.MOVE_DOWN_LEFT,
+            'n': GameAction.MOVE_DOWN_RIGHT,
+
+            # 행동
+            'e': GameAction.INTERACT,
+            'g': GameAction.PICKUP,
+
+            # 메뉴
+            'i': GameAction.OPEN_INVENTORY,
+            'c': GameAction.OPEN_CHARACTER,
+            's': GameAction.OPEN_SKILLS,
+            'm': GameAction.OPEN_MAP,
+
+            # 시스템 (Z = 선택, X = 취소)
+            'z': GameAction.CONFIRM,
+            'x': GameAction.CANCEL,
+            'q': GameAction.QUIT,
         }
 
     def ev_quit(self, event: tcod.event.Quit) -> Optional[GameAction]:
@@ -105,7 +114,17 @@ class InputHandler(tcod.event.EventDispatch[Optional[GameAction]]):
 
     def ev_keydown(self, event: tcod.event.KeyDown) -> Optional[GameAction]:
         """키 다운 이벤트"""
+        # KeySym으로 먼저 확인
         action = self.key_bindings.get(event.sym)
+
+        # 문자 키로 확인 (mod가 없을 때만)
+        if not action and event.mod == 0:
+            # Unicode 문자로 변환 시도
+            try:
+                char = chr(event.sym)
+                action = self.char_bindings.get(char.lower())
+            except (ValueError, OverflowError):
+                pass
 
         if action:
             self.logger.debug(f"키 입력: {event.sym} -> {action.value}")

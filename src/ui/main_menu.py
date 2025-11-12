@@ -1,0 +1,235 @@
+"""
+Main Menu - 메인 메뉴
+
+게임 시작 시 표시되는 메인 메뉴
+"""
+
+import tcod.console
+import tcod.event
+from typing import Optional
+from enum import Enum
+
+from src.ui.cursor_menu import CursorMenu, MenuItem
+from src.ui.tcod_display import Colors
+from src.ui.input_handler import GameAction
+from src.core.logger import get_logger
+
+
+class MenuResult(Enum):
+    """메뉴 결과"""
+    NEW_GAME = "new_game"
+    CONTINUE = "continue"
+    SHOP = "shop"
+    SETTINGS = "settings"
+    QUIT = "quit"
+    NONE = "none"
+
+
+class MainMenu:
+    """
+    메인 메뉴
+
+    - 새 게임
+    - 계속하기
+    - 상점
+    - 설정
+    - 종료
+    """
+
+    def __init__(self, screen_width: int = 80, screen_height: int = 50):
+        """
+        Args:
+            screen_width: 화면 너비
+            screen_height: 화면 높이
+        """
+        self.screen_width = screen_width
+        self.screen_height = screen_height
+        self.logger = get_logger("main_menu")
+
+        # 메뉴 결과
+        self.result: MenuResult = MenuResult.NONE
+
+        # 타이틀 아스키 아트 (컬러풀)
+        self.title_art = [
+            "  ____                             __   ____  __       ____       ____           ",
+            " |  _ \\  __ ___      ___ __       / /  / ___|| |_ ___|  _ \\ __ _|  _ \\",
+            " | | | |/ _` \\ \\ /\\ / / '_ \\     / /   \\___ \\|  _/ _ \\ |_) / _` | |_) |",
+            " | |_| | (_| |\\ V  V /| | | |   / /     ___) | ||  __/  _ | (_| |  _ <",
+            " |____/ \\__,_| \\_/\\_/ |_| |_|  /_/     |____/ \\__\\___|_| \\_\\__,_|_| \\_\\",
+            "",
+            "                        ★ 별빛의 여명 ★",
+            "",
+            "            A Roguelike RPG with ATB + Brave Combat",
+        ]
+
+        # 메뉴 아이템 생성
+        menu_items = [
+            MenuItem(
+                text="새 게임",
+                action=self._new_game,
+                description="새로운 모험을 시작합니다"
+            ),
+            MenuItem(
+                text="계속하기",
+                action=self._continue_game,
+                enabled=False,  # TODO: 세이브 파일 확인 후 활성화
+                description="저장된 게임을 불러옵니다"
+            ),
+            MenuItem(
+                text="상점",
+                action=self._open_shop,
+                description="별빛의 파편으로 직업과 패시브를 구매합니다"
+            ),
+            MenuItem(
+                text="설정",
+                action=self._open_settings,
+                description="게임 설정을 변경합니다"
+            ),
+            MenuItem(
+                text="종료",
+                action=self._quit_game,
+                description="게임을 종료합니다"
+            ),
+        ]
+
+        # 커서 메뉴 생성 (중앙 하단 배치)
+        menu_width = 40
+        menu_x = (screen_width - menu_width) // 2
+        menu_y = screen_height // 2 + 3
+
+        self.menu = CursorMenu(
+            title="",
+            items=menu_items,
+            x=menu_x,
+            y=menu_y,
+            width=menu_width,
+            show_description=True
+        )
+
+    def _new_game(self) -> None:
+        """새 게임 시작"""
+        self.logger.info("새 게임 선택")
+        self.result = MenuResult.NEW_GAME
+
+    def _continue_game(self) -> None:
+        """게임 계속하기"""
+        self.logger.info("계속하기 선택")
+        self.result = MenuResult.CONTINUE
+
+    def _open_shop(self) -> None:
+        """상점 열기"""
+        self.logger.info("상점 선택")
+        self.result = MenuResult.SHOP
+
+    def _open_settings(self) -> None:
+        """설정 열기"""
+        self.logger.info("설정 선택")
+        self.result = MenuResult.SETTINGS
+
+    def _quit_game(self) -> None:
+        """게임 종료"""
+        self.logger.info("종료 선택")
+        self.result = MenuResult.QUIT
+
+    def handle_input(self, action: GameAction) -> bool:
+        """
+        입력 처리
+
+        Args:
+            action: 게임 액션
+
+        Returns:
+            메뉴가 종료되었으면 True
+        """
+        if action == GameAction.MOVE_UP:
+            self.menu.move_cursor_up()
+        elif action == GameAction.MOVE_DOWN:
+            self.menu.move_cursor_down()
+        elif action == GameAction.CONFIRM:
+            self.menu.execute_selected()
+            return self.result != MenuResult.NONE
+        elif action == GameAction.ESCAPE or action == GameAction.QUIT:
+            self.result = MenuResult.QUIT
+            return True
+
+        return False
+
+    def render(self, console: tcod.console.Console) -> None:
+        """
+        메인 메뉴 렌더링
+
+        Args:
+            console: 렌더링할 콘솔
+        """
+        # 배경 클리어
+        console.clear()
+
+        # 타이틀 렌더링 (중앙 상단)
+        title_y = 5
+        for i, line in enumerate(self.title_art):
+            title_x = (self.screen_width - len(line)) // 2
+            console.print(
+                title_x,
+                title_y + i,
+                line,
+                fg=Colors.UI_TEXT_SELECTED
+            )
+
+        # 버전 정보
+        version = "v5.0.0"
+        console.print(
+            self.screen_width - len(version) - 2,
+            self.screen_height - 2,
+            version,
+            fg=Colors.GRAY
+        )
+
+        # 조작 안내
+        controls = "방향키: 이동  Z: 선택  X: 취소"
+        console.print(
+            2,
+            self.screen_height - 2,
+            controls,
+            fg=Colors.GRAY
+        )
+
+        # 메뉴 렌더링
+        self.menu.render(console)
+
+    def reset(self) -> None:
+        """메뉴 상태 초기화"""
+        self.result = MenuResult.NONE
+
+
+def run_main_menu(console: tcod.console.Console, context: tcod.context.Context) -> MenuResult:
+    """
+    메인 메뉴 실행
+
+    Args:
+        console: TCOD 콘솔
+        context: TCOD 컨텍스트
+
+    Returns:
+        메뉴 선택 결과
+    """
+    from src.ui.input_handler import InputHandler
+
+    menu = MainMenu(console.width, console.height)
+    handler = InputHandler()
+
+    while True:
+        # 렌더링
+        menu.render(console)
+        context.present(console)
+
+        # 입력 처리
+        for event in tcod.event.wait():
+            action = handler.dispatch(event)
+
+            if action:
+                if menu.handle_input(action):
+                    return menu.result
+
+            # 윈도우 닫기
+            if isinstance(event, tcod.event.Quit):
+                return MenuResult.QUIT

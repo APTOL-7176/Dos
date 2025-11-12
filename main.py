@@ -99,37 +99,41 @@ def main() -> int:
         logger.info(f"디버그 모드: {config.debug_mode}")
         logger.info("=" * 60)
 
-        # TODO: 게임 엔진 초기화
-        # from src.core.game_engine import GameEngine
-        # engine = GameEngine(config)
-        # engine.run()
+        # TCOD 디스플레이 초기화
+        from src.ui.tcod_display import get_display
+        from src.ui.main_menu import run_main_menu, MenuResult
 
-        print("\n" + "=" * 60)
-        print("  Dawn of Stellar - 별빛의 여명")
-        print("  Version 5.0.0 (재구조화)")
-        print("=" * 60)
-        print()
-        print("[*] 게임 시스템 초기화 중...")
-        print()
-        print("[OK] 설정 로드 완료")
-        print("[OK] 로거 초기화 완료")
-        print("[OK] 이벤트 버스 초기화 완료")
-        print()
-        print("[!] 게임 엔진이 아직 구현되지 않았습니다.")
-        print("    구조와 설정만 준비된 상태입니다.")
-        print()
-        print("다음 단계:")
-        print("  1. src/core/game_engine.py 구현")
-        print("  2. 전투 시스템 구현 (src/combat/)")
-        print("  3. 캐릭터 시스템 구현 (src/character/)")
-        print("  4. 월드 시스템 구현 (src/world/)")
-        print()
-        print("Claude Code 명령어를 사용하여 개발을 진행하세요:")
-        print("  /add-character <이름>  - 새 캐릭터 클래스 추가")
-        print("  /add-skill <이름>      - 새 스킬 추가")
-        print("  /test                  - 테스트 실행")
-        print("  /build                 - 프로젝트 빌드")
-        print()
+        display = get_display()
+        logger.info("TCOD 디스플레이 초기화 완료")
+
+        # 메인 게임 루프
+        while True:
+            # 메인 메뉴 실행
+            menu_result = run_main_menu(display.console, display.context)
+            logger.info(f"메인 메뉴 결과: {menu_result.value}")
+
+            if menu_result == MenuResult.QUIT:
+                break
+            elif menu_result == MenuResult.NEW_GAME:
+                logger.info("새 게임 시작 (구현 예정)")
+                # TODO: 파티 구성 → 특성 선택 → 패시브 선택 → 게임 시작
+                print("\n[TODO] 파티 구성 시스템 구현 필요")
+                break
+            elif menu_result == MenuResult.CONTINUE:
+                logger.info("게임 계속하기 (구현 예정)")
+                # TODO: 세이브 로드
+                break
+            elif menu_result == MenuResult.SHOP:
+                logger.info("상점 열기 (구현 예정)")
+                # TODO: 상점 UI
+                break
+            elif menu_result == MenuResult.SETTINGS:
+                logger.info("설정 열기 (구현 예정)")
+                # TODO: 설정 UI
+                break
+
+        # 정리
+        display.close()
 
         logger.info("게임 종료")
         return 0
