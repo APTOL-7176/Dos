@@ -59,11 +59,24 @@ class DamageCalculator:
             attacker: 공격자
             defender: 방어자
             skill_multiplier: 스킬 배율
-            **kwargs: 추가 옵션
+            **kwargs: 추가 옵션 (ignore_evasion: 회피 무시)
 
         Returns:
             DamageResult
         """
+        # 명중 판정 (회피 무시가 아닌 경우)
+        ignore_evasion = kwargs.get("ignore_evasion", False)
+        if not ignore_evasion and not self.check_hit(attacker, defender):
+            # 회피 성공 - 데미지 0
+            return DamageResult(
+                base_damage=0,
+                final_damage=0,
+                is_critical=False,
+                multiplier=0,
+                variance=0,
+                details={"miss": True}
+            )
+
         # 스탯 추출
         attacker_atk = self._get_attack_stat(attacker)
         defender_def = self._get_defense_stat(defender)
@@ -190,11 +203,24 @@ class DamageCalculator:
             defender: 방어자
             skill_multiplier: 스킬 배율
             element: 속성 (fire, ice, lightning 등)
-            **kwargs: 추가 옵션
+            **kwargs: 추가 옵션 (ignore_evasion: 회피 무시)
 
         Returns:
             DamageResult
         """
+        # 명중 판정 (회피 무시가 아닌 경우)
+        ignore_evasion = kwargs.get("ignore_evasion", False)
+        if not ignore_evasion and not self.check_hit(attacker, defender):
+            # 회피 성공 - 데미지 0
+            return DamageResult(
+                base_damage=0,
+                final_damage=0,
+                is_critical=False,
+                multiplier=0,
+                variance=0,
+                details={"miss": True}
+            )
+
         # 마법 스탯 추출
         attacker_mag = self._get_magic_stat(attacker)
         defender_spr = self._get_spirit_stat(defender)
@@ -263,6 +289,52 @@ class DamageCalculator:
             if hasattr(character, attr):
                 return getattr(character, attr)
         return 10  # 기본값
+
+    def _get_accuracy_stat(self, character: Any) -> int:
+        """명중률 스탯 추출"""
+        for attr in ["accuracy", "acc", "hit_rate"]:
+            if hasattr(character, attr):
+                return getattr(character, attr)
+        return 50  # 기본값
+
+    def _get_evasion_stat(self, character: Any) -> int:
+        """회피율 스탯 추출"""
+        for attr in ["evasion", "eva", "dodge"]:
+            if hasattr(character, attr):
+                return getattr(character, attr)
+        return 10  # 기본값
+
+    def check_hit(self, attacker: Any, defender: Any) -> bool:
+        """
+        명중 판정
+
+        공식: 명중률 - 회피율 = 최종 명중률 (최소 5%, 최대 95%)
+
+        Args:
+            attacker: 공격자
+            defender: 방어자
+
+        Returns:
+            명중 여부
+        """
+        accuracy = self._get_accuracy_stat(attacker)
+        evasion = self._get_evasion_stat(defender)
+
+        # 최종 명중률 계산 (명중률 - 회피율)
+        hit_chance = accuracy - evasion
+
+        # 최소/최대 제한 (5% ~ 95%)
+        hit_chance = max(5, min(95, hit_chance))
+
+        # 확률 변환 (0.0 ~ 1.0)
+        hit_chance_pct = hit_chance / 100.0
+
+        is_hit = random.random() < hit_chance_pct
+
+        if not is_hit:
+            self.logger.debug(f"공격 회피! {defender.name}가 {attacker.name}의 공격을 피했다")
+
+        return is_hit
 
     def _check_critical(self, attacker: Any) -> bool:
         """
