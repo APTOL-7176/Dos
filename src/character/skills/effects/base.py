@@ -7,6 +7,7 @@ class EffectType(Enum):
     DAMAGE = "damage"
     HEAL = "heal"
     GIMMICK = "gimmick"
+    BUFF = "buff"
 
 @dataclass
 class EffectResult:
