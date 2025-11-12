@@ -35,6 +35,14 @@ traits:
   name: 마법 전사
   description: 물리/마법 공격력 중 높은 쪽으로 데미지 계산
   type: passive
+- id: arcane_blade_dance
+  name: 비전 검무
+  description: 물리 공격 후 마법 스킬 사용 시 MP 소모 50% 감소, 역도 동일
+  type: trigger
+- id: rune_resonance
+  name: 룬 공명
+  description: 룬 스택 5개 이상 시 모든 공격이 물리+마법 하이브리드로 계산
+  type: conditional
 skills:
 - engrave_rune
 - rune_burst

@@ -35,6 +35,14 @@ traits:
   name: 집중의 힘
   description: 행동하지 않고 대기 시 다음 공격 위력 +50% (최대 3턴)
   type: passive
+- id: long_range_mastery
+  name: 장거리 지배
+  description: 첫 공격 시 100% 크리티컬, 이후 턴마다 크리티컬 확률 -20%
+  type: trigger
+- id: steady_hands
+  name: 안정된 손
+  description: 공격 시 명중률 무시 (100% 적중), 단 이동 시 다음 턴 비활성화
+  type: conditional
 skills:
 - precise_aim
 - headshot

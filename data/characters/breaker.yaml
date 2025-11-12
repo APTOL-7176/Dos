@@ -35,6 +35,14 @@ traits:
   name: 방패 파괴자
   description: 보호막 무시 40%
   type: passive
+- id: ruthless_breaker
+  name: 무자비한 파괴자
+  description: BREAK 상태의 적 공격 시 추가 데미지 +80%, 스턴 기간 +1턴
+  type: trigger
+- id: momentum_crush
+  name: 연쇄 파괴
+  description: BREAK 발동 시 다음 BRV 공격 위력 +60% (3턴)
+  type: trigger
 skills:
 - crush_strike
 - break_hit

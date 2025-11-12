@@ -35,6 +35,14 @@ traits:
   name: 밤의 힘
   description: HP가 낮을수록 공격력 증가 (HP 10%당 +10%)
   type: passive
+- id: blood_pool
+  name: 피의 저장고
+  description: 과잉 흡혈(HP 최대치 초과)을 혈액 풀로 저장 (최대 200), 사망 시 혈액 풀 소모하여 부활
+  type: trigger
+- id: crimson_frenzy
+  name: 진홍의 광란
+  description: 흡혈로 회복 시 20% 확률로 즉시 추가 공격
+  type: trigger
 skills:
 - blood_drain
 - blood_lance

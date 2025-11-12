@@ -128,9 +128,51 @@ def main() -> int:
                             f"  {i+1}. {member.character_name} ({member.job_name})"
                         )
 
-                    # TODO: 특성 선택 → 패시브 선택 → 게임 시작
-                    print("\n[TODO] 특성/패시브 선택 및 게임 시작 구현 필요")
-                    break
+                    # 특성 선택
+                    from src.ui.trait_selection import run_trait_selection
+                    trait_selections = run_trait_selection(
+                        display.console,
+                        display.context,
+                        party
+                    )
+
+                    if trait_selections:
+                        logger.info(f"특성 선택 완료: {len(trait_selections)}명")
+                        for traits in trait_selections:
+                            logger.info(
+                                f"  {traits.character_name} ({traits.job_name}): "
+                                f"{', '.join([t.name for t in traits.selected_traits])}"
+                            )
+
+                        # 패시브 선택
+                        from src.ui.passive_selection import run_passive_selection
+                        passive_selection = run_passive_selection(
+                            display.console,
+                            display.context
+                        )
+
+                        if passive_selection:
+                            logger.info(
+                                f"패시브 선택 완료: {len(passive_selection.passives)}개, "
+                                f"총 코스트 {passive_selection.total_cost}"
+                            )
+                            for passive in passive_selection.passives:
+                                logger.info(
+                                    f"  [{passive.cost}] {passive.name}"
+                                )
+
+                            # TODO: 게임 시작 (전투 시스템)
+                            print("\n[TODO] 게임 시작 - 전투 시스템 구현 필요")
+                            print(f"파티: {[m.character_name for m in party]}")
+                            print(f"특성 선택: {len(trait_selections)}명 완료")
+                            print(f"패시브: {[p.name for p in passive_selection.passives]}")
+                            break
+                        else:
+                            logger.info("패시브 선택 취소 - 메인 메뉴로")
+                            continue
+                    else:
+                        logger.info("특성 선택 취소 - 메인 메뉴로")
+                        continue
                 else:
                     logger.info("파티 구성 취소 - 메인 메뉴로")
                     continue

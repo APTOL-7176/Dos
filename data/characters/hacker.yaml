@@ -35,6 +35,14 @@ traits:
   name: 백도어 접근
   description: 전투 시작 시 해킹 스택 3개로 시작
   type: passive
+- id: exploit_vulnerability
+  name: 취약점 악용
+  description: 디버프 3개 이상 걸린 적 공격 시 데미지 +100%
+  type: conditional
+- id: firewall_breach
+  name: 방화벽 침투
+  description: 적의 방어 버프 효과 50% 무시
+  type: passive
 skills:
 - hack_attempt
 - system_overload
