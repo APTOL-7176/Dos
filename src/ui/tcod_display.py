@@ -127,15 +127,24 @@ class TCODDisplay:
                 if Path(font_path).exists():
                     # 타일 크기 설정
                     # char_spacing_adjust를 사용하여 글자 간격 조정
-                    # 양수: 타일을 더 넓게 만들어 글자가 타일을 가득 채움 (간격 감소)
-                    # 음수: 타일을 더 좁게 만들어 간격 증가
-                    char_width = font_size // 2 + char_spacing_adjust
+                    # 폰트를 셀보다 크게 렌더링하여 공백을 최소화
                     char_height = font_size // 2
+                    char_width = char_height - char_spacing_adjust  # 셀을 좁게
+
+                    # 폰트는 셀보다 크게 렌더링
+                    font_render_width = char_width + 4
+                    font_render_height = char_height + 4
 
                     self.tileset = tcod.tileset.load_truetype_font(
                         font_path,
-                        char_width,
-                        char_height
+                        font_render_width,
+                        font_render_height
+                    )
+                    # 셀 크기 재조정 (폰트가 셀을 넘치도록)
+                    self.tileset = self.tileset.remap(
+                        columns=self.tileset.tiles.shape[1],
+                        rows=self.tileset.tiles.shape[0],
+                        charmap=self.tileset.charmap
                     )
                     self.logger.info(f"폰트 로드 성공: {font_path} (셀: {char_width}x{char_height}, 간격 조정: {char_spacing_adjust})")
                     break
@@ -169,7 +178,8 @@ class TCODDisplay:
                 rows=self.screen_height,
                 tileset=self.tileset,
                 title="Dawn of Stellar - 별빛의 여명",
-                vsync=self.config.get("display.vsync", True)
+                vsync=self.config.get("display.vsync", True),
+                renderer=tcod.context.RENDERER_SDL2  # SDL2 렌더러 사용
             )
         else:
             self.context = tcod.context.new_terminal(
