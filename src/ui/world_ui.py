@@ -66,7 +66,7 @@ class WorldUI:
             return True
 
         # 인벤토리 열기
-        if action == GameAction.MENU:
+        if action == GameAction.MENU or action == GameAction.OPEN_INVENTORY:
             if self.inventory and self.party and console and context:
                 from src.ui.inventory_ui import open_inventory
                 open_inventory(console, context, self.inventory, self.party)
