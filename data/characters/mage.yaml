@@ -1,0 +1,67 @@
+class_name: 마법사
+description: 마법의 기초를 완벽하게 다루는 마법사
+archetype: 마법 딜러
+base_stats:
+  hp: 121
+  mp: 86
+  init_brv: 800
+  physical_attack: 43
+  physical_defense: 33
+  magic_attack: 78
+  magic_defense: 67
+  speed: 58
+stat_growth:
+  hp: 8
+  mp: 8
+  init_brv: 40
+  physical_attack: 2.0
+  physical_defense: 1.5
+  magic_attack: 5.5
+  magic_defense: 4.0
+  speed: 3.5
+gimmick:
+  type: elemental_counter
+  name: 원소 조합
+  description: 화염/빙결/번개 원소를 조합하여 강력한 마법 발동
+  elements:
+  - id: fire
+    name: 화염
+    max_count: 5
+  - id: ice
+    name: 빙결
+    max_count: 5
+  - id: lightning
+    name: 번개
+    max_count: 5
+traits:
+- id: mana_efficiency
+  name: 마나 효율
+  description: 모든 마법 스킬 MP 소모 25% 감소
+  type: passive
+- id: spell_power
+  name: 주문력
+  description: 마법 공격력 15% 증가
+  type: passive
+- id: magic_focus
+  name: 마법 집중
+  description: 연속 마법 시전 시 위력 누적 (최대 40%)
+  type: trigger
+- id: quick_cast
+  name: 고속 시전
+  description: 마법 시전 시간 20% 감소
+  type: passive
+- id: mana_surge
+  name: 마나 폭주
+  description: MP 80% 이상일 때 크리티컬 확률 15% 증가
+  type: trigger
+skills:
+- fire_blast
+- ice_shard
+- thunder_bolt
+- magic_missile
+- mana_shield
+- arcane_explosion
+bonuses:
+  mp_multiplier: 1.5
+  magic_damage: 1.2
+  spell_cost_reduction: 0.75

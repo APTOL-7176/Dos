@@ -1,0 +1,658 @@
+"""
+Combat Manager - 전투 관리자
+
+ATB, Brave, Damage 시스템을 통합하여 전투 흐름 제어
+"""
+
+from typing import List, Dict, Any, Optional, Callable
+from enum import Enum
+
+from src.core.config import get_config
+from src.core.logger import get_logger
+from src.core.event_bus import event_bus, Events
+from src.combat.atb_system import get_atb_system, ATBSystem
+from src.combat.brave_system import get_brave_system, BraveSystem
+from src.combat.damage_calculator import get_damage_calculator, DamageCalculator
+
+
+class CombatState(Enum):
+    """전투 상태"""
+    NOT_STARTED = "not_started"
+    IN_PROGRESS = "in_progress"
+    PLAYER_TURN = "player_turn"
+    ENEMY_TURN = "enemy_turn"
+    VICTORY = "victory"
+    DEFEAT = "defeat"
+    FLED = "fled"
+
+
+class ActionType(Enum):
+    """행동 타입"""
+    BRV_ATTACK = "brv_attack"
+    HP_ATTACK = "hp_attack"
+    BRV_HP_ATTACK = "brv_hp_attack"
+    SKILL = "skill"
+    ITEM = "item"
+    DEFEND = "defend"
+    FLEE = "flee"
+
+
+class CombatManager:
+    """
+    전투 관리자
+
+    전투 흐름 제어 및 시스템 통합
+    """
+
+    def __init__(self) -> None:
+        self.logger = get_logger("combat")
+        self.config = get_config()
+
+        # 서브시스템
+        self.atb: ATBSystem = get_atb_system()
+        self.brave: BraveSystem = get_brave_system()
+        self.damage_calc: DamageCalculator = get_damage_calculator()
+
+        # 전투 상태
+        self.state: CombatState = CombatState.NOT_STARTED
+        self.turn_count = 0
+        self.current_actor: Optional[Any] = None
+
+        # 전투원
+        self.allies: List[Any] = []
+        self.enemies: List[Any] = []
+
+        # 콜백
+        self.on_combat_end: Optional[Callable[[CombatState], None]] = None
+        self.on_turn_start: Optional[Callable[[Any], None]] = None
+        self.on_action_complete: Optional[Callable[[Any, Dict], None]] = None
+
+    def start_combat(self, allies: List[Any], enemies: List[Any]) -> None:
+        """
+        전투 시작
+
+        Args:
+            allies: 아군 리스트
+            enemies: 적군 리스트
+        """
+        self.logger.info("전투 시작!")
+
+        # 전투원 설정
+        self.allies = allies
+        self.enemies = enemies
+        self.turn_count = 0
+        self.state = CombatState.IN_PROGRESS
+
+        # ATB 시스템에 전투원 등록
+        for ally in allies:
+            self.atb.register_combatant(ally)
+            self.brave.initialize_brv(ally)
+
+        for enemy in enemies:
+            self.atb.register_combatant(enemy)
+            self.brave.initialize_brv(enemy)
+
+        # 이벤트 발행
+        event_bus.publish(Events.COMBAT_START, {
+            "allies": allies,
+            "enemies": enemies
+        })
+
+        self.logger.debug(
+            f"전투 참여자: 아군 {len(allies)}명, 적군 {len(enemies)}명"
+        )
+
+    def update(self, delta_time: float = 1.0) -> None:
+        """
+        전투 업데이트 (매 프레임 호출)
+
+        Args:
+            delta_time: 경과 시간
+        """
+        if self.state not in [CombatState.IN_PROGRESS, CombatState.PLAYER_TURN, CombatState.ENEMY_TURN]:
+            return
+
+        # ATB 시스템 업데이트
+        is_player_turn = self.state == CombatState.PLAYER_TURN
+        self.atb.update(delta_time, is_player_turn)
+
+        # 승리/패배 판정
+        self._check_battle_end()
+
+    def execute_action(
+        self,
+        actor: Any,
+        action_type: ActionType,
+        target: Optional[Any] = None,
+        skill: Optional[Any] = None,
+        **kwargs
+    ) -> Dict[str, Any]:
+        """
+        행동 실행
+
+        Args:
+            actor: 행동자
+            action_type: 행동 타입
+            target: 대상
+            skill: 스킬 (있는 경우)
+            **kwargs: 추가 옵션
+
+        Returns:
+            행동 결과
+        """
+        self.current_actor = actor
+        result = {}
+
+        self.logger.debug(
+            f"행동 실행: {actor.name} → {action_type.value}",
+            {"target": getattr(target, "name", None) if target else None}
+        )
+
+        # 행동 타입별 처리
+        if action_type == ActionType.BRV_ATTACK:
+            result = self._execute_brv_attack(actor, target, skill, **kwargs)
+        elif action_type == ActionType.HP_ATTACK:
+            result = self._execute_hp_attack(actor, target, skill, **kwargs)
+        elif action_type == ActionType.BRV_HP_ATTACK:
+            result = self._execute_brv_hp_attack(actor, target, skill, **kwargs)
+        elif action_type == ActionType.SKILL:
+            result = self._execute_skill(actor, target, skill, **kwargs)
+        elif action_type == ActionType.ITEM:
+            result = self._execute_item(actor, target, **kwargs)
+        elif action_type == ActionType.DEFEND:
+            result = self._execute_defend(actor, **kwargs)
+        elif action_type == ActionType.FLEE:
+            result = self._execute_flee(actor, **kwargs)
+
+        # ATB 소비
+        self.atb.consume_atb(actor)
+
+        # 턴 종료 처리
+        self._on_turn_end(actor)
+
+        # 콜백 호출
+        if self.on_action_complete:
+            self.on_action_complete(actor, result)
+
+        # 이벤트 발행
+        event_bus.publish(Events.COMBAT_ACTION, {
+            "actor": actor,
+            "action_type": action_type.value,
+            "target": target,
+            "result": result
+        })
+
+        self.current_actor = None
+        return result
+
+    def _execute_brv_attack(
+        self,
+        attacker: Any,
+        defender: Any,
+        skill: Optional[Any] = None,
+        **kwargs
+    ) -> Dict[str, Any]:
+        """BRV 공격 실행"""
+        # 스킬 배율
+        skill_multiplier = getattr(skill, "brv_multiplier", 1.0) if skill else 1.0
+
+        # 데미지 계산
+        damage_result = self.damage_calc.calculate_brv_damage(
+            attacker, defender, skill_multiplier, **kwargs
+        )
+
+        # BRV 공격 적용
+        brv_result = self.brave.brv_attack(attacker, defender, damage_result.final_damage)
+
+        return {
+            "action": "brv_attack",
+            "damage": damage_result.final_damage,
+            "is_critical": damage_result.is_critical,
+            "brv_stolen": brv_result["brv_stolen"],
+            "actual_gain": brv_result["actual_gain"],
+            "is_break": brv_result["is_break"]
+        }
+
+    def _execute_hp_attack(
+        self,
+        attacker: Any,
+        defender: Any,
+        skill: Optional[Any] = None,
+        **kwargs
+    ) -> Dict[str, Any]:
+        """HP 공격 실행"""
+        if attacker.current_brv <= 0:
+            self.logger.warning(f"{attacker.name}: BRV가 0이라 HP 공격 불가")
+            return {"action": "hp_attack", "error": "no_brv"}
+
+        # 스킬 배율
+        hp_multiplier = getattr(skill, "hp_multiplier", 1.0) if skill else 1.0
+
+        # BREAK 상태 확인
+        is_break = self.brave.is_broken(defender)
+
+        # 데미지 계산
+        damage_result, wound_damage = self.damage_calc.calculate_hp_damage(
+            attacker, defender, attacker.current_brv, hp_multiplier, is_break, **kwargs
+        )
+
+        # 실제 HP 감소 (HP 공격 전에 적용)
+        if hasattr(defender, "take_damage"):
+            actual_damage = defender.take_damage(damage_result.final_damage)
+        else:
+            actual_damage = damage_result.final_damage
+
+        # HP 공격 적용 (BRV 소비)
+        hp_result = self.brave.hp_attack(attacker, defender, hp_multiplier)
+
+        return {
+            "action": "hp_attack",
+            "hp_damage": actual_damage,
+            "wound_damage": wound_damage,
+            "brv_consumed": hp_result["brv_consumed"],
+            "is_break_bonus": is_break
+        }
+
+    def _execute_brv_hp_attack(
+        self,
+        attacker: Any,
+        defender: Any,
+        skill: Optional[Any] = None,
+        **kwargs
+    ) -> Dict[str, Any]:
+        """BRV + HP 복합 공격 실행"""
+        # 1. BRV 공격
+        brv_attack_result = self._execute_brv_attack(attacker, defender, skill, **kwargs)
+
+        # 2. HP 공격 (BRV가 있으면)
+        if attacker.current_brv > 0:
+            hp_attack_result = self._execute_hp_attack(attacker, defender, skill, **kwargs)
+        else:
+            hp_attack_result = {"hp_damage": 0, "wound_damage": 0, "brv_consumed": 0}
+
+        # 결과 병합
+        combined_result = {
+            "action": "brv_hp_attack",
+            "is_combo": True
+        }
+
+        # BRV 결과 추가
+        for key in ["damage", "is_critical", "brv_stolen", "actual_gain", "is_break"]:
+            if key in brv_attack_result:
+                combined_result[f"brv_{key}"] = brv_attack_result[key]
+
+        # HP 결과 추가
+        for key in ["hp_damage", "wound_damage", "brv_consumed", "is_break_bonus"]:
+            if key in hp_attack_result:
+                combined_result[key] = hp_attack_result[key]
+
+        return combined_result
+
+    def _execute_skill(
+        self,
+        actor: Any,
+        target: Optional[Any] = None,
+        skill: Optional[Any] = None,
+        **kwargs
+    ) -> Dict[str, Any]:
+        """스킬 실행"""
+        if not skill:
+            return {"action": "skill", "error": "no_skill"}
+
+        result = {
+            "action": "skill",
+            "skill_name": getattr(skill, "name", "Unknown"),
+            "targets": []
+        }
+
+        # 적 스킬인지 확인
+        try:
+            from src.combat.enemy_skills import EnemySkill, SkillTargetType
+
+            if isinstance(skill, EnemySkill):
+                # 적 스킬 실행
+                result.update(self._execute_enemy_skill(actor, target, skill, **kwargs))
+                return result
+        except ImportError:
+            pass
+
+        # 일반 스킬 실행 (플레이어 스킬)
+        # TODO: 플레이어 스킬 시스템 연동
+        result["error"] = "player_skill_not_implemented"
+        return result
+
+    def _execute_enemy_skill(
+        self,
+        actor: Any,
+        target: Any,
+        skill: 'EnemySkill',
+        **kwargs
+    ) -> Dict[str, Any]:
+        """
+        적 스킬 실행
+
+        Args:
+            actor: 스킬 사용자 (적)
+            target: 대상 (단일 또는 리스트)
+            skill: 적 스킬
+            **kwargs: 추가 옵션
+
+        Returns:
+            실행 결과
+        """
+        from src.combat.enemy_skills import SkillTargetType
+
+        result = {
+            "targets": [],
+            "effects": []
+        }
+
+        # MP/HP 코스트 지불
+        if hasattr(actor, 'current_mp'):
+            actor.current_mp = max(0, actor.current_mp - skill.mp_cost)
+        if hasattr(actor, 'current_hp'):
+            actor.current_hp = max(1, actor.current_hp - skill.hp_cost)
+
+        # 대상 결정
+        targets = []
+        if skill.target_type == SkillTargetType.SELF:
+            targets = [actor]
+        elif skill.target_type == SkillTargetType.ALL_ALLIES:
+            # 아군 전체
+            targets = [e for e in self.enemies if getattr(e, 'is_alive', True)]
+        elif skill.target_type == SkillTargetType.ALL_ENEMIES:
+            # 적 전체
+            targets = [a for a in self.allies if getattr(a, 'is_alive', True)]
+        elif target:
+            # 단일 대상
+            if isinstance(target, list):
+                targets = target
+            else:
+                targets = [target]
+
+        # 각 대상에게 스킬 효과 적용
+        for tgt in targets:
+            target_result = {"target": getattr(tgt, 'name', 'Unknown')}
+
+            # 데미지 적용
+            if skill.damage > 0:
+                # 스킬 특수 처리: 페로 카오스 (HP를 1로)
+                if skill.skill_id == "heartless_angel":
+                    if hasattr(tgt, 'current_hp'):
+                        damage = tgt.current_hp - 1
+                        tgt.current_hp = 1
+                        target_result["hp_damage"] = damage
+                        target_result["special"] = "hp_to_1"
+                else:
+                    # 일반 데미지 계산
+                    if skill.is_magical:
+                        base_damage = int(skill.damage + actor.magic_attack * skill.damage_multiplier)
+                        defense = getattr(tgt, 'magic_defense', 0)
+                    else:
+                        base_damage = int(skill.damage + actor.physical_attack * skill.damage_multiplier)
+                        defense = getattr(tgt, 'physical_defense', 0)
+
+                    # 방어력 적용
+                    final_damage = max(1, base_damage - defense // 2)
+
+                    # BRV 데미지
+                    if skill.brv_damage > 0:
+                        if hasattr(tgt, 'current_brv'):
+                            brv_dmg = min(skill.brv_damage, tgt.current_brv)
+                            tgt.current_brv = max(0, tgt.current_brv - brv_dmg)
+                            target_result["brv_damage"] = brv_dmg
+
+                    # HP 데미지
+                    if skill.hp_attack or not skill.brv_damage:
+                        if hasattr(tgt, 'take_damage'):
+                            actual_damage = tgt.take_damage(final_damage)
+                        elif hasattr(tgt, 'current_hp'):
+                            actual_damage = min(final_damage, tgt.current_hp)
+                            tgt.current_hp -= actual_damage
+                        else:
+                            actual_damage = final_damage
+                        target_result["hp_damage"] = actual_damage
+
+            # 힐링 적용
+            if skill.heal_amount > 0:
+                if hasattr(tgt, 'heal'):
+                    healed = tgt.heal(skill.heal_amount)
+                elif hasattr(tgt, 'current_hp') and hasattr(tgt, 'max_hp'):
+                    healed = min(skill.heal_amount, tgt.max_hp - tgt.current_hp)
+                    tgt.current_hp += healed
+                else:
+                    healed = skill.heal_amount
+                target_result["healing"] = healed
+
+            # 버프 적용
+            if skill.buff_stats:
+                target_result["buffs"] = skill.buff_stats
+                # TODO: 실제 버프 시스템 연동
+
+            # 디버프 적용
+            if skill.debuff_stats:
+                target_result["debuffs"] = skill.debuff_stats
+                # TODO: 실제 디버프 시스템 연동
+
+            # 상태이상 적용
+            if skill.status_effects:
+                target_result["status_effects"] = skill.status_effects
+                # TODO: 실제 상태이상 시스템 연동
+
+            result["targets"].append(target_result)
+
+        return result
+
+    def _execute_item(self, actor: Any, target: Optional[Any] = None, **kwargs) -> Dict[str, Any]:
+        """아이템 사용"""
+        # TODO: 아이템 시스템 연동
+        return {
+            "action": "item"
+        }
+
+    def _execute_defend(self, actor: Any, **kwargs) -> Dict[str, Any]:
+        """방어 태세"""
+        # 방어 버프 적용 (TODO: 버프 시스템 연동)
+        return {
+            "action": "defend"
+        }
+
+    def _execute_flee(self, actor: Any, **kwargs) -> Dict[str, Any]:
+        """도망"""
+        # 도망 확률 계산
+        flee_chance = 0.5  # 기본 50%
+        import random
+        if random.random() < flee_chance:
+            self.state = CombatState.FLED
+            return {
+                "action": "flee",
+                "success": True
+            }
+        else:
+            return {
+                "action": "flee",
+                "success": False
+            }
+
+    def _on_turn_end(self, actor: Any) -> None:
+        """
+        턴 종료 처리
+
+        Args:
+            actor: 행동한 캐릭터
+        """
+        # 턴 시작 시 INT BRV 회복
+        self.brave.recover_int_brv(actor)
+
+        # 이벤트 발행
+        event_bus.publish(Events.COMBAT_TURN_END, {
+            "actor": actor,
+            "turn": self.turn_count
+        })
+
+        self.turn_count += 1
+
+    def _check_battle_end(self) -> None:
+        """승리/패배 판정"""
+        # 모든 적이 죽었는가?
+        if all(self._is_defeated(enemy) for enemy in self.enemies):
+            self._end_combat(CombatState.VICTORY)
+            return
+
+        # 모든 아군이 죽었는가?
+        if all(self._is_defeated(ally) for ally in self.allies):
+            self._end_combat(CombatState.DEFEAT)
+            return
+
+    def _is_defeated(self, character: Any) -> bool:
+        """캐릭터가 전투 불능 상태인지 확인"""
+        if hasattr(character, "is_alive"):
+            return not character.is_alive()
+        if hasattr(character, "current_hp"):
+            return character.current_hp <= 0
+        return False
+
+    def _end_combat(self, state: CombatState) -> None:
+        """
+        전투 종료
+
+        Args:
+            state: 종료 상태
+        """
+        self.state = state
+
+        self.logger.info(f"전투 종료: {state.value}")
+
+        # 이벤트 발행
+        event_bus.publish(Events.COMBAT_END, {
+            "state": state.value,
+            "turn_count": self.turn_count
+        })
+
+        # 콜백 호출
+        if self.on_combat_end:
+            self.on_combat_end(state)
+
+        # 시스템 정리
+        self.atb.clear()
+
+    def get_action_order(self) -> List[Any]:
+        """
+        현재 행동 순서 가져오기
+
+        Returns:
+            행동 가능한 전투원 리스트
+        """
+        return self.atb.get_action_order()
+
+    def is_player_turn(self, character: Any) -> bool:
+        """플레이어 턴 여부"""
+        return character in self.allies
+
+    def get_valid_targets(self, actor: Any, action_type: ActionType) -> List[Any]:
+        """
+        유효한 대상 리스트
+
+        Args:
+            actor: 행동자
+            action_type: 행동 타입
+
+        Returns:
+            대상 리스트
+        """
+        if action_type in [ActionType.BRV_ATTACK, ActionType.HP_ATTACK, ActionType.BRV_HP_ATTACK]:
+            # 공격: 상대편 대상
+            if actor in self.allies:
+                return [e for e in self.enemies if not self._is_defeated(e)]
+            else:
+                return [a for a in self.allies if not self._is_defeated(a)]
+        else:
+            # 아이템, 스킬 등: 아군 대상
+            if actor in self.allies:
+                return self.allies
+            else:
+                return self.enemies
+
+    def execute_enemy_turn(self, enemy: Any) -> Optional[Dict[str, Any]]:
+        """
+        적 턴 실행 (AI 사용)
+
+        Args:
+            enemy: 적 캐릭터
+
+        Returns:
+            행동 결과
+        """
+        try:
+            from src.ai.enemy_ai import create_ai_for_enemy
+
+            # 적 AI 생성
+            ai = create_ai_for_enemy(enemy)
+
+            # AI가 행동 결정
+            allies = self.enemies  # 적 입장에서 아군
+            enemies = self.allies  # 적 입장에서 적군
+
+            action_decision = ai.decide_action(allies, enemies)
+
+            if not action_decision:
+                # 결정 실패 시 기본 공격
+                target = self.get_valid_targets(enemy, ActionType.BRV_ATTACK)
+                if target:
+                    return self.execute_action(
+                        enemy,
+                        ActionType.BRV_ATTACK,
+                        target=target[0]
+                    )
+                return None
+
+            # AI 결정에 따라 행동 실행
+            action_type_str = action_decision.get("type", "attack")
+            target = action_decision.get("target")
+            skill = action_decision.get("skill")
+
+            if action_type_str == "skill":
+                # 스킬 사용
+                return self.execute_action(
+                    enemy,
+                    ActionType.SKILL,
+                    target=target,
+                    skill=skill
+                )
+            elif action_type_str == "defend":
+                # 방어
+                return self.execute_action(
+                    enemy,
+                    ActionType.DEFEND
+                )
+            else:
+                # 일반 공격
+                return self.execute_action(
+                    enemy,
+                    ActionType.BRV_ATTACK,
+                    target=target
+                )
+
+        except ImportError as e:
+            self.logger.warning(f"AI 시스템 로드 실패: {e}, 기본 공격 사용")
+            # AI 없으면 기본 공격
+            target = self.get_valid_targets(enemy, ActionType.BRV_ATTACK)
+            if target:
+                return self.execute_action(
+                    enemy,
+                    ActionType.BRV_ATTACK,
+                    target=target[0]
+                )
+            return None
+
+
+# 전역 인스턴스
+_combat_manager: Optional[CombatManager] = None
+
+
+def get_combat_manager() -> CombatManager:
+    """전역 전투 관리자 인스턴스"""
+    global _combat_manager
+    if _combat_manager is None:
+        _combat_manager = CombatManager()
+    return _combat_manager
