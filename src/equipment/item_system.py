@@ -560,16 +560,27 @@ class ItemGenerator:
         )
 
     @staticmethod
-    def create_random_drop(level: int) -> Item:
+    def create_random_drop(level: int, boss_drop: bool = False) -> Item:
         """레벨에 맞는 랜덤 드롭 생성"""
         # 등급 확률
-        rarity_chances = {
-            ItemRarity.COMMON: 0.50,
-            ItemRarity.UNCOMMON: 0.30,
-            ItemRarity.RARE: 0.15,
-            ItemRarity.EPIC: 0.04,
-            ItemRarity.LEGENDARY: 0.01
-        }
+        if boss_drop:
+            # 보스 드롭: 높은 등급 확률 증가
+            rarity_chances = {
+                ItemRarity.COMMON: 0.10,
+                ItemRarity.UNCOMMON: 0.25,
+                ItemRarity.RARE: 0.35,
+                ItemRarity.EPIC: 0.20,
+                ItemRarity.LEGENDARY: 0.10
+            }
+        else:
+            # 일반 드롭
+            rarity_chances = {
+                ItemRarity.COMMON: 0.50,
+                ItemRarity.UNCOMMON: 0.30,
+                ItemRarity.RARE: 0.15,
+                ItemRarity.EPIC: 0.04,
+                ItemRarity.LEGENDARY: 0.01
+            }
 
         # 등급 결정
         roll = random.random()

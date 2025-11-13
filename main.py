@@ -128,6 +128,23 @@ def main() -> int:
                             f"  {i+1}. {member.character_name} ({member.job_name})"
                         )
 
+                    # PartyMember를 Character 객체로 변환
+                    from src.character.character import Character
+                    character_party = []
+                    for member in party:
+                        char = Character(
+                            name=member.character_name,
+                            character_class=member.job_id,
+                            level=1
+                        )
+                        # 경험치 초기화
+                        char.experience = 0
+                        character_party.append(char)
+
+                    # 이제 character_party를 사용
+                    party = character_party
+                    logger.info("파티 멤버를 Character 객체로 변환 완료")
+
                     # 특성 선택
                     from src.ui.trait_selection import run_trait_selection
                     trait_selections = run_trait_selection(
@@ -165,7 +182,14 @@ def main() -> int:
                             logger.info("=== 게임 시작! ===")
                             from src.world.dungeon_generator import DungeonGenerator
                             from src.world.exploration import ExplorationSystem
+                            from src.world.enemy_generator import EnemyGenerator
                             from src.ui.world_ui import run_exploration
+                            from src.ui.combat_ui import run_combat, CombatState
+                            from src.combat.experience_system import (
+                                RewardCalculator,
+                                distribute_party_experience
+                            )
+                            from src.ui.reward_ui import show_reward_screen
 
                             floor_number = 1
 
@@ -188,20 +212,69 @@ def main() -> int:
                                     logger.info("게임 종료")
                                     break
                                 elif result == "combat":
-                                    # TODO: 전투 시작
-                                    logger.info("전투 시작 (구현 예정)")
-                                    break
+                                    # 전투 시작!
+                                    logger.info("⚔ 전투 시작!")
+
+                                    # 적 생성
+                                    enemies = EnemyGenerator.generate_enemies(floor_number)
+                                    logger.info(f"적 {len(enemies)}명: {[e.name for e in enemies]}")
+
+                                    # 전투 실행
+                                    combat_result = run_combat(
+                                        display.console,
+                                        display.context,
+                                        party,
+                                        enemies
+                                    )
+
+                                    logger.info(f"전투 결과: {combat_result}")
+
+                                    if combat_result == CombatState.VICTORY:
+                                        logger.info("✅ 승리!")
+
+                                        # 보상 계산
+                                        rewards = RewardCalculator.calculate_combat_rewards(
+                                            enemies,
+                                            floor_number,
+                                            is_boss_fight=False
+                                        )
+
+                                        # 경험치 분배
+                                        level_up_info = distribute_party_experience(
+                                            party,
+                                            rewards["experience"]
+                                        )
+
+                                        # 보상 화면 표시
+                                        show_reward_screen(
+                                            display.console,
+                                            display.context,
+                                            rewards,
+                                            level_up_info
+                                        )
+
+                                        # TODO: 아이템을 인벤토리에 추가
+                                        # TODO: 골드 추가
+
+                                        continue  # 탐험 계속
+                                    elif combat_result == CombatState.DEFEAT:
+                                        logger.info("❌ 패배... 게임 오버")
+                                        break
+                                    else:
+                                        logger.info("🏃 도망쳤다")
+                                        continue
+
                                 elif result == "floor_down":
                                     floor_number += 1
-                                    logger.info(f"다음 층으로: {floor_number}층")
+                                    logger.info(f"⬇ 다음 층: {floor_number}층")
                                     continue
                                 elif result == "floor_up":
                                     if floor_number > 1:
                                         floor_number -= 1
-                                        logger.info(f"이전 층으로: {floor_number}층")
+                                        logger.info(f"⬆ 이전 층: {floor_number}층")
                                         continue
                                     else:
-                                        logger.info("던전 탈출!")
+                                        logger.info("🎉 던전 탈출 성공!")
                                         break
 
                             break
