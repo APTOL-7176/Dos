@@ -169,11 +169,15 @@ def open_game_menu(
                     logger.info(f"메뉴 선택: {result.value}")
 
                     # 하위 메뉴로 이동
-                    if result == MenuOption.INVENTORY and inventory and party:
-                        from src.ui.inventory_ui import open_inventory
-                        open_inventory(console, context, inventory, party)
-                        # 인벤토리에서 돌아온 후 메뉴 계속
-                        continue
+                    if result == MenuOption.INVENTORY:
+                        if inventory is not None and party is not None:
+                            from src.ui.inventory_ui import open_inventory
+                            open_inventory(console, context, inventory, party)
+                            # 인벤토리에서 돌아온 후 메뉴 계속
+                            continue
+                        else:
+                            show_message(console, context, "인벤토리를 열 수 없습니다.")
+                            continue
 
                     elif result == MenuOption.PARTY_STATUS and party:
                         open_party_status_menu(console, context, party)
@@ -181,13 +185,25 @@ def open_game_menu(
                         continue
 
                     elif result == MenuOption.SAVE_GAME:
-                        # TODO: 저장 기능 구현
-                        show_message(console, context, "저장 기능은 아직 구현되지 않았습니다.")
+                        from src.ui.save_load_ui import show_save_screen
+                        from src.persistence.save_system import serialize_party_member
+                        # 게임 상태 직렬화
+                        game_state = {
+                            "party": [serialize_party_member(m) for m in party] if party else [],
+                            "floor_number": 1,  # TODO: 현재 층수 전달 필요
+                            "gold": inventory.gold if inventory and hasattr(inventory, 'gold') else 0,
+                        }
+                        success = show_save_screen(console, context, game_state)
+                        if success:
+                            show_message(console, context, "저장 완료!")
                         continue
 
                     elif result == MenuOption.LOAD_GAME:
-                        # TODO: 불러오기 기능 구현
-                        show_message(console, context, "불러오기 기능은 아직 구현되지 않았습니다.")
+                        from src.ui.save_load_ui import show_load_screen
+                        game_state = show_load_screen(console, context)
+                        if game_state:
+                            # 로드 성공 - 메뉴 닫고 게임 재시작 필요
+                            show_message(console, context, "게임 불러오기 성공!\n(아직 게임 복원 기능은 개발 중입니다)")
                         continue
 
                     elif result == MenuOption.OPTIONS:
@@ -210,7 +226,7 @@ def open_party_status_menu(
     party: List
 ):
     """
-    파티 상태 화면
+    파티 상태 화면 (캐릭터 선택 가능)
 
     Args:
         console: TCOD 콘솔
@@ -223,6 +239,8 @@ def open_party_status_menu(
 
     logger.info("파티 상태 화면 열림")
 
+    selected_index = 0
+
     while True:
         console.clear()
 
@@ -230,12 +248,17 @@ def open_party_status_menu(
         title = "=== 파티 상태 ==="
         console.print((console.width - len(title)) // 2, 2, title, fg=(255, 255, 100))
 
-        # 파티원 정보
+        # 파티원 정보 (간략)
         y = 5
         for i, member in enumerate(party):
+            # 선택 커서
+            if i == selected_index:
+                console.print(3, y, "►", fg=(255, 255, 100))
+
             # 이름과 직업
-            console.print(5, y, f"{i+1}. {member.name}", fg=(255, 255, 255))
-            console.print(30, y, f"Lv.{member.level}", fg=(200, 200, 200))
+            name_color = (255, 255, 255) if i == selected_index else (200, 200, 200)
+            console.print(5, y, f"{i+1}. {member.name}", fg=name_color)
+            console.print(30, y, f"Lv.{member.level}", fg=name_color)
 
             if hasattr(member, 'job_name'):
                 console.print(40, y, member.job_name, fg=(150, 200, 255))
@@ -247,38 +270,139 @@ def open_party_status_menu(
             # HP
             if hasattr(member, 'current_hp') and hasattr(member, 'max_hp'):
                 hp_bar, hp_color = gauge_renderer.render_bar(
-                    member.current_hp, member.max_hp, width=20, show_numbers=True
+                    member.current_hp, member.max_hp, width=15, show_numbers=True
                 )
                 console.print(7, y, f"HP: {hp_bar}", fg=hp_color)
                 y += 1
 
-            # MP
-            if hasattr(member, 'current_mp') and hasattr(member, 'max_mp'):
-                mp_bar, mp_color = gauge_renderer.render_bar(
-                    member.current_mp, member.max_mp, width=20, show_numbers=True, color_gradient=False
-                )
-                console.print(7, y, f"MP: {mp_bar}", fg=(100, 150, 255))
-                y += 1
+            y += 1  # 다음 파티원과 간격
 
-            # 스탯
-            if hasattr(member, 'strength'):
-                console.print(7, y, f"STR: {member.strength:3d}  DEF: {member.defense:3d}  MAG: {member.magic:3d}  SPR: {member.spirit:3d}", fg=(180, 180, 180))
-                y += 1
+        # 조작법
+        console.print(
+            5,
+            console.height - 3,
+            "↑↓: 선택  Enter: 상세 정보  ESC: 돌아가기",
+            fg=(180, 180, 180)
+        )
 
-            if hasattr(member, 'speed'):
-                console.print(7, y, f"SPD: {member.speed:3d}  LUK: {member.luck:3d}", fg=(180, 180, 180))
-                y += 1
+        context.present(console)
 
-            # 경험치
-            if hasattr(member, 'experience') and hasattr(member, 'experience_to_next_level'):
-                exp_ratio = member.experience / member.experience_to_next_level if member.experience_to_next_level > 0 else 0
-                exp_bar, exp_color = gauge_renderer.render_percentage_bar(
-                    exp_ratio, width=20, show_percent=False
-                )
-                console.print(7, y, f"EXP: {exp_bar} {member.experience}/{member.experience_to_next_level}", fg=(100, 255, 100))
-                y += 1
+        # 입력 처리
+        for event in tcod.event.wait():
+            action = handler.dispatch(event)
 
-            y += 2  # 다음 파티원과 간격
+            if action == GameAction.MOVE_UP:
+                selected_index = max(0, selected_index - 1)
+            elif action == GameAction.MOVE_DOWN:
+                selected_index = min(len(party) - 1, selected_index + 1)
+            elif action == GameAction.CONFIRM:
+                # 선택한 캐릭터 상세 정보 표시
+                show_character_detail(console, context, party[selected_index])
+            elif action == GameAction.ESCAPE or action == GameAction.MENU:
+                return
+
+            # 윈도우 닫기
+            if isinstance(event, tcod.event.Quit):
+                return
+
+
+def show_character_detail(
+    console: tcod.console.Console,
+    context: tcod.context.Context,
+    character
+):
+    """
+    캐릭터 상세 정보 표시
+
+    Args:
+        console: TCOD 콘솔
+        context: TCOD 컨텍스트
+        character: 캐릭터 객체
+    """
+    from src.ui.gauge_renderer import GaugeRenderer
+    gauge_renderer = GaugeRenderer()
+    handler = InputHandler()
+
+    while True:
+        console.clear()
+
+        # 제목
+        title = f"=== {character.name} 상세 정보 ==="
+        console.print((console.width - len(title)) // 2, 2, title, fg=(255, 255, 100))
+
+        y = 5
+
+        # 기본 정보
+        console.print(10, y, f"이름: {character.name}", fg=(255, 255, 255))
+        y += 1
+        console.print(10, y, f"레벨: {character.level}", fg=(200, 200, 200))
+        y += 1
+
+        if hasattr(character, 'job_name'):
+            console.print(10, y, f"직업: {character.job_name}", fg=(150, 200, 255))
+        elif hasattr(character, 'character_class'):
+            console.print(10, y, f"직업: {character.character_class}", fg=(150, 200, 255))
+        y += 2
+
+        # HP
+        if hasattr(character, 'current_hp') and hasattr(character, 'max_hp'):
+            hp_bar, hp_color = gauge_renderer.render_bar(
+                character.current_hp, character.max_hp, width=30, show_numbers=True
+            )
+            console.print(10, y, f"HP: {hp_bar}", fg=hp_color)
+            y += 1
+
+        # MP
+        if hasattr(character, 'current_mp') and hasattr(character, 'max_mp'):
+            mp_bar, mp_color = gauge_renderer.render_bar(
+                character.current_mp, character.max_mp, width=30, show_numbers=True, color_gradient=False
+            )
+            console.print(10, y, f"MP: {mp_bar}", fg=(100, 150, 255))
+            y += 2
+
+        # 스탯 상세
+        console.print(10, y, "[ 스탯 ]", fg=(255, 200, 100))
+        y += 1
+
+        if hasattr(character, 'strength'):
+            console.print(12, y, f"STR (힘):      {character.strength:3d}", fg=(255, 180, 180))
+            y += 1
+            console.print(12, y, f"DEF (방어):    {character.defense:3d}", fg=(180, 180, 255))
+            y += 1
+            console.print(12, y, f"MAG (마력):    {character.magic:3d}", fg=(200, 150, 255))
+            y += 1
+            console.print(12, y, f"SPR (정신):    {character.spirit:3d}", fg=(150, 255, 200))
+            y += 1
+            console.print(12, y, f"SPD (속도):    {character.speed:3d}", fg=(255, 255, 150))
+            y += 1
+            console.print(12, y, f"LUK (행운):    {character.luck:3d}", fg=(255, 200, 255))
+            y += 2
+
+        # 경험치
+        if hasattr(character, 'experience') and hasattr(character, 'experience_to_next_level'):
+            console.print(10, y, "[ 경험치 ]", fg=(255, 200, 100))
+            y += 1
+            exp_ratio = character.experience / character.experience_to_next_level if character.experience_to_next_level > 0 else 0
+            exp_bar, exp_color = gauge_renderer.render_percentage_bar(
+                exp_ratio, width=30, show_percent=False
+            )
+            console.print(12, y, f"{exp_bar}", fg=(100, 255, 100))
+            y += 1
+            console.print(12, y, f"{character.experience} / {character.experience_to_next_level} EXP", fg=(150, 255, 150))
+            y += 2
+
+        # 장비 정보
+        if hasattr(character, 'equipment'):
+            console.print(10, y, "[ 장비 ]", fg=(255, 200, 100))
+            y += 1
+            if character.equipment:
+                for slot, item in character.equipment.items():
+                    if item:
+                        console.print(12, y, f"{slot}: {item.name}", fg=(200, 200, 200))
+                        y += 1
+            else:
+                console.print(12, y, "장비 없음", fg=(150, 150, 150))
+                y += 1
 
         # 조작법
         console.print(
@@ -294,7 +418,7 @@ def open_party_status_menu(
         for event in tcod.event.wait():
             action = handler.dispatch(event)
 
-            if action == GameAction.ESCAPE or action == GameAction.MENU:
+            if action == GameAction.ESCAPE or action == GameAction.MENU or action == GameAction.CONFIRM:
                 return
 
             # 윈도우 닫기
