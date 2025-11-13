@@ -62,9 +62,8 @@ class MapRenderer:
                     continue
 
                 # 탐험되지 않은 타일은 표시 안 함
-                if not tile.explored and tile.tile_type != TileType.VOID:
-                    # 일단 전부 표시 (시야 시스템 미구현)
-                    pass
+                if not tile.explored:
+                    continue
 
                 # 타일 표시
                 char = tile.char
@@ -72,8 +71,9 @@ class MapRenderer:
                 bg = tile.bg_color
 
                 # 탐험됐지만 현재 보이지 않는 경우 어둡게
-                if tile.explored and not tile.visible:
-                    fg = tuple(c // 3 for c in fg)
+                if not tile.visible:
+                    fg = tuple(c // 4 for c in fg)
+                    bg = tuple(c // 4 for c in bg)
 
                 console.print(screen_x, screen_y, char, fg=fg, bg=bg)
 
