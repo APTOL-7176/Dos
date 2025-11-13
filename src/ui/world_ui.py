@@ -64,6 +64,8 @@ class WorldUI:
         Returns:
             True면 종료
         """
+        logger.warning(f"[DEBUG] handle_input 호출됨: action={action}")
+
         if action == GameAction.QUIT or action == GameAction.ESCAPE:
             self.quit_requested = True
             return True
@@ -285,18 +287,26 @@ def run_exploration(
             action = handler.dispatch(event)
 
             if action:
+                logger.warning(f"[DEBUG] 액션 수신: {action}")
                 done = ui.handle_input(action, console, context)
+                logger.warning(f"[DEBUG] handle_input 반환값: {done}")
                 if done:
+                    logger.warning(f"[DEBUG] 루프 탈출 - done=True")
                     break
+            else:
+                # action이 None인 경우는 로그하지 않음 (너무 많음)
+                pass
 
             # 윈도우 닫기
             if isinstance(event, tcod.event.Quit):
                 return ("quit", None)
 
         # 상태 체크
+        logger.warning(f"[DEBUG] 상태 체크: quit={ui.quit_requested}, combat={ui.combat_requested}, floor_change={ui.floor_change_requested}")
         if ui.quit_requested:
             return ("quit", None)
         elif ui.combat_requested:
+            logger.warning(f"[DEBUG] 전투 반환! 적 {len(ui.combat_enemies) if ui.combat_enemies else 0}마리")
             return ("combat", ui.combat_enemies)
         elif ui.floor_change_requested:
             return (ui.floor_change_requested, None)
