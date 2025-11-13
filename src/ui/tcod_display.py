@@ -126,21 +126,17 @@ class TCODDisplay:
             try:
                 if Path(font_path).exists():
                     # 타일 크기 설정
-                    # char_spacing_adjust를 사용하여 글자 간격 조정
-                    # 폰트를 셀보다 크게 렌더링하여 공백을 최소화
+                    # 터미널 모드처럼 간격 없이 표시
                     char_height = font_size // 2
-                    char_width = char_height - char_spacing_adjust  # 셀을 좁게
-
-                    # 폰트는 셀보다 크게 렌더링
-                    font_render_width = char_width + 4
-                    font_render_height = char_height + 4
+                    # char_spacing_adjust만큼 셀을 좁게 만들어 문자 간격 줄이기
+                    char_width = char_height - char_spacing_adjust
 
                     self.tileset = tcod.tileset.load_truetype_font(
                         font_path,
-                        font_render_width,
-                        font_render_height
+                        char_width,
+                        char_height
                     )
-                    self.logger.info(f"폰트 로드 성공: {font_path} (셀: {char_width}x{char_height}, 간격 조정: {char_spacing_adjust})")
+                    self.logger.info(f"폰트 로드 성공: {font_path} (셀: {char_width}x{char_height})")
                     break
             except Exception as e:
                 self.logger.debug(f"폰트 로드 시도 실패 ({font_path}): {e}")
