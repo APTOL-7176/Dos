@@ -37,6 +37,9 @@ class WorldUI:
         self.map_renderer = MapRenderer(map_x=0, map_y=5)
         self.gauge_renderer = GaugeRenderer()
 
+        # 초기화 로그
+        logger.info(f"WorldUI 초기화 - inventory: {inventory is not None}, party: {party is not None}, party members: {len(party) if party else 0}")
+
         # 메시지 로그
         self.messages: List[str] = []
         self.max_messages = 5

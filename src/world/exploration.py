@@ -158,17 +158,18 @@ class ExplorationSystem:
                 message="이동할 수 없습니다"
             )
 
+        # 적과의 충돌 확인 (이동 전에!)
+        enemy = self.get_enemy_at(new_x, new_y)
+        if enemy:
+            # 플레이어는 이동하지 않고 전투만 트리거
+            return self._trigger_combat_with_enemy(enemy)
+
         # 이동
         self.player.x = new_x
         self.player.y = new_y
 
         # FOV 업데이트
         self.update_fov()
-
-        # 적과의 충돌 확인
-        enemy = self.get_enemy_at(new_x, new_y)
-        if enemy:
-            return self._trigger_combat_with_enemy(enemy)
 
         # 타일 이벤트 체크
         tile = self.dungeon.get_tile(new_x, new_y)
