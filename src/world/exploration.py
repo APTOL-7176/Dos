@@ -426,8 +426,10 @@ class ExplorationSystem:
 
     def _spawn_enemies(self):
         """적 배치"""
-        # 층 수에 따라 적 수 결정 (2-6마리)
-        num_enemies = min(6, 2 + self.floor_number // 2)
+        # 층 수에 따라 적 수 결정 (8-30마리)
+        base_enemies = 8
+        additional = self.floor_number * 2
+        num_enemies = min(30, base_enemies + additional)
 
         # 플레이어 시작 위치 주변을 제외한 바닥 타일에 적 배치
         possible_positions = []
