@@ -118,12 +118,17 @@ class TCODDisplay:
         for font_path in font_paths:
             try:
                 if Path(font_path).exists():
+                    # 글자 간격 조정: width를 height보다 작게 설정
+                    # 비율 0.6으로 설정하면 간격이 좁아짐
+                    char_width = int(font_size * 0.6)
+                    char_height = font_size
+
                     self.tileset = tcod.tileset.load_truetype_font(
                         font_path,
-                        font_size,
-                        font_size
+                        char_width,
+                        char_height
                     )
-                    self.logger.info(f"폰트 로드 성공: {font_path}")
+                    self.logger.info(f"폰트 로드 성공: {font_path} ({char_width}x{char_height})")
                     break
             except Exception as e:
                 self.logger.debug(f"폰트 로드 시도 실패 ({font_path}): {e}")
