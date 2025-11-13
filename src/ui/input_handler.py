@@ -82,10 +82,6 @@ class InputHandler(tcod.event.EventDispatch[Optional[GameAction]]):
             # 시스템
             tcod.event.KeySym.ESCAPE: GameAction.ESCAPE,
             tcod.event.KeySym.RETURN: GameAction.MENU,  # Enter: 메뉴/확정
-
-            # Z: 확인, X: 취소 (KeySym으로 처리)
-            tcod.event.KeySym.z: GameAction.CONFIRM,
-            tcod.event.KeySym.x: GameAction.CANCEL,
         }
 
         # 문자 키 바인딩 (소문자 ord 값)
