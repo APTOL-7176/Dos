@@ -66,10 +66,6 @@ class Ingredient(Item):
     raw_hp_restore: int = 0
     raw_mp_restore: int = 0
 
-    def __post_init__(self):
-        """아이템 타입 설정"""
-        self.item_type = ItemType.MATERIAL
-
     def spoil(self, turns: int = 1):
         """
         부패 진행
@@ -134,6 +130,7 @@ class IngredientDatabase:
             item_id="monster_meat",
             name="몬스터 고기",
             description="몬스터에게서 얻은 고기. 날것으로 먹으면 위험하다.",
+            item_type=ItemType.MATERIAL,
             rarity=ItemRarity.COMMON,
             weight=0.5,
             sell_price=5,
@@ -149,6 +146,7 @@ class IngredientDatabase:
             item_id="beast_meat",
             name="야수 고기",
             description="야수에게서 얻은 질 좋은 고기.",
+            item_type=ItemType.MATERIAL,
             rarity=ItemRarity.UNCOMMON,
             weight=0.8,
             sell_price=15,
@@ -164,6 +162,7 @@ class IngredientDatabase:
             item_id="dragon_meat",
             name="드래곤 고기",
             description="드래곤의 고기. 마력이 깃들어 있다.",
+            item_type=ItemType.MATERIAL,
             rarity=ItemRarity.RARE,
             weight=1.2,
             sell_price=50,
@@ -180,6 +179,7 @@ class IngredientDatabase:
             item_id="carrot",
             name="당근",
             description="신선한 당근.",
+            item_type=ItemType.MATERIAL,
             rarity=ItemRarity.COMMON,
             weight=0.2,
             sell_price=3,
@@ -195,6 +195,7 @@ class IngredientDatabase:
             item_id="potato",
             name="감자",
             description="평범한 감자.",
+            item_type=ItemType.MATERIAL,
             rarity=ItemRarity.COMMON,
             weight=0.3,
             sell_price=3,
@@ -210,6 +211,7 @@ class IngredientDatabase:
             item_id="magic_herb",
             name="마법 허브",
             description="마력이 담긴 허브. 요리에 넣으면 MP 회복 효과가 있다.",
+            item_type=ItemType.MATERIAL,
             rarity=ItemRarity.UNCOMMON,
             weight=0.1,
             sell_price=20,
@@ -226,6 +228,7 @@ class IngredientDatabase:
             item_id="berry",
             name="베리",
             description="달콤한 베리.",
+            item_type=ItemType.MATERIAL,
             rarity=ItemRarity.COMMON,
             weight=0.1,
             sell_price=5,
@@ -241,6 +244,7 @@ class IngredientDatabase:
             item_id="apple",
             name="사과",
             description="빨갛고 아삭한 사과.",
+            item_type=ItemType.MATERIAL,
             rarity=ItemRarity.COMMON,
             weight=0.2,
             sell_price=5,
@@ -257,6 +261,7 @@ class IngredientDatabase:
             item_id="red_mushroom",
             name="붉은 버섯",
             description="독이 있어 보이는 붉은 버섯.",
+            item_type=ItemType.MATERIAL,
             rarity=ItemRarity.COMMON,
             weight=0.1,
             sell_price=10,
@@ -272,6 +277,7 @@ class IngredientDatabase:
             item_id="blue_mushroom",
             name="푸른 버섯",
             description="마력이 담긴 푸른 버섯.",
+            item_type=ItemType.MATERIAL,
             rarity=ItemRarity.UNCOMMON,
             weight=0.1,
             sell_price=15,
@@ -288,6 +294,7 @@ class IngredientDatabase:
             item_id="fish",
             name="물고기",
             description="신선한 물고기.",
+            item_type=ItemType.MATERIAL,
             rarity=ItemRarity.COMMON,
             weight=0.5,
             sell_price=10,
@@ -304,6 +311,7 @@ class IngredientDatabase:
             item_id="spice",
             name="향신료",
             description="요리의 풍미를 높여주는 향신료.",
+            item_type=ItemType.MATERIAL,
             rarity=ItemRarity.UNCOMMON,
             weight=0.05,
             sell_price=20,
@@ -320,6 +328,7 @@ class IngredientDatabase:
             item_id="honey",
             name="꿀",
             description="달콤한 꿀.",
+            item_type=ItemType.MATERIAL,
             rarity=ItemRarity.UNCOMMON,
             weight=0.3,
             sell_price=15,
@@ -336,6 +345,7 @@ class IngredientDatabase:
             item_id="ice",
             name="얼음",
             description="차가운 얼음. 요리 재료로 쓸 수 있다.",
+            item_type=ItemType.MATERIAL,
             rarity=ItemRarity.COMMON,
             weight=0.2,
             sell_price=2,
@@ -351,6 +361,7 @@ class IngredientDatabase:
             item_id="stick",
             name="나뭇가지",
             description="마른 나뭇가지. 연료나 요리 재료로 쓸 수 있다.",
+            item_type=ItemType.MATERIAL,
             rarity=ItemRarity.COMMON,
             weight=0.1,
             sell_price=1,
@@ -373,6 +384,7 @@ class IngredientDatabase:
                 item_id=template.item_id,
                 name=template.name,
                 description=template.description,
+                item_type=ItemType.MATERIAL,
                 rarity=template.rarity,
                 weight=template.weight,
                 sell_price=template.sell_price,
