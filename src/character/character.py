@@ -416,9 +416,7 @@ class Character:
         # StatManager를 통해 모든 스탯 성장
         self.stat_manager.apply_level_up(self.level)
 
-        # HP/MP 회복
-        self.current_hp = self.max_hp
-        self.current_mp = self.max_mp
+        # HP/MP는 회복하지 않음 (전투 중 레벨업 시 밸런스)
 
         self.logger.info(f"{self.name} 레벨업: {old_level} → {self.level}")
 

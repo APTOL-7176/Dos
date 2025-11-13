@@ -24,11 +24,15 @@ class WorldUI:
         self,
         screen_width: int,
         screen_height: int,
-        exploration: ExplorationSystem
+        exploration: ExplorationSystem,
+        inventory=None,
+        party=None
     ):
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.exploration = exploration
+        self.inventory = inventory
+        self.party = party
         self.map_renderer = MapRenderer(map_x=0, map_y=5)
         self.gauge_renderer = GaugeRenderer()
 
@@ -48,7 +52,7 @@ class WorldUI:
             self.messages.pop(0)
         logger.debug(f"메시지: {text}")
 
-    def handle_input(self, action: GameAction) -> bool:
+    def handle_input(self, action: GameAction, console=None, context=None) -> bool:
         """
         입력 처리
 
@@ -58,6 +62,13 @@ class WorldUI:
         if action == GameAction.QUIT or action == GameAction.ESCAPE:
             self.quit_requested = True
             return True
+
+        # 인벤토리 열기
+        if action == GameAction.MENU:
+            if self.inventory and self.party and console and context:
+                from src.ui.inventory_ui import open_inventory
+                open_inventory(console, context, self.inventory, self.party)
+                return False
 
         # 이동
         dx, dy = 0, 0
@@ -161,7 +172,7 @@ class WorldUI:
         console.print(
             5,
             self.screen_height - 2,
-            "방향키: 이동  Z: 계단 이용  ESC: 종료",
+            "방향키: 이동  Z: 계단 이용  M: 인벤토리  ESC: 종료",
             fg=(180, 180, 180)
         )
 
@@ -202,7 +213,9 @@ class WorldUI:
 def run_exploration(
     console: tcod.console.Console,
     context: tcod.context.Context,
-    exploration: ExplorationSystem
+    exploration: ExplorationSystem,
+    inventory=None,
+    party=None
 ) -> str:
     """
     탐험 실행
@@ -210,7 +223,7 @@ def run_exploration(
     Returns:
         "quit", "combat", "floor_up", "floor_down"
     """
-    ui = WorldUI(console.width, console.height, exploration)
+    ui = WorldUI(console.width, console.height, exploration, inventory, party)
     handler = InputHandler()
 
     logger.info(f"탐험 시작: {exploration.floor_number}층")
@@ -225,7 +238,7 @@ def run_exploration(
             action = handler.dispatch(event)
 
             if action:
-                done = ui.handle_input(action)
+                done = ui.handle_input(action, console, context)
                 if done:
                     break
 

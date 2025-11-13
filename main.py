@@ -190,6 +190,12 @@ def main() -> int:
                                 distribute_party_experience
                             )
                             from src.ui.reward_ui import show_reward_screen
+                            from src.equipment.inventory import Inventory
+
+                            # 인벤토리 생성
+                            inventory = Inventory(max_slots=100)
+                            inventory.add_gold(1000)  # 시작 골드
+                            logger.info("인벤토리 생성 완료")
 
                             floor_number = 1
 
@@ -203,7 +209,9 @@ def main() -> int:
                                 result = run_exploration(
                                     display.console,
                                     display.context,
-                                    exploration
+                                    exploration,
+                                    inventory,
+                                    party
                                 )
 
                                 logger.info(f"탐험 결과: {result}")
@@ -253,8 +261,13 @@ def main() -> int:
                                             level_up_info
                                         )
 
-                                        # TODO: 아이템을 인벤토리에 추가
-                                        # TODO: 골드 추가
+                                        # 아이템을 인벤토리에 추가
+                                        for item in rewards.get("items", []):
+                                            if not inventory.add_item(item):
+                                                logger.warning(f"인벤토리 가득 참! {item.name} 버려짐")
+
+                                        # 골드 추가
+                                        inventory.add_gold(rewards.get("gold", 0))
 
                                         continue  # 탐험 계속
                                     elif combat_result == CombatState.DEFEAT:
