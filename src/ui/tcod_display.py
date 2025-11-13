@@ -118,9 +118,9 @@ class TCODDisplay:
         for font_path in font_paths:
             try:
                 if Path(font_path).exists():
-                    # 글자 간격 조정: width를 height보다 작게 설정
-                    # 비율 0.6으로 설정하면 간격이 좁아짐
-                    char_width = int(font_size * 0.6)
+                    # 한글은 정사각형 비율이 적합 (1:1 비율)
+                    # 영문/기호와의 균형을 위해 약간 좁게 조정
+                    char_width = int(font_size * 0.55)  # 0.55 비율로 조정
                     char_height = font_size
 
                     self.tileset = tcod.tileset.load_truetype_font(
