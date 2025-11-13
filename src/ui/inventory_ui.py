@@ -277,6 +277,22 @@ class InventoryUI:
             fg=weight_color
         )
 
+        # 무게 제한 세부 내역 (작게 표시)
+        if hasattr(self.inventory, 'weight_breakdown'):
+            breakdown = self.inventory.weight_breakdown
+            detail_text = (
+                f"기본{int(breakdown['base'])} "
+                f"+파티{int(breakdown['party_count'])} "
+                f"+힘{int(breakdown['strength_bonus'])} "
+                f"+Lv{int(breakdown['level_bonus'])}"
+            )
+            console.print(
+                self.screen_width - 30,
+                4,
+                detail_text,
+                fg=Colors.DARK_GRAY
+            )
+
         # 아이템 목록
         y = 5
         console.print(5, y, "─" * 70, fg=Colors.UI_BORDER)

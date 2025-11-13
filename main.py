@@ -192,10 +192,20 @@ def main() -> int:
                             from src.ui.reward_ui import show_reward_screen
                             from src.equipment.inventory import Inventory
 
-                            # 인벤토리 생성 (무게 기반)
-                            inventory = Inventory(max_weight=100.0)  # 최대 100kg
+                            # 인벤토리 생성 (무게 기반 - 파티 스탯에 연동)
+                            inventory = Inventory(base_weight=50.0, party=party)
                             inventory.add_gold(1000)  # 시작 골드
-                            logger.info("인벤토리 생성 완료")
+                            logger.info(f"인벤토리 생성 완료: {inventory.max_weight}kg 가능")
+
+                            # 무게 제한 세부 내역 로그
+                            breakdown = inventory.weight_breakdown
+                            logger.info(
+                                f"무게 제한 세부: 기본 {breakdown['base']}kg + "
+                                f"파티 {breakdown['party_count']}kg + "
+                                f"힘 {breakdown['strength_bonus']}kg + "
+                                f"레벨 {breakdown['level_bonus']}kg = "
+                                f"총 {inventory.max_weight}kg"
+                            )
 
                             floor_number = 1
 

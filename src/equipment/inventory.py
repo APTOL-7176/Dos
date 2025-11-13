@@ -28,18 +28,59 @@ class Inventory:
     - 아이템 저장/관리 (무게 기반)
     - 골드 관리
     - 장비/소비 아이템 사용
+    - 동적 무게 제한 (파티 스탯에 따라 변동)
     """
 
-    def __init__(self, max_weight: float = 100.0):
+    def __init__(self, base_weight: float = 50.0, party: List[Any] = None):
         """
         Args:
-            max_weight: 최대 무게 (kg)
+            base_weight: 기본 무게 (kg)
+            party: 파티 멤버 리스트 (스탯 계산용)
         """
-        self.max_weight = max_weight
+        self.base_weight = base_weight
+        self.party = party or []
         self.slots: List[InventorySlot] = []
         self.gold = 0
 
-        logger.info(f"인벤토리 생성: 최대 무게 {max_weight}kg")
+        logger.info(f"인벤토리 생성: 기본 무게 {base_weight}kg")
+
+    @property
+    def max_weight(self) -> float:
+        """
+        최대 무게 계산 (동적)
+
+        계산 방식:
+        - 기본 무게: 50kg
+        - 파티원 1명당: +10kg
+        - 힘(Strength) 1당: +0.5kg
+        - 레벨 1당: +1kg
+        """
+        total = self.base_weight
+
+        if self.party:
+            # 파티원 수 보너스
+            total += len(self.party) * 10.0
+
+            # 파티원들의 힘 스탯 합계
+            total_strength = 0
+            total_level = 0
+
+            for member in self.party:
+                # 힘 스탯
+                strength = getattr(member, 'strength', 0)
+                total_strength += strength
+
+                # 레벨
+                level = getattr(member, 'level', 1)
+                total_level += level
+
+            # 힘 보너스: 1 STR = +0.5kg
+            total += total_strength * 0.5
+
+            # 레벨 보너스: 1 Level = +1kg
+            total += total_level * 1.0
+
+        return round(total, 1)
 
     @property
     def current_weight(self) -> float:
@@ -58,6 +99,27 @@ class Inventory:
     def remaining_weight(self) -> float:
         """남은 무게"""
         return round(max(0, self.max_weight - self.current_weight), 2)
+
+    @property
+    def weight_breakdown(self) -> Dict[str, float]:
+        """무게 제한 세부 내역"""
+        breakdown = {
+            "base": self.base_weight,
+            "party_count": 0.0,
+            "strength_bonus": 0.0,
+            "level_bonus": 0.0
+        }
+
+        if self.party:
+            breakdown["party_count"] = len(self.party) * 10.0
+
+            total_strength = sum(getattr(m, 'strength', 0) for m in self.party)
+            breakdown["strength_bonus"] = total_strength * 0.5
+
+            total_level = sum(getattr(m, 'level', 1) for m in self.party)
+            breakdown["level_bonus"] = total_level * 1.0
+
+        return breakdown
 
     def add_item(self, item: Item, quantity: int = 1) -> bool:
         """
@@ -359,17 +421,20 @@ class Inventory:
             })
 
         return {
-            "max_weight": self.max_weight,
+            "base_weight": self.base_weight,
             "slots": slots_data,
             "gold": self.gold
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Inventory":
+    def from_dict(cls, data: Dict[str, Any], party: List[Any] = None) -> "Inventory":
         """딕셔너리에서 복원"""
         from src.persistence.save_system import deserialize_item
 
-        inventory = cls(max_weight=data.get("max_weight", 100.0))
+        # 하위 호환성: max_weight 필드가 있으면 base_weight로 변환
+        base_weight = data.get("base_weight", data.get("max_weight", 50.0))
+
+        inventory = cls(base_weight=base_weight, party=party)
         inventory.gold = data.get("gold", 0)
 
         for slot_data in data.get("slots", []):
