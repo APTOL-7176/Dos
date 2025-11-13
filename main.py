@@ -215,7 +215,7 @@ def main() -> int:
                                 dungeon = dungeon_gen.generate(floor_number)
 
                                 # 탐험 시작
-                                exploration = ExplorationSystem(dungeon, party, floor_number)
+                                exploration = ExplorationSystem(dungeon, party, floor_number, inventory)
                                 result, data = run_exploration(
                                     display.console,
                                     display.context,
@@ -236,14 +236,8 @@ def main() -> int:
                                     # 적 생성 (exploration에서 전달된 적들 사용)
                                     if data and len(data) > 0:
                                         # exploration에서 전달된 Enemy 엔티티를 전투용 적으로 변환
-                                        from src.character.enemy_database import EnemyDatabase
-                                        enemies = []
-                                        for enemy_entity in data:
-                                            enemy_char = EnemyDatabase.get_enemy_by_level(
-                                                enemy_entity.level,
-                                                is_boss=enemy_entity.is_boss
-                                            )
-                                            enemies.append(enemy_char)
+                                        num_enemies = len(data)
+                                        enemies = EnemyGenerator.generate_enemies(floor_number, num_enemies)
                                         logger.info(f"적 {len(enemies)}명 조우: {[e.name for e in enemies]}")
                                     else:
                                         # fallback: 랜덤 생성

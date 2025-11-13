@@ -90,7 +90,7 @@ class ExplorationResult:
 class ExplorationSystem:
     """탐험 시스템"""
 
-    def __init__(self, dungeon: DungeonMap, party: List[Any], floor_number: int = 1):
+    def __init__(self, dungeon: DungeonMap, party: List[Any], floor_number: int = 1, inventory=None):
         self.dungeon = dungeon
         self.player = Player(
             x=dungeon.stairs_up[0] if dungeon.stairs_up else 5,
@@ -101,6 +101,7 @@ class ExplorationSystem:
         self.floor_number = floor_number
         self.explored_tiles = set()
         self.enemies: List[Enemy] = []  # 적 리스트
+        self.inventory = inventory  # 인벤토리 추가
 
         # 적 배치
         self._spawn_enemies()
@@ -181,6 +182,12 @@ class ExplorationSystem:
 
         # 플레이어가 움직인 후 모든 적 움직임
         self._move_all_enemies()
+
+        # 적 움직임 후 플레이어 위치에 적이 있는지 다시 체크
+        enemy_at_player = self.get_enemy_at(self.player.x, self.player.y)
+        if enemy_at_player:
+            logger.warning(f"[DEBUG] 적이 플레이어에게 접근! 전투 시작")
+            return self._trigger_combat_with_enemy(enemy_at_player)
 
         return result
 
@@ -314,10 +321,23 @@ class ExplorationSystem:
 
     def _handle_chest(self, tile: Tile) -> ExplorationResult:
         """보물상자 처리"""
-        loot_id = tile.loot_id or "random_item"
-        self.player.inventory.append(loot_id)
+        from src.equipment.item_system import ItemGenerator
 
-        logger.info(f"보물상자 획득: {loot_id}")
+        # 랜덤 아이템 생성 (보물상자는 보스 드롭 취급)
+        item = ItemGenerator.create_random_drop(self.floor_number, boss_drop=True)
+
+        # 인벤토리에 추가
+        if self.inventory:
+            success = self.inventory.add_item(item)
+            if not success:
+                logger.warning(f"인벤토리 가득 참! {item.name} 버려짐")
+                return ExplorationResult(
+                    success=False,
+                    event=ExplorationEvent.NONE,
+                    message=f"📦 보물상자 발견! 하지만 인벤토리가 가득 차서 {item.name}을(를) 버렸다..."
+                )
+
+        logger.info(f"보물상자 획득: {item.name}")
 
         # 상자 제거
         tile.tile_type = TileType.FLOOR
@@ -326,16 +346,29 @@ class ExplorationSystem:
         return ExplorationResult(
             success=True,
             event=ExplorationEvent.CHEST_FOUND,
-            message=f"📦 보물상자 발견! {loot_id} 획득!",
-            data={"item": loot_id}
+            message=f"📦 보물상자 발견! {item.name} 획득!",
+            data={"item": item}
         )
 
     def _handle_item(self, tile: Tile) -> ExplorationResult:
         """떨어진 아이템 처리"""
-        item_id = tile.loot_id or "random_item"
-        self.player.inventory.append(item_id)
+        from src.equipment.item_system import ItemGenerator
 
-        logger.info(f"아이템 획득: {item_id}")
+        # 랜덤 아이템 생성 (일반 드롭)
+        item = ItemGenerator.create_random_drop(self.floor_number, boss_drop=False)
+
+        # 인벤토리에 추가
+        if self.inventory:
+            success = self.inventory.add_item(item)
+            if not success:
+                logger.warning(f"인벤토리 가득 참! {item.name} 버려짐")
+                return ExplorationResult(
+                    success=False,
+                    event=ExplorationEvent.NONE,
+                    message=f"✨ 아이템 발견! 하지만 인벤토리가 가득 차서 {item.name}을(를) 버렸다..."
+                )
+
+        logger.info(f"아이템 획득: {item.name}")
 
         # 아이템 제거
         tile.tile_type = TileType.FLOOR
@@ -344,8 +377,8 @@ class ExplorationSystem:
         return ExplorationResult(
             success=True,
             event=ExplorationEvent.ITEM_FOUND,
-            message=f"✨ 아이템 발견! {item_id} 획득!",
-            data={"item": item_id}
+            message=f"✨ 아이템 발견! {item.name} 획득!",
+            data={"item": item}
         )
 
     def _handle_key(self, tile: Tile) -> ExplorationResult:
@@ -554,6 +587,7 @@ class ExplorationSystem:
         # 이동 가능 여부 확인
         if self.dungeon.is_walkable(new_x, new_y):
             # 다른 적과 겹치지 않는지 확인
-            if not self.get_enemy_at(new_x, new_y):
+            # 플레이어 위치도 피함 (적이 플레이어 위로 이동하면 전투가 트리거되므로)
+            if not self.get_enemy_at(new_x, new_y) and not (new_x == self.player.x and new_y == self.player.y):
                 enemy.x = new_x
                 enemy.y = new_y
