@@ -21,7 +21,7 @@ display:
   screen_height: 50
 
   # 한글 폰트 설정
-  font_size: 16  # TrueType 폰트 크기 (픽셀)
+  font_size: 24  # TrueType 폰트 크기 (픽셀) - 16, 20, 24, 28 등으로 조절 가능
   tileset: "assets/fonts/dejavu10x10_gs_tc.png"  # tcod 기본 타일셋 (사용 안 함)
 
   # 렌더링
