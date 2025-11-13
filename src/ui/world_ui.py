@@ -87,6 +87,9 @@ class WorldUI:
         if dx != 0 or dy != 0:
             result = self.exploration.move_player(dx, dy)
             self._handle_exploration_result(result)
+            # 전투가 트리거되면 즉시 루프 탈출
+            if self.combat_requested:
+                return True
 
         # 계단 이동
         elif action == GameAction.CONFIRM:
