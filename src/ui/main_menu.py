@@ -50,18 +50,31 @@ class MainMenu:
         # 메뉴 결과
         self.result: MenuResult = MenuResult.NONE
 
-        # 타이틀 (텍스트만 사용)
+        # ASCII 아트 타이틀
         self.title_art = [
+            "    ██████╗  █████╗ ██╗    ██╗███╗   ██╗",
+            "    ██╔══██╗██╔══██╗██║    ██║████╗  ██║",
+            "    ██║  ██║███████║██║ █╗ ██║██╔██╗ ██║",
+            "    ██║  ██║██╔══██║██║███╗██║██║╚██╗██║",
+            "    ██████╔╝██║  ██║╚███╔███╔╝██║ ╚████║",
+            "    ╚═════╝ ╚═╝  ╚═╝ ╚══╝╚══╝ ╚═╝  ╚═══╝",
             "",
-            "",
-            "        DAWN OF STELLAR",
-            "",
-            "        별빛의 여명",
-            "",
-            "",
+            "      ██████╗ ███████╗    ███████╗████████╗███████╗██╗     ██╗      █████╗ ██████╗ ",
+            "     ██╔═══██╗██╔════╝    ██╔════╝╚══██╔══╝██╔════╝██║     ██║     ██╔══██╗██╔══██╗",
+            "     ██║   ██║█████╗      ███████╗   ██║   █████╗  ██║     ██║     ███████║██████╔╝",
+            "     ██║   ██║██╔══╝      ╚════██║   ██║   ██╔══╝  ██║     ██║     ██╔══██║██╔══██╗",
+            "     ╚██████╔╝██║         ███████║   ██║   ███████╗███████╗███████╗██║  ██║██║  ██║",
+            "      ╚═════╝ ╚═╝         ╚══════╝   ╚═╝   ╚══════╝╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝",
         ]
 
-        self.subtitle = ""  # 중복 제거
+        # 한글 서브타이틀
+        self.subtitle = "별빛의 여명"
+
+        # 애니메이션 관련
+        self.animation_frame = 0
+        self.star_positions = []  # 반짝이는 별 위치
+        self.shooting_stars = []  # 떨어지는 별똥별
+        self._generate_stars()
 
         # 타이틀 색상 (별빛 그라데이션)
         self.title_gradient = [
@@ -71,6 +84,17 @@ class MainMenu:
             (255, 240, 200),   # 따뜻한 빛
             (255, 255, 150),   # 노란 빛
         ]
+
+    def _generate_stars(self):
+        """배경 별 생성"""
+        import random
+        # 화면에 랜덤하게 별 배치
+        self.star_positions = []
+        for _ in range(30):  # 30개의 별
+            x = random.randint(0, self.screen_width - 1)
+            y = random.randint(0, self.screen_height // 2)  # 상단 절반에만
+            brightness = random.randint(0, 10)  # 초기 밝기
+            self.star_positions.append([x, y, brightness])
 
         # 메뉴 아이템 생성
         menu_items = [
@@ -171,16 +195,75 @@ class MainMenu:
         Args:
             console: 렌더링할 콘솔
         """
+        import math
+        import random
+
         # 배경 클리어
         console.clear()
 
+        # 애니메이션 프레임 증가
+        self.animation_frame += 1
+
+        # 배경 별 렌더링 (반짝임 효과)
+        for star in self.star_positions:
+            x, y, brightness = star
+            # 밝기 변화 (사인 함수로 부드러운 반짝임)
+            phase = (self.animation_frame + brightness * 10) / 20.0
+            current_brightness = int(150 + 105 * math.sin(phase))
+
+            # 별 문자와 색상
+            star_chars = [".", "*", "✦", "✧", "⋆"]
+            star_char = star_chars[brightness % len(star_chars)]
+            star_color = (current_brightness, current_brightness, 255)
+
+            console.print(x, y, star_char, fg=star_color)
+
+        # 떨어지는 별똥별 (랜덤 생성)
+        if self.animation_frame % 120 == 0 or random.random() < 0.01:  # 가끔 생성
+            start_x = random.randint(0, self.screen_width - 1)
+            self.shooting_stars.append([start_x, 0, 0])  # [x, y, life]
+
+        # 별똥별 렌더링 및 업데이트
+        for shooting_star in self.shooting_stars[:]:
+            x, y, life = shooting_star
+            # 별똥별 꼬리 렌더링
+            trail_length = 3
+            for i in range(trail_length):
+                trail_y = y - i
+                trail_x = x + i
+                if 0 <= trail_x < self.screen_width and 0 <= trail_y < self.screen_height:
+                    alpha = 255 - (i * 60)
+                    console.print(trail_x, trail_y, "·", fg=(alpha, alpha, 255))
+
+            # 별똥별 머리 부분
+            if 0 <= x < self.screen_width and 0 <= y < self.screen_height:
+                console.print(x, y, "★", fg=(255, 255, 200))
+
+            # 별똥별 이동 (오른쪽 아래로)
+            shooting_star[0] += 1
+            shooting_star[1] += 1
+            shooting_star[2] += 1
+
+            # 화면 밖으로 나가거나 수명 다하면 제거
+            if shooting_star[0] >= self.screen_width or shooting_star[1] >= self.screen_height or shooting_star[2] > 30:
+                self.shooting_stars.remove(shooting_star)
+
         # ASCII 아트 타이틀 렌더링 (중앙 상단)
-        title_start_y = 3
+        title_start_y = 5
+
+        # 타이틀 색상 애니메이션 (천천히 변화)
+        color_shift = math.sin(self.animation_frame / 30.0) * 30
 
         # 각 줄마다 그라데이션 색상 적용
         for line_idx, line in enumerate(self.title_art):
             # 줄별로 다른 색상 (그라데이션)
-            color = self.title_gradient[line_idx % len(self.title_gradient)]
+            base_color = self.title_gradient[line_idx % len(self.title_gradient)]
+
+            # 색상에 애니메이션 효과 추가
+            r = min(255, max(0, int(base_color[0] + color_shift)))
+            g = min(255, max(0, int(base_color[1] + color_shift)))
+            b = min(255, max(0, int(base_color[2] + color_shift * 0.5)))
+            color = (r, g, b)
 
             # 중앙 정렬
             title_x = (self.screen_width - len(line)) // 2
@@ -191,7 +274,26 @@ class MainMenu:
                 fg=color
             )
 
-        # 서브타이틀 제거됨 (중복 방지)
+        # 한글 서브타이틀 (별빛의 여명)
+        subtitle_y = title_start_y + len(self.title_art) + 1
+        subtitle_x = (self.screen_width - len(self.subtitle)) // 2
+        # 서브타이틀도 은은하게 반짝임
+        subtitle_brightness = int(200 + 55 * math.sin(self.animation_frame / 25.0))
+        console.print(
+            subtitle_x,
+            subtitle_y,
+            self.subtitle,
+            fg=(subtitle_brightness, subtitle_brightness, 255)
+        )
+
+        # 장식 별 (타이틀 양옆)
+        star_y = title_start_y + len(self.title_art) // 2
+        star_brightness = int(150 + 105 * math.sin(self.animation_frame / 15.0))
+        star_color = (star_brightness, star_brightness, 255)
+        console.print(2, star_y, "✧", fg=star_color)
+        console.print(self.screen_width - 3, star_y, "✧", fg=star_color)
+        console.print(5, star_y - 2, "⋆", fg=star_color)
+        console.print(self.screen_width - 6, star_y - 2, "⋆", fg=star_color)
 
         # 버전 정보
         version = "v5.0.0"
@@ -231,6 +333,7 @@ def run_main_menu(console: tcod.console.Console, context: tcod.context.Context) 
         메뉴 선택 결과
     """
     from src.ui.input_handler import InputHandler
+    import time
 
     # 메인 메뉴 BGM 재생
     play_bgm("main_menu")
@@ -238,13 +341,24 @@ def run_main_menu(console: tcod.console.Console, context: tcod.context.Context) 
     menu = MainMenu(console.width, console.height)
     handler = InputHandler()
 
-    while True:
-        # 렌더링
-        menu.render(console)
-        context.present(console)
+    # 애니메이션을 위한 시간 관리
+    last_time = time.time()
+    frame_time = 1.0 / 30.0  # 30 FPS
 
-        # 입력 처리
-        for event in tcod.event.wait():
+    while True:
+        current_time = time.time()
+        delta_time = current_time - last_time
+
+        # 프레임 제한 (30 FPS)
+        if delta_time >= frame_time:
+            last_time = current_time
+
+            # 렌더링 (매 프레임마다 애니메이션 업데이트)
+            menu.render(console)
+            context.present(console)
+
+        # 입력 처리 (논블로킹)
+        for event in tcod.event.get():
             action = handler.dispatch(event)
 
             if action:
@@ -254,3 +368,6 @@ def run_main_menu(console: tcod.console.Console, context: tcod.context.Context) 
             # 윈도우 닫기
             if isinstance(event, tcod.event.Quit):
                 return MenuResult.QUIT
+
+        # CPU 사용률 낮추기
+        time.sleep(0.01)
