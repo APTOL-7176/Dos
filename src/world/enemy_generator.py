@@ -176,12 +176,13 @@ ENEMY_TEMPLATES = {
     ),
 
     # 최종 보스 - 세피로스 (15층)
+    # 압도적인 스탯의 최종 보스 - 플레이어보다 훨씬 빠르게 행동
     "sephiroth": EnemyTemplate(
         "sephiroth", "세피로스", 15,
-        hp=9999, mp=999,
-        physical_attack=150, physical_defense=120,
-        magic_attack=180, magic_defense=150,
-        speed=25, luck=30, accuracy=85, evasion=25
+        hp=50000, mp=9999,
+        physical_attack=300, physical_defense=250,
+        magic_attack=400, magic_defense=300,
+        speed=300, luck=50, accuracy=95, evasion=40
     ),
 }
 
