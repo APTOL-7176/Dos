@@ -44,6 +44,7 @@ class WorldUI:
         # 상태
         self.quit_requested = False
         self.combat_requested = False
+        self.combat_enemies = None  # 전투에 참여할 적들
         self.floor_change_requested = None  # "up" or "down"
 
     def add_message(self, text: str):
@@ -114,6 +115,9 @@ class WorldUI:
 
         if result.event == ExplorationEvent.COMBAT:
             self.combat_requested = True
+            # 전투에 참여할 적들 저장
+            if result.data and "enemies" in result.data:
+                self.combat_enemies = result.data["enemies"]
 
         elif result.event == ExplorationEvent.TRAP_TRIGGERED:
             # 함정 데미지는 이미 적용됨
@@ -271,12 +275,12 @@ def run_exploration(
 
             # 윈도우 닫기
             if isinstance(event, tcod.event.Quit):
-                return "quit"
+                return ("quit", None)
 
         # 상태 체크
         if ui.quit_requested:
-            return "quit"
+            return ("quit", None)
         elif ui.combat_requested:
-            return "combat"
+            return ("combat", ui.combat_enemies)
         elif ui.floor_change_requested:
-            return ui.floor_change_requested
+            return (ui.floor_change_requested, None)

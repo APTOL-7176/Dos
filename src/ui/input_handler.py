@@ -81,7 +81,11 @@ class InputHandler(tcod.event.EventDispatch[Optional[GameAction]]):
 
             # 시스템
             tcod.event.KeySym.ESCAPE: GameAction.ESCAPE,
-            tcod.event.KeySym.RETURN: GameAction.MENU,  # Enter: 확정/메뉴
+            tcod.event.KeySym.RETURN: GameAction.CONFIRM,  # Enter: 확정
+
+            # 메뉴/인벤토리
+            tcod.event.KeySym.m: GameAction.MENU,
+            tcod.event.KeySym.i: GameAction.OPEN_INVENTORY,
 
             # Z: 확인, X: 취소 (메뉴용)
             tcod.event.KeySym.z: GameAction.CONFIRM,

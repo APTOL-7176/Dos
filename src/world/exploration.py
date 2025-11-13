@@ -90,7 +90,7 @@ class ExplorationResult:
 class ExplorationSystem:
     """탐험 시스템"""
 
-    def __init__(self, dungeon: DungeonMap, party: List[Any]):
+    def __init__(self, dungeon: DungeonMap, party: List[Any], floor_number: int = 1):
         self.dungeon = dungeon
         self.player = Player(
             x=dungeon.stairs_up[0] if dungeon.stairs_up else 5,
@@ -98,7 +98,7 @@ class ExplorationSystem:
             party=party
         )
         self.fov_system = FOVSystem(default_radius=3)
-        self.floor_number = 1
+        self.floor_number = floor_number
         self.explored_tiles = set()
         self.enemies: List[Enemy] = []  # 적 리스트
 

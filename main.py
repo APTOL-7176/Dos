@@ -215,8 +215,8 @@ def main() -> int:
                                 dungeon = dungeon_gen.generate(floor_number)
 
                                 # 탐험 시작
-                                exploration = ExplorationSystem(dungeon, party)
-                                result = run_exploration(
+                                exploration = ExplorationSystem(dungeon, party, floor_number)
+                                result, data = run_exploration(
                                     display.console,
                                     display.context,
                                     exploration,
@@ -233,9 +233,22 @@ def main() -> int:
                                     # 전투 시작!
                                     logger.info("⚔ 전투 시작!")
 
-                                    # 적 생성
-                                    enemies = EnemyGenerator.generate_enemies(floor_number)
-                                    logger.info(f"적 {len(enemies)}명: {[e.name for e in enemies]}")
+                                    # 적 생성 (exploration에서 전달된 적들 사용)
+                                    if data and len(data) > 0:
+                                        # exploration에서 전달된 Enemy 엔티티를 전투용 적으로 변환
+                                        from src.character.enemy_database import EnemyDatabase
+                                        enemies = []
+                                        for enemy_entity in data:
+                                            enemy_char = EnemyDatabase.get_enemy_by_level(
+                                                enemy_entity.level,
+                                                is_boss=enemy_entity.is_boss
+                                            )
+                                            enemies.append(enemy_char)
+                                        logger.info(f"적 {len(enemies)}명 조우: {[e.name for e in enemies]}")
+                                    else:
+                                        # fallback: 랜덤 생성
+                                        enemies = EnemyGenerator.generate_enemies(floor_number)
+                                        logger.info(f"적 {len(enemies)}명: {[e.name for e in enemies]}")
 
                                     # 전투 실행
                                     combat_result = run_combat(
@@ -249,6 +262,13 @@ def main() -> int:
 
                                     if combat_result == CombatState.VICTORY:
                                         logger.info("✅ 승리!")
+
+                                        # 필드에서 해당 적들 제거
+                                        if data:
+                                            for enemy_entity in data:
+                                                if enemy_entity in exploration.enemies:
+                                                    exploration.enemies.remove(enemy_entity)
+                                            logger.info(f"적 {len(data)}명 제거됨")
 
                                         # 보상 계산
                                         rewards = RewardCalculator.calculate_combat_rewards(
