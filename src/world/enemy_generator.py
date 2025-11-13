@@ -174,6 +174,15 @@ ENEMY_TEMPLATES = {
         magic_attack=150, magic_defense=120,
         speed=18, luck=25, accuracy=75, evasion=15
     ),
+
+    # 최종 보스 - 세피로스 (15층)
+    "sephiroth": EnemyTemplate(
+        "sephiroth", "세피로스", 15,
+        hp=9999, mp=999,
+        physical_attack=150, physical_defense=120,
+        magic_attack=180, magic_defense=150,
+        speed=25, luck=30, accuracy=85, evasion=25
+    ),
 }
 
 
@@ -275,6 +284,14 @@ class EnemyGenerator:
             level_modifier = max(0.5, min(2.0, level_modifier))  # 0.5배 ~ 2배
 
             enemy = SimpleEnemy(template, level_modifier)
+
+            # 적 타입에 맞는 스킬 추가
+            try:
+                from src.combat.enemy_skills import EnemySkillDatabase
+                enemy.skills = EnemySkillDatabase.get_skills_for_enemy_type(template.enemy_id)
+            except ImportError:
+                pass
+
             enemies.append(enemy)
 
         return enemies
@@ -283,7 +300,10 @@ class EnemyGenerator:
     def generate_boss(floor_number: int) -> SimpleEnemy:
         """보스 생성"""
         # 층수에 맞는 보스 선택
-        if floor_number < 15:
+        if floor_number == 15:
+            # 15층: 세피로스 (최종 보스)
+            template = ENEMY_TEMPLATES["sephiroth"]
+        elif floor_number < 15:
             template = ENEMY_TEMPLATES["boss_chimera"]
         elif floor_number < 25:
             template = ENEMY_TEMPLATES["boss_lich"]
@@ -293,4 +313,14 @@ class EnemyGenerator:
         level_modifier = floor_number / template.level
         level_modifier = max(1.0, level_modifier)  # 최소 1배
 
-        return SimpleEnemy(template, level_modifier)
+        boss = SimpleEnemy(template, level_modifier)
+
+        # 세피로스일 경우 스킬 추가
+        if floor_number == 15:
+            try:
+                from src.combat.enemy_skills import EnemySkillDatabase
+                boss.skills = EnemySkillDatabase.get_skills_for_enemy_type("sephiroth")
+            except ImportError:
+                pass
+
+        return boss
