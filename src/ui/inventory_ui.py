@@ -26,6 +26,9 @@ class InventoryMode(Enum):
     USE_ITEM = "use_item"  # 아이템 사용
     EQUIP = "equip"  # 장비 착용
     SELECT_TARGET = "select_target"  # 대상 선택
+    CHARACTER_EQUIPMENT = "character_equipment"  # 캐릭터 장비 보기
+    UNEQUIP = "unequip"  # 장비 해제
+    CONFIRM_DESTROY = "confirm_destroy"  # 파괴 확인
 
 
 class InventoryUI:
@@ -65,6 +68,18 @@ class InventoryUI:
         # 정렬 메뉴
         self.sort_menu: Optional[CursorMenu] = None
 
+        # 캐릭터 장비 관리
+        self.selected_character_index: Optional[int] = None
+        self.equipment_cursor = 0  # weapon, armor, accessory 선택
+        self.equipment_slots = ["weapon", "armor", "accessory"]
+
+        # 파괴 확인
+        self.confirm_destroy_item: Optional[int] = None
+        self.confirm_yes = False
+
+        # 장비 비교 모드
+        self.show_comparison = False
+
         self.closed = False
 
     def handle_input(self, action: GameAction) -> bool:
@@ -77,12 +92,22 @@ class InventoryUI:
         Returns:
             닫기 여부
         """
+        # 정렬 메뉴가 열려있으면 우선 처리
+        if self.sort_menu:
+            return self._handle_sort_menu(action)
+
         if self.mode == InventoryMode.BROWSE:
             return self._handle_browse(action)
         elif self.mode == InventoryMode.USE_ITEM or self.mode == InventoryMode.EQUIP:
             return self._handle_use_or_equip(action)
         elif self.mode == InventoryMode.SELECT_TARGET:
             return self._handle_target_select(action)
+        elif self.mode == InventoryMode.CHARACTER_EQUIPMENT:
+            return self._handle_character_equipment(action)
+        elif self.mode == InventoryMode.UNEQUIP:
+            return self._handle_unequip(action)
+        elif self.mode == InventoryMode.CONFIRM_DESTROY:
+            return self._handle_confirm_destroy(action)
 
         return False
 
@@ -91,9 +116,11 @@ class InventoryUI:
         if action == GameAction.MOVE_UP:
             self.cursor = max(0, self.cursor - 1)
             self._update_scroll()
+            self.show_comparison = False
         elif action == GameAction.MOVE_DOWN:
             self.cursor = min(len(self.inventory) - 1, self.cursor + 1)
             self._update_scroll()
+            self.show_comparison = False
         elif action == GameAction.CONFIRM:
             # 아이템 사용/장착
             if len(self.inventory) > 0:
@@ -102,7 +129,8 @@ class InventoryUI:
                     self.selected_item_index = self.cursor
 
                     if isinstance(item, Equipment):
-                        self.mode = InventoryMode.EQUIP
+                        # 장비 아이템: 비교 모드 토글
+                        self.show_comparison = not self.show_comparison
                     elif isinstance(item, Consumable):
                         self.mode = InventoryMode.USE_ITEM
         elif action == GameAction.CANCEL or action == GameAction.ESCAPE:
@@ -111,12 +139,27 @@ class InventoryUI:
         elif action == GameAction.MOVE_LEFT:
             # 필터 변경
             self._change_filter(-1)
+            self.show_comparison = False
         elif action == GameAction.MOVE_RIGHT:
             # 필터 변경
             self._change_filter(1)
+            self.show_comparison = False
         elif action == GameAction.MENU:
-            # 정렬 메뉴
+            # 정렬 메뉴 ('M' 키)
             self._open_sort_menu()
+            self.show_comparison = False
+        elif action == GameAction.OPEN_CHARACTER:
+            # 캐릭터 장비 보기 ('C' 키)
+            self.mode = InventoryMode.CHARACTER_EQUIPMENT
+            self.target_cursor = 0
+            self.show_comparison = False
+        elif action == GameAction.INVENTORY_DESTROY:
+            # 아이템 파괴 ('V' 키)
+            if len(self.inventory) > 0:
+                self.confirm_destroy_item = self.cursor
+                self.mode = InventoryMode.CONFIRM_DESTROY
+                self.confirm_yes = False
+                self.show_comparison = False
 
         return False
 
@@ -158,6 +201,115 @@ class InventoryUI:
         """대상 선택 모드 입력"""
         # USE_ITEM과 동일
         return self._handle_use_or_equip(action)
+
+    def _handle_character_equipment(self, action: GameAction) -> bool:
+        """캐릭터 장비 보기 모드"""
+        if action == GameAction.MOVE_UP:
+            self.target_cursor = max(0, self.target_cursor - 1)
+        elif action == GameAction.MOVE_DOWN:
+            self.target_cursor = min(len(self.party) - 1, self.target_cursor + 1)
+        elif action == GameAction.CONFIRM:
+            # 캐릭터 선택 → 장비 해제 모드로
+            self.selected_character_index = self.target_cursor
+            self.mode = InventoryMode.UNEQUIP
+            self.equipment_cursor = 0
+        elif action == GameAction.CANCEL or action == GameAction.ESCAPE:
+            self.mode = InventoryMode.BROWSE
+            self.selected_character_index = None
+
+        return False
+
+    def _handle_unequip(self, action: GameAction) -> bool:
+        """장비 해제 모드"""
+        if action == GameAction.MOVE_UP:
+            self.equipment_cursor = max(0, self.equipment_cursor - 1)
+        elif action == GameAction.MOVE_DOWN:
+            self.equipment_cursor = min(len(self.equipment_slots) - 1, self.equipment_cursor + 1)
+        elif action == GameAction.CONFIRM:
+            # 장비 해제
+            character = self.party[self.selected_character_index]
+            slot = self.equipment_slots[self.equipment_cursor]
+
+            # 장비가 있는지 확인
+            if character.equipment.get(slot):
+                item = character.unequip_item(slot)
+                if item:
+                    # 인벤토리에 추가
+                    if self.inventory.add_item(item):
+                        logger.info(f"{character.name}: {item.name} 해제 → 인벤토리")
+                    else:
+                        # 인벤토리 가득 참 - 다시 장착
+                        character.equip_item(slot, item)
+                        logger.warning(f"인벤토리 가득 참! {item.name} 해제 실패")
+        elif action == GameAction.CANCEL or action == GameAction.ESCAPE:
+            # 캐릭터 선택 모드로 복귀
+            self.mode = InventoryMode.CHARACTER_EQUIPMENT
+            self.selected_character_index = None
+
+        return False
+
+    def _handle_confirm_destroy(self, action: GameAction) -> bool:
+        """아이템 파괴 확인"""
+        if action == GameAction.MOVE_LEFT:
+            self.confirm_yes = True
+        elif action == GameAction.MOVE_RIGHT:
+            self.confirm_yes = False
+        elif action == GameAction.CONFIRM:
+            if self.confirm_yes:
+                # 파괴 실행
+                item = self.inventory.get_item(self.confirm_destroy_item)
+                if item:
+                    self.inventory.remove_item(self.confirm_destroy_item)
+                    logger.info(f"{item.name} 파괴됨")
+
+                    # 커서 조정
+                    if self.cursor >= len(self.inventory) and len(self.inventory) > 0:
+                        self.cursor = len(self.inventory) - 1
+                    elif len(self.inventory) == 0:
+                        self.cursor = 0
+
+            # 모드 복귀
+            self.mode = InventoryMode.BROWSE
+            self.confirm_destroy_item = None
+        elif action == GameAction.CANCEL or action == GameAction.ESCAPE:
+            # 취소
+            self.mode = InventoryMode.BROWSE
+            self.confirm_destroy_item = None
+
+        return False
+
+    def _handle_sort_menu(self, action: GameAction) -> bool:
+        """정렬 메뉴 처리"""
+        if action == GameAction.MOVE_UP:
+            if self.sort_menu:
+                self.sort_menu.move_cursor_up()
+        elif action == GameAction.MOVE_DOWN:
+            if self.sort_menu:
+                self.sort_menu.move_cursor_down()
+        elif action == GameAction.CONFIRM:
+            if self.sort_menu:
+                selected = self.sort_menu.get_selected_item()
+                if selected:
+                    sort_type = selected.data
+                    if sort_type == "rarity":
+                        self.inventory.sort_by_rarity()
+                        logger.info("인벤토리 정렬: 등급순")
+                    elif sort_type == "type":
+                        self.inventory.sort_by_type()
+                        logger.info("인벤토리 정렬: 타입순")
+                    elif sort_type == "name":
+                        self.inventory.sort_by_name()
+                        logger.info("인벤토리 정렬: 이름순")
+
+                    # 커서 초기화
+                    self.cursor = 0
+                    self.scroll_offset = 0
+
+                self.sort_menu = None
+        elif action == GameAction.CANCEL or action == GameAction.ESCAPE:
+            self.sort_menu = None
+
+        return False
 
     def _update_scroll(self):
         """스크롤 업데이트"""
@@ -350,12 +502,43 @@ class InventoryUI:
         if self.mode in [InventoryMode.USE_ITEM, InventoryMode.EQUIP]:
             self._render_target_selection(console)
 
+        # 캐릭터 장비 보기 모드
+        if self.mode == InventoryMode.CHARACTER_EQUIPMENT:
+            self._render_character_selection(console, "장비 보기")
+
+        # 장비 해제 모드
+        if self.mode == InventoryMode.UNEQUIP:
+            self._render_equipment_unequip(console)
+
+        # 파괴 확인 모드
+        if self.mode == InventoryMode.CONFIRM_DESTROY:
+            self._render_destroy_confirm(console)
+
+        # 정렬 메뉴
+        if self.sort_menu:
+            self.sort_menu.render(console)
+
+        # 장비 비교 (BROWSE 모드에서만)
+        if self.mode == InventoryMode.BROWSE and self.show_comparison and len(self.inventory) > 0:
+            item = self.inventory.get_item(self.cursor)
+            if item and isinstance(item, Equipment):
+                self._render_equipment_comparison(console, item)
+
         # 도움말
         help_y = self.screen_height - 2
         if self.mode == InventoryMode.BROWSE:
-            help_text = "Z: 사용/착용  X: 닫기  ←→: 필터  M: 정렬"
+            help_text = "Z: 사용/비교  C: 캐릭터 장비  V: 파괴  M: 정렬  ←→: 필터  X: 닫기"
             console.print(2, help_y, help_text, fg=Colors.GRAY)
-        else:
+        elif self.mode == InventoryMode.CHARACTER_EQUIPMENT:
+            help_text = "↑↓: 캐릭터 선택  Z: 확인  X: 취소"
+            console.print(2, help_y, help_text, fg=Colors.GRAY)
+        elif self.mode == InventoryMode.UNEQUIP:
+            help_text = "↑↓: 장비 슬롯 선택  Z: 해제  X: 뒤로"
+            console.print(2, help_y, help_text, fg=Colors.GRAY)
+        elif self.mode == InventoryMode.CONFIRM_DESTROY:
+            help_text = "←→: 선택  Z: 확인  X: 취소"
+            console.print(2, help_y, help_text, fg=Colors.GRAY)
+        elif self.mode in [InventoryMode.USE_ITEM, InventoryMode.EQUIP]:
             help_text = "↑↓: 대상 선택  Z: 확인  X: 취소"
             console.print(2, help_y, help_text, fg=Colors.GRAY)
 
@@ -467,6 +650,250 @@ class InventoryUI:
                 f"HP {char_hp}/{char_max_hp}",
                 fg=Colors.GRAY
             )
+
+            y += 1
+
+
+    def _render_character_selection(self, console: tcod.console.Console, title: str):
+        """캐릭터 선택 UI"""
+        box_width = 50
+        box_height = 10 + len(self.party)
+        box_x = (self.screen_width - box_width) // 2
+        box_y = (self.screen_height - box_height) // 2
+
+        console.draw_frame(
+            box_x, box_y, box_width, box_height,
+            title,
+            fg=Colors.UI_BORDER,
+            bg=Colors.UI_BG
+        )
+
+        y = box_y + 2
+        for i, character in enumerate(self.party):
+            is_selected = (i == self.target_cursor)
+            prefix = "►" if is_selected else " "
+
+            char_name = getattr(character, 'name', str(character))
+            char_class = getattr(character, 'character_class', '???')
+            char_level = getattr(character, 'level', 1)
+
+            console.print(
+                box_x + 2, y,
+                f"{prefix} {char_name} (Lv.{char_level} {char_class})",
+                fg=Colors.UI_TEXT_SELECTED if is_selected else Colors.UI_TEXT
+            )
+            y += 1
+
+    def _render_equipment_unequip(self, console: tcod.console.Console):
+        """장비 해제 UI"""
+        if self.selected_character_index is None:
+            return
+
+        character = self.party[self.selected_character_index]
+        char_name = getattr(character, 'name', str(character))
+
+        box_width = 60
+        box_height = 18
+        box_x = (self.screen_width - box_width) // 2
+        box_y = (self.screen_height - box_height) // 2
+
+        console.draw_frame(
+            box_x, box_y, box_width, box_height,
+            f"{char_name}의 장비",
+            fg=Colors.UI_BORDER,
+            bg=Colors.UI_BG
+        )
+
+        y = box_y + 2
+        slot_names = {
+            "weapon": "무기",
+            "armor": "방어구",
+            "accessory": "악세서리"
+        }
+
+        for i, slot in enumerate(self.equipment_slots):
+            is_selected = (i == self.equipment_cursor)
+            prefix = "►" if is_selected else " "
+
+            item = character.equipment.get(slot)
+            if item:
+                item_name = getattr(item, 'name', '???')
+                rarity_color = getattr(getattr(item, 'rarity', None), 'color', Colors.UI_TEXT)
+            else:
+                item_name = "(없음)"
+                rarity_color = Colors.DARK_GRAY
+
+            console.print(
+                box_x + 2, y,
+                f"{prefix} {slot_names.get(slot, slot)}: ",
+                fg=Colors.UI_TEXT_SELECTED if is_selected else Colors.UI_TEXT
+            )
+
+            console.print(
+                box_x + 15, y,
+                item_name,
+                fg=rarity_color
+            )
+
+            # 장비 스탯 표시
+            if item and is_selected:
+                y += 1
+                if hasattr(item, 'base_stats'):
+                    stat_texts = []
+                    for stat_name, value in item.base_stats.items():
+                        if value != 0:
+                            stat_texts.append(f"{stat_name}+{value}")
+                    if stat_texts:
+                        console.print(
+                            box_x + 4, y,
+                            " ".join(stat_texts[:4]),  # 최대 4개
+                            fg=Colors.GRAY
+                        )
+            y += 2
+
+    def _render_destroy_confirm(self, console: tcod.console.Console):
+        """파괴 확인 대화상자"""
+        if self.confirm_destroy_item is None:
+            return
+
+        item = self.inventory.get_item(self.confirm_destroy_item)
+        if not item:
+            return
+
+        box_width = 55
+        box_height = 10
+        box_x = (self.screen_width - box_width) // 2
+        box_y = (self.screen_height - box_height) // 2
+
+        console.draw_frame(
+            box_x, box_y, box_width, box_height,
+            "아이템 파괴",
+            fg=Colors.UI_BORDER,
+            bg=Colors.UI_BG
+        )
+
+        # 경고 메시지
+        msg = f"'{item.name}'을(를) 파괴하시겠습니까?"
+        console.print(
+            box_x + (box_width - len(msg)) // 2,
+            box_y + 3,
+            msg,
+            fg=(255, 100, 100)
+        )
+
+        console.print(
+            box_x + (box_width - 30) // 2,
+            box_y + 4,
+            "이 작업은 되돌릴 수 없습니다!",
+            fg=Colors.GRAY
+        )
+
+        # YES / NO 버튼
+        y = box_y + 7
+        yes_color = Colors.UI_TEXT_SELECTED if self.confirm_yes else Colors.UI_TEXT
+        no_color = Colors.UI_TEXT_SELECTED if not self.confirm_yes else Colors.UI_TEXT
+
+        console.print(
+            box_x + 15, y,
+            "[ 예 ]" if self.confirm_yes else "  예  ",
+            fg=yes_color
+        )
+
+        console.print(
+            box_x + 30, y,
+            "[아니오]" if not self.confirm_yes else " 아니오 ",
+            fg=no_color
+        )
+
+    def _render_equipment_comparison(self, console: tcod.console.Console, new_item: Equipment):
+        """장비 비교 UI"""
+        box_width = 70
+        box_height = 25
+        box_x = (self.screen_width - box_width) // 2
+        box_y = (self.screen_height - box_height) // 2
+
+        console.draw_frame(
+            box_x, box_y, box_width, box_height,
+            "장비 비교",
+            fg=Colors.UI_BORDER,
+            bg=Colors.UI_BG
+        )
+
+        y = box_y + 2
+
+        # 새 아이템 정보
+        console.print(
+            box_x + 2, y,
+            "인벤토리 아이템:",
+            fg=Colors.UI_TEXT_SELECTED
+        )
+        y += 1
+
+        item_name = f"{new_item.name} [{getattr(new_item.rarity, 'display_name', '일반')}]"
+        console.print(
+            box_x + 4, y,
+            item_name,
+            fg=getattr(new_item.rarity, 'color', Colors.UI_TEXT)
+        )
+        y += 2
+
+        # 스탯 표시
+        if hasattr(new_item, 'base_stats'):
+            for stat_name, value in new_item.base_stats.items():
+                if value != 0:
+                    console.print(
+                        box_x + 4, y,
+                        f"{stat_name}: +{value}",
+                        fg=Colors.UI_TEXT
+                    )
+                    y += 1
+
+        y += 1
+
+        # 각 캐릭터의 현재 장비와 비교
+        console.print(
+            box_x + 2, y,
+            "파티 현재 장비:",
+            fg=Colors.UI_TEXT_SELECTED
+        )
+        y += 1
+
+        slot = new_item.equip_slot.value
+        for character in self.party:
+            char_name = getattr(character, 'name', '???')
+            current_item = character.equipment.get(slot)
+
+            if current_item:
+                console.print(
+                    box_x + 4, y,
+                    f"{char_name}: {getattr(current_item, 'name', '???')}",
+                    fg=Colors.UI_TEXT
+                )
+                y += 1
+
+                # 스탯 차이 표시
+                if hasattr(new_item, 'base_stats') and hasattr(current_item, 'base_stats'):
+                    for stat_name in new_item.base_stats.keys():
+                        new_val = new_item.base_stats.get(stat_name, 0)
+                        old_val = current_item.base_stats.get(stat_name, 0)
+                        diff = new_val - old_val
+
+                        if diff != 0:
+                            diff_color = (100, 255, 100) if diff > 0 else (255, 100, 100)
+                            diff_text = f"+{diff}" if diff > 0 else str(diff)
+                            console.print(
+                                box_x + 6, y,
+                                f"{stat_name}: {diff_text}",
+                                fg=diff_color
+                            )
+                            y += 1
+            else:
+                console.print(
+                    box_x + 4, y,
+                    f"{char_name}: (없음)",
+                    fg=Colors.DARK_GRAY
+                )
+                y += 1
 
             y += 1
 

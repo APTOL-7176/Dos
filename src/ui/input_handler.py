@@ -40,6 +40,10 @@ class GameAction(Enum):
     QUIT = "quit"
     CONFIRM = "confirm"
     CANCEL = "cancel"
+    MENU = "menu"
+
+    # 인벤토리 전용
+    INVENTORY_DESTROY = "inventory_destroy"
 
 
 class InputHandler(tcod.event.EventDispatch[Optional[GameAction]]):
@@ -100,7 +104,10 @@ class InputHandler(tcod.event.EventDispatch[Optional[GameAction]]):
             'i': GameAction.OPEN_INVENTORY,
             'c': GameAction.OPEN_CHARACTER,
             's': GameAction.OPEN_SKILLS,
-            'm': GameAction.OPEN_MAP,
+            'm': GameAction.MENU,  # 정렬/메뉴
+
+            # 인벤토리
+            'v': GameAction.INVENTORY_DESTROY,  # 파괴/버리기
 
             # 시스템 (Z = 선택, X = 취소)
             'z': GameAction.CONFIRM,
