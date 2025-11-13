@@ -49,27 +49,24 @@ class MainMenu:
         # 메뉴 결과
         self.result: MenuResult = MenuResult.NONE
 
-        # 타이틀 텍스트 (단순)
-        self.title = "Dawn Of Stellar"
+        # ASCII 아트 타이틀
+        self.title_art = [
+            "    ____                             __   _____ __       ____          ",
+            "   / __ \\____ __      ______ ___   / /  / ___// /____  / / /___ ______",
+            "  / / / / __ `/ | /| / / __ `__ \\ / /   \\__ \\/ __/ _ \\/ / / __ `/ ___/",
+            " / /_/ / /_/ /| |/ |/ / / / / / // /   ___/ / /_/  __/ / / /_/ / /    ",
+            "/_____/\\__,_/ |__/|__/_/ /_/ /_//_/   /____/\\__/\\___/_/_/\\__,_/_/     ",
+        ]
+
         self.subtitle = "별빛의 여명"
 
-        # 각 글자에 적용할 색상 (무지개 그라데이션)
-        self.title_colors = [
-            (255, 100, 100),   # D - 빨강
-            (255, 180, 100),   # a - 주황
-            (255, 255, 100),   # w - 노랑
-            (100, 255, 100),   # n - 초록
-            (100, 200, 255),   # (공백) - 하늘
-            (100, 150, 255),   # O - 파랑
-            (180, 100, 255),   # f - 남색
-            (255, 100, 255),   # (공백) - 보라
-            (255, 120, 180),   # S - 분홍
-            (255, 150, 150),   # t - 연빨강
-            (255, 200, 120),   # e - 연주황
-            (255, 255, 150),   # l - 연노랑
-            (150, 255, 150),   # l - 연초록
-            (150, 220, 255),   # a - 연하늘
-            (180, 150, 255),   # r - 연보라
+        # 타이틀 색상 (별빛 그라데이션)
+        self.title_gradient = [
+            (100, 150, 255),   # 파란 별빛
+            (150, 180, 255),   # 밝은 파랑
+            (200, 220, 255),   # 하얀 별빛
+            (255, 240, 200),   # 따뜻한 빛
+            (255, 255, 150),   # 노란 빛
         ]
 
         # 메뉴 아이템 생성
@@ -174,26 +171,46 @@ class MainMenu:
         # 배경 클리어
         console.clear()
 
-        # 타이틀 렌더링 (중앙 상단) - 각 글자에 다른 색상 적용
-        title_y = 10
-        title_x = (self.screen_width - len(self.title)) // 2
+        # ASCII 아트 타이틀 렌더링 (중앙 상단)
+        title_start_y = 3
 
-        for i, char in enumerate(self.title):
-            color = self.title_colors[i % len(self.title_colors)]
+        # 각 줄마다 그라데이션 색상 적용
+        for line_idx, line in enumerate(self.title_art):
+            # 줄별로 다른 색상 (그라데이션)
+            color = self.title_gradient[line_idx % len(self.title_gradient)]
+
+            # 중앙 정렬
+            title_x = (self.screen_width - len(line)) // 2
             console.print(
-                title_x + i,
-                title_y,
-                char,
+                title_x,
+                title_start_y + line_idx,
+                line,
                 fg=color
             )
 
-        # 서브타이틀 (별빛의 여명)
+        # 서브타이틀 (별빛의 여명) - 반짝이는 효과
+        subtitle_y = title_start_y + len(self.title_art) + 1
         subtitle_x = (self.screen_width - len(self.subtitle)) // 2
+
+        # 서브타이틀 양옆에 별 장식
+        star_decoration = "✦"
+        console.print(
+            subtitle_x - 2,
+            subtitle_y,
+            star_decoration,
+            fg=(255, 255, 100)
+        )
         console.print(
             subtitle_x,
-            title_y + 2,
+            subtitle_y,
             self.subtitle,
-            fg=(200, 200, 255)
+            fg=(220, 220, 255)
+        )
+        console.print(
+            subtitle_x + len(self.subtitle) + 1,
+            subtitle_y,
+            star_decoration,
+            fg=(255, 255, 100)
         )
 
         # 버전 정보
