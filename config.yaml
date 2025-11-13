@@ -18,10 +18,10 @@ development:
 display:
   # 콘솔 크기 (문자 단위)
   screen_width: 80
-  screen_height: 50
+  screen_height: 45
 
   # 한글 폰트 설정
-  font_size: 10  # TrueType 폰트 크기 (픽셀) - 작을수록 글자가 촘촘하게 붙음
+  font_size: 40  # 셀 크기 = 폰트 크기 (픽셀)
   tileset: "assets/fonts/dejavu10x10_gs_tc.png"  # tcod 기본 타일셋 (사용 안 함)
 
   # 렌더링
@@ -32,8 +32,8 @@ display:
 
   # 패널 레이아웃
   panels:
-    map_width: 60      # 맵 영역 너비
-    map_height: 43     # 맵 영역 높이
+    map_width: 50      # 맵 영역 너비
+    map_height: 33     # 맵 영역 높이
     sidebar_width: 20  # 사이드바 너비
     message_height: 7  # 메시지 로그 높이
 
