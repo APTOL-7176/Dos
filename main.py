@@ -161,11 +161,49 @@ def main() -> int:
                                     f"  [{passive.cost}] {passive.name}"
                                 )
 
-                            # TODO: 게임 시작 (전투 시스템)
-                            print("\n[TODO] 게임 시작 - 전투 시스템 구현 필요")
-                            print(f"파티: {[m.character_name for m in party]}")
-                            print(f"특성 선택: {len(trait_selections)}명 완료")
-                            print(f"패시브: {[p.name for p in passive_selection.passives]}")
+                            # 게임 시작!
+                            logger.info("=== 게임 시작! ===")
+                            from src.world.dungeon_generator import DungeonGenerator
+                            from src.world.exploration import ExplorationSystem
+                            from src.ui.world_ui import run_exploration
+
+                            floor_number = 1
+
+                            while True:
+                                # 던전 생성
+                                dungeon_gen = DungeonGenerator(width=80, height=50)
+                                dungeon = dungeon_gen.generate(floor_number)
+
+                                # 탐험 시작
+                                exploration = ExplorationSystem(dungeon, party)
+                                result = run_exploration(
+                                    display.console,
+                                    display.context,
+                                    exploration
+                                )
+
+                                logger.info(f"탐험 결과: {result}")
+
+                                if result == "quit":
+                                    logger.info("게임 종료")
+                                    break
+                                elif result == "combat":
+                                    # TODO: 전투 시작
+                                    logger.info("전투 시작 (구현 예정)")
+                                    break
+                                elif result == "floor_down":
+                                    floor_number += 1
+                                    logger.info(f"다음 층으로: {floor_number}층")
+                                    continue
+                                elif result == "floor_up":
+                                    if floor_number > 1:
+                                        floor_number -= 1
+                                        logger.info(f"이전 층으로: {floor_number}층")
+                                        continue
+                                    else:
+                                        logger.info("던전 탈출!")
+                                        break
+
                             break
                         else:
                             logger.info("패시브 선택 취소 - 메인 메뉴로")
