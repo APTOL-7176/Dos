@@ -87,12 +87,32 @@ class TCODDisplay:
         # 한글 지원 TrueType 폰트 로드
         font_size = self.config.get("display.font_size", 16)
 
-        # 시스템 폰트 우선순위 목록 (한글 지원)
-        font_paths = [
-            "/usr/share/fonts/opentype/unifont/unifont.otf",  # Unifont (유니코드 전체 지원)
-            "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",  # WenQuanYi (CJK 지원)
-            "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",  # 폴백
-        ]
+        import platform
+        import os
+
+        # OS별 시스템 폰트 경로 (한글 지원)
+        font_paths = []
+
+        if platform.system() == "Windows":
+            # Windows 시스템 폰트
+            windows_fonts = os.path.join(os.environ.get("WINDIR", "C:\\Windows"), "Fonts")
+            font_paths = [
+                os.path.join(windows_fonts, "malgun.ttf"),      # 맑은 고딕
+                os.path.join(windows_fonts, "malgunbd.ttf"),    # 맑은 고딕 Bold
+                os.path.join(windows_fonts, "gulim.ttc"),       # 굴림
+                os.path.join(windows_fonts, "batang.ttc"),      # 바탕
+                os.path.join(windows_fonts, "msyh.ttc"),        # Microsoft YaHei (중국어지만 한글도 지원)
+                os.path.join(windows_fonts, "consola.ttf"),     # Consolas (폴백)
+            ]
+        else:
+            # Linux/Mac 시스템 폰트
+            font_paths = [
+                "/usr/share/fonts/opentype/unifont/unifont.otf",  # Unifont (유니코드 전체)
+                "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",  # WenQuanYi (CJK)
+                "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",  # Noto Sans CJK
+                "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",  # 폴백
+                "/System/Library/Fonts/AppleSDGothicNeo.ttc",  # Mac 애플 고딕
+            ]
 
         self.tileset = None
         for font_path in font_paths:
@@ -106,12 +126,15 @@ class TCODDisplay:
                     self.logger.info(f"폰트 로드 성공: {font_path}")
                     break
             except Exception as e:
-                self.logger.warning(f"폰트 로드 실패 ({font_path}): {e}")
+                self.logger.debug(f"폰트 로드 시도 실패 ({font_path}): {e}")
                 continue
 
         # 폴백: 기본 폰트
         if not self.tileset:
-            self.logger.warning("한글 폰트 로드 실패, 기본 터미널 폰트 사용 (한글 미지원 가능)")
+            self.logger.warning(
+                "한글 시스템 폰트를 찾을 수 없습니다. "
+                "기본 터미널 폰트를 사용합니다 (한글이 깨질 수 있음)."
+            )
             self.tileset = None
 
         # 콘솔 생성
