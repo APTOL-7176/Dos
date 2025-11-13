@@ -128,8 +128,8 @@ class MainMenu:
 
         # 커서 메뉴 생성 (중앙 하단 배치)
         menu_width = 40
-        menu_x = (screen_width - menu_width) // 2
-        menu_y = screen_height // 2 + 3
+        menu_x = (self.screen_width - menu_width) // 2
+        menu_y = self.screen_height // 2 + 3
 
         self.menu = CursorMenu(
             title="",
