@@ -77,6 +77,7 @@ class Item:
     unique_effect: Optional[str] = None
     stack_size: int = 1
     sell_price: int = 0
+    weight: float = 1.0  # 무게 (kg)
 
     def get_total_stats(self) -> Dict[str, float]:
         """기본 스탯 + 접사 스탯 합계"""
@@ -459,6 +460,17 @@ class ItemGenerator:
         if add_random_affixes:
             affixes = ItemGenerator.generate_random_affixes(template["rarity"])
 
+        # 무게 계산: 등급에 따라 3~15kg
+        rarity_weight = {
+            ItemRarity.COMMON: 3.0,
+            ItemRarity.UNCOMMON: 5.0,
+            ItemRarity.RARE: 8.0,
+            ItemRarity.EPIC: 12.0,
+            ItemRarity.LEGENDARY: 15.0,
+            ItemRarity.UNIQUE: 10.0
+        }
+        weight = rarity_weight.get(template["rarity"], 5.0)
+
         return Equipment(
             item_id=template_id,
             name=template["name"],
@@ -469,7 +481,8 @@ class ItemGenerator:
             base_stats=template["base_stats"].copy(),
             affixes=affixes,
             equip_slot=EquipSlot.WEAPON,
-            sell_price=template["sell_price"]
+            sell_price=template["sell_price"],
+            weight=weight
         )
 
     @staticmethod
@@ -483,6 +496,17 @@ class ItemGenerator:
         if add_random_affixes:
             affixes = ItemGenerator.generate_random_affixes(template["rarity"])
 
+        # 무게 계산: 등급에 따라 5~25kg (방어구는 무거움)
+        rarity_weight = {
+            ItemRarity.COMMON: 5.0,
+            ItemRarity.UNCOMMON: 8.0,
+            ItemRarity.RARE: 12.0,
+            ItemRarity.EPIC: 18.0,
+            ItemRarity.LEGENDARY: 25.0,
+            ItemRarity.UNIQUE: 15.0
+        }
+        weight = rarity_weight.get(template["rarity"], 8.0)
+
         return Equipment(
             item_id=template_id,
             name=template["name"],
@@ -493,7 +517,8 @@ class ItemGenerator:
             base_stats=template["base_stats"].copy(),
             affixes=affixes,
             equip_slot=EquipSlot.BODY,
-            sell_price=template["sell_price"]
+            sell_price=template["sell_price"],
+            weight=weight
         )
 
     @staticmethod
@@ -507,6 +532,17 @@ class ItemGenerator:
         if add_random_affixes:
             affixes = ItemGenerator.generate_random_affixes(template["rarity"])
 
+        # 무게 계산: 0.1~0.5kg (가벼움)
+        rarity_weight = {
+            ItemRarity.COMMON: 0.1,
+            ItemRarity.UNCOMMON: 0.2,
+            ItemRarity.RARE: 0.3,
+            ItemRarity.EPIC: 0.4,
+            ItemRarity.LEGENDARY: 0.5,
+            ItemRarity.UNIQUE: 0.3
+        }
+        weight = rarity_weight.get(template["rarity"], 0.2)
+
         return Equipment(
             item_id=template_id,
             name=template["name"],
@@ -517,7 +553,8 @@ class ItemGenerator:
             base_stats=template["base_stats"].copy(),
             affixes=affixes,
             equip_slot=EquipSlot.ACCESSORY1,
-            sell_price=template["sell_price"]
+            sell_price=template["sell_price"],
+            weight=weight
         )
 
     @staticmethod
@@ -538,7 +575,8 @@ class ItemGenerator:
             affixes=[],
             unique_effect=template["unique_effect"],
             equip_slot=EquipSlot.WEAPON,
-            sell_price=template["sell_price"]
+            sell_price=template["sell_price"],
+            weight=10.0  # 유니크 아이템: 고정 10kg
         )
 
     @staticmethod
@@ -548,6 +586,15 @@ class ItemGenerator:
         if not template:
             raise ValueError(f"Unknown consumable template: {template_id}")
 
+        # 소비품 무게: 0.1~0.3kg (가벼움)
+        consumable_weights = {
+            "health_potion": 0.2,
+            "mega_health_potion": 0.3,
+            "mana_potion": 0.2,
+            "elixir": 0.3
+        }
+        weight = consumable_weights.get(template_id, 0.2)
+
         return Consumable(
             item_id=template_id,
             name=template["name"],
@@ -556,7 +603,8 @@ class ItemGenerator:
             rarity=template["rarity"],
             effect_type=template["effect_type"],
             effect_value=template["effect_value"],
-            sell_price=template["sell_price"]
+            sell_price=template["sell_price"],
+            weight=weight
         )
 
     @staticmethod

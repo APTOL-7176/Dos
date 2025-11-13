@@ -259,12 +259,22 @@ class InventoryUI:
             fg=Colors.GRAY
         )
 
-        # 슬롯 정보
+        # 무게 정보
+        current = self.inventory.current_weight
+        maximum = self.inventory.max_weight
+        weight_percent = (current / maximum * 100) if maximum > 0 else 0
+
+        weight_color = Colors.UI_TEXT
+        if weight_percent >= 90:
+            weight_color = (255, 100, 100)  # 빨강 (거의 가득)
+        elif weight_percent >= 70:
+            weight_color = (255, 255, 100)  # 노랑 (많이 참)
+
         console.print(
-            self.screen_width - 20,
+            self.screen_width - 30,
             3,
-            f"슬롯: {len(self.inventory)}/{self.inventory.max_slots}",
-            fg=Colors.GRAY
+            f"무게: {current}kg/{maximum}kg ({int(weight_percent)}%)",
+            fg=weight_color
         )
 
         # 아이템 목록
@@ -350,6 +360,10 @@ class InventoryUI:
 
         # 설명
         console.print(x, y, item.description, fg=Colors.GRAY)
+        y += 1
+
+        # 무게
+        console.print(x, y, f"무게: {item.weight}kg", fg=Colors.DARK_GRAY)
         y += 1
 
         # 장비 정보

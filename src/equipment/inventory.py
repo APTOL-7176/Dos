@@ -25,31 +25,39 @@ class Inventory:
     """
     인벤토리 시스템
 
-    - 아이템 저장/관리
+    - 아이템 저장/관리 (무게 기반)
     - 골드 관리
     - 장비/소비 아이템 사용
     """
 
-    def __init__(self, max_slots: int = 100):
+    def __init__(self, max_weight: float = 100.0):
         """
         Args:
-            max_slots: 최대 슬롯 수
+            max_weight: 최대 무게 (kg)
         """
-        self.max_slots = max_slots
+        self.max_weight = max_weight
         self.slots: List[InventorySlot] = []
         self.gold = 0
 
-        logger.info(f"인벤토리 생성: {max_slots}칸")
+        logger.info(f"인벤토리 생성: 최대 무게 {max_weight}kg")
+
+    @property
+    def current_weight(self) -> float:
+        """현재 총 무게"""
+        total = 0.0
+        for slot in self.slots:
+            total += slot.item.weight * slot.quantity
+        return round(total, 2)
 
     @property
     def is_full(self) -> bool:
-        """인벤토리가 가득 찼는지"""
-        return len(self.slots) >= self.max_slots
+        """인벤토리가 가득 찼는지 (무게 기준)"""
+        return self.current_weight >= self.max_weight
 
     @property
-    def free_slots(self) -> int:
-        """빈 슬롯 수"""
-        return self.max_slots - len(self.slots)
+    def remaining_weight(self) -> float:
+        """남은 무게"""
+        return round(max(0, self.max_weight - self.current_weight), 2)
 
     def add_item(self, item: Item, quantity: int = 1) -> bool:
         """
@@ -62,23 +70,34 @@ class Inventory:
         Returns:
             성공 여부
         """
+        # 무게 체크
+        item_weight = item.weight * quantity
+        if self.current_weight + item_weight > self.max_weight:
+            logger.warning(
+                f"무게 초과! {item.name} x{quantity} ({item_weight}kg) 추가 실패. "
+                f"현재: {self.current_weight}kg / 최대: {self.max_weight}kg"
+            )
+            return False
+
         # 소비 아이템은 스택 가능
         if isinstance(item, Consumable):
             # 같은 아이템이 있는지 확인
             for slot in self.slots:
                 if isinstance(slot.item, Consumable) and slot.item.item_id == item.item_id:
                     slot.quantity += quantity
-                    logger.info(f"아이템 추가: {item.name} x{quantity} (총 {slot.quantity}개)")
+                    logger.info(
+                        f"아이템 추가: {item.name} x{quantity} (총 {slot.quantity}개). "
+                        f"무게: {self.current_weight}kg/{self.max_weight}kg"
+                    )
                     return True
 
-        # 빈 슬롯이 있으면 추가
-        if not self.is_full:
-            self.slots.append(InventorySlot(item, quantity))
-            logger.info(f"아이템 추가: {item.name} x{quantity}")
-            return True
-
-        logger.warning(f"인벤토리 가득 찼음! {item.name} 추가 실패")
-        return False
+        # 새 슬롯 추가
+        self.slots.append(InventorySlot(item, quantity))
+        logger.info(
+            f"아이템 추가: {item.name} x{quantity}. "
+            f"무게: {self.current_weight}kg/{self.max_weight}kg"
+        )
+        return True
 
     def remove_item(self, slot_index: int, quantity: int = 1) -> Optional[Item]:
         """
@@ -340,7 +359,7 @@ class Inventory:
             })
 
         return {
-            "max_slots": self.max_slots,
+            "max_weight": self.max_weight,
             "slots": slots_data,
             "gold": self.gold
         }
@@ -350,7 +369,7 @@ class Inventory:
         """딕셔너리에서 복원"""
         from src.persistence.save_system import deserialize_item
 
-        inventory = cls(max_slots=data.get("max_slots", 100))
+        inventory = cls(max_weight=data.get("max_weight", 100.0))
         inventory.gold = data.get("gold", 0)
 
         for slot_data in data.get("slots", []):
@@ -358,7 +377,7 @@ class Inventory:
             quantity = slot_data.get("quantity", 1)
             inventory.slots.append(InventorySlot(item, quantity))
 
-        logger.info(f"인벤토리 로드: {len(inventory.slots)}개 아이템, {inventory.gold}G")
+        logger.info(f"인벤토리 로드: {len(inventory.slots)}개 아이템, {inventory.gold}G, {inventory.current_weight}kg/{inventory.max_weight}kg")
         return inventory
 
     def __len__(self) -> int:
@@ -366,4 +385,4 @@ class Inventory:
         return len(self.slots)
 
     def __repr__(self) -> str:
-        return f"Inventory({len(self.slots)}/{self.max_slots} slots, {self.gold}G)"
+        return f"Inventory({len(self.slots)} items, {self.current_weight}kg/{self.max_weight}kg, {self.gold}G)"

@@ -192,8 +192,8 @@ def main() -> int:
                             from src.ui.reward_ui import show_reward_screen
                             from src.equipment.inventory import Inventory
 
-                            # 인벤토리 생성
-                            inventory = Inventory(max_slots=100)
+                            # 인벤토리 생성 (무게 기반)
+                            inventory = Inventory(max_weight=100.0)  # 최대 100kg
                             inventory.add_gold(1000)  # 시작 골드
                             logger.info("인벤토리 생성 완료")
 
