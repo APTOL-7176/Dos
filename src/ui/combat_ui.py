@@ -489,7 +489,8 @@ class CombatUI:
             console.print(8, y + 3, f"BRV: {brv_bar}", fg=(255, 200, 100))
 
             # ATB 게이지 (더 정밀)
-            atb_value = self.combat_manager.atb.get_atb(ally)
+            gauge = self.combat_manager.atb.get_gauge(ally)
+            atb_value = gauge.current if gauge else 0
             atb_bar, atb_color = gauge_renderer.render_percentage_bar(
                 atb_value / 1000.0, width=15, show_percent=False, custom_color=(200, 200, 255)
             )
