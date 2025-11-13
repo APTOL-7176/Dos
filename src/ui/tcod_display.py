@@ -85,7 +85,7 @@ class TCODDisplay:
     def _initialize_tcod(self) -> None:
         """TCOD 초기화"""
         # 한글 지원 TrueType 폰트 로드
-        font_size = self.config.get("display.font_size", 16)
+        font_size = self.config.get("display.font_size", 32)
 
         import platform
         import os
@@ -93,16 +93,22 @@ class TCODDisplay:
         # OS별 시스템 폰트 경로 (한글 지원)
         font_paths = []
 
+        # 프로젝트 루트 경로
+        project_root = Path(__file__).parent.parent.parent
+
         if platform.system() == "Windows":
-            # Windows 시스템 폰트 (조밀한 폰트 우선)
+            # Windows 시스템 폰트 (고정폭 우선 - 공백 제거)
             windows_fonts = os.path.join(os.environ.get("WINDIR", "C:\\Windows"), "Fonts")
             font_paths = [
-                os.path.join(windows_fonts, "gulim.ttc"),       # 굴림 (조밀, 1순위)
-                os.path.join(windows_fonts, "batang.ttc"),      # 바탕 (조밀)
-                os.path.join(windows_fonts, "malgunbd.ttf"),    # 맑은 고딕 Bold (더 진함)
+                str(project_root / "GalmuriMono9.ttf"),             # 프로젝트 내 D2Coding TTF (1순위!)
+                str(project_root / "GalmuriMono9.ttc"),             # 프로젝트 내 D2Coding TTC
+                os.path.join(windows_fonts, "GalmuriMono9.ttf"),    # 시스템 D2Coding TTF
+                os.path.join(windows_fonts, "HTSMGOT.TTF"),     # 함초롬돋움 (고정폭)
+                os.path.join(windows_fonts, "gulim.ttf"),       # 굴림 (TTF 버전)
+                os.path.join(windows_fonts, "batang.ttf"),      # 바탕 (TTF 버전)
+                os.path.join(windows_fonts, "malgunbd.ttf"),    # 맑은 고딕 Bold
                 os.path.join(windows_fonts, "malgun.ttf"),      # 맑은 고딕
-                os.path.join(windows_fonts, "msyh.ttc"),        # Microsoft YaHei
-                os.path.join(windows_fonts, "consola.ttf"),     # Consolas (폴백)
+                os.path.join(windows_fonts, "msyh.ttf"),        # Microsoft YaHei
             ]
         else:
             # Linux/Mac 시스템 폰트
@@ -118,10 +124,10 @@ class TCODDisplay:
         for font_path in font_paths:
             try:
                 if Path(font_path).exists():
-                    # 정사각형 셀로 설정
-                    # 폰트 크기는 셀 크기와 동일하게 설정하여 간격 최소화
-                    char_width = font_size
-                    char_height = font_size
+                    # D2Coding은 이중폭 폰트 (한글 2칸, 영문 1칸)
+                    # 하지만 tcod는 단일 크기 셀만 지원하므로 절반 너비 사용
+                    char_width = font_size // 2  # 절반 너비
+                    char_height = font_size // 2
 
                     self.tileset = tcod.tileset.load_truetype_font(
                         font_path,
