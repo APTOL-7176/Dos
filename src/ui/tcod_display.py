@@ -173,14 +173,29 @@ class TCODDisplay:
 
         # 컨텍스트 생성
         if self.tileset:
-            self.context = tcod.context.new(
-                columns=self.screen_width,
-                rows=self.screen_height,
-                tileset=self.tileset,
-                title="Dawn of Stellar - 별빛의 여명",
-                vsync=self.config.get("display.vsync", True),
-                renderer=tcod.context.RENDERER_SDL2  # SDL2 렌더러 사용
-            )
+            # 렌더러 선택 (config에서 가져오거나 자동 선택)
+            renderer_name = self.config.get("display.renderer", "auto")
+            renderer_map = {
+                "sdl2": tcod.context.RENDERER_SDL2,
+                "opengl": tcod.context.RENDERER_OPENGL,
+                "opengl2": tcod.context.RENDERER_OPENGL2,
+                "auto": None  # TCOD가 자동 선택
+            }
+            renderer = renderer_map.get(renderer_name.lower(), None)
+
+            context_kwargs = {
+                "columns": self.screen_width,
+                "rows": self.screen_height,
+                "tileset": self.tileset,
+                "title": "Dawn of Stellar - 별빛의 여명",
+                "vsync": self.config.get("display.vsync", True)
+            }
+
+            if renderer is not None:
+                context_kwargs["renderer"] = renderer
+                self.logger.info(f"렌더러 사용: {renderer_name}")
+
+            self.context = tcod.context.new(**context_kwargs)
         else:
             self.context = tcod.context.new_terminal(
                 self.screen_width,

@@ -26,6 +26,7 @@ display:
   tileset: "assets/fonts/dejavu10x10_gs_tc.png"  # tcod 기본 타일셋 (사용 안 함)
 
   # 렌더링
+  renderer: "opengl2"  # auto, sdl2, opengl, opengl2 (opengl2 권장 - 더 나은 폰트 렌더링)
   fullscreen: false
   fps_limit: 60
   show_fps: false
