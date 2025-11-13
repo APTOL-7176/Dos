@@ -90,7 +90,7 @@ class ExplorationResult:
 class ExplorationSystem:
     """탐험 시스템"""
 
-    def __init__(self, dungeon: DungeonMap, party: List[Any]):
+    def __init__(self, dungeon: DungeonMap, party: List[Any], floor_number: int = 1):
         self.dungeon = dungeon
         self.player = Player(
             x=dungeon.stairs_up[0] if dungeon.stairs_up else 5,
@@ -98,7 +98,7 @@ class ExplorationSystem:
             party=party
         )
         self.fov_system = FOVSystem(default_radius=3)
-        self.floor_number = 1
+        self.floor_number = floor_number
         self.explored_tiles = set()
         self.enemies: List[Enemy] = []  # 적 리스트
 
@@ -426,8 +426,10 @@ class ExplorationSystem:
 
     def _spawn_enemies(self):
         """적 배치"""
-        # 층 수에 따라 적 수 결정 (2-6마리)
-        num_enemies = min(6, 2 + self.floor_number // 2)
+        # 층 수에 따라 적 수 결정 (8-30마리)
+        base_enemies = 8
+        additional = self.floor_number * 2
+        num_enemies = min(30, base_enemies + additional)
 
         # 플레이어 시작 위치 주변을 제외한 바닥 타일에 적 배치
         possible_positions = []
