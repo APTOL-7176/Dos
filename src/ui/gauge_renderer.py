@@ -7,11 +7,10 @@
 from typing import Tuple
 
 
-# 유니코드 블록 문자 (8단계) - 왼쪽에서 오른쪽으로 채워지는 블록 (U+258F ~ U+2588)
-# 빈 상태부터 꽉 찬 상태까지 순서대로
-BLOCK_CHARS = [" ", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█"]
+# 유니코드 블록 문자 (7단계) - 왼쪽에서 오른쪽으로 채워지는 블록 (U+258F ~ U+2588)
+# 부분 블록만 (공백 제외)
+BLOCK_CHARS = ["▏", "▎", "▍", "▌", "▋", "▊", "▉"]
 FULL_BLOCK = "█"
-EMPTY_BLOCK = " "
 
 
 class GaugeRenderer:
@@ -48,9 +47,9 @@ class GaugeRenderer:
         full_count = int(filled_blocks)
         partial = filled_blocks - full_count
 
-        # 부분 블록 선택 (8단계)
-        partial_index = int(partial * 8)
-        partial_char = BLOCK_CHARS[partial_index] if partial_index > 0 else ""
+        # 부분 블록 선택 (7단계)
+        partial_index = int(partial * 7)
+        partial_char = BLOCK_CHARS[partial_index] if partial > 0 and partial_index < len(BLOCK_CHARS) else ""
 
         # 게이지 문자열 생성 (공백 없이)
         gauge = FULL_BLOCK * full_count
@@ -104,8 +103,8 @@ class GaugeRenderer:
         partial = filled_blocks - full_count
 
         # 부분 블록
-        partial_index = int(partial * 8)
-        partial_char = BLOCK_CHARS[partial_index] if partial_index > 0 else ""
+        partial_index = int(partial * 7)
+        partial_char = BLOCK_CHARS[partial_index] if partial > 0 and partial_index < len(BLOCK_CHARS) else ""
 
         # 게이지 문자열 (공백 없이)
         gauge = FULL_BLOCK * full_count
@@ -154,8 +153,8 @@ class GaugeRenderer:
         full_count = int(filled_blocks)
         partial = filled_blocks - full_count
 
-        partial_index = int(partial * 8)
-        partial_char = BLOCK_CHARS[partial_index] if partial_index > 0 else ""
+        partial_index = int(partial * 7)
+        partial_char = BLOCK_CHARS[partial_index] if partial > 0 and partial_index < len(BLOCK_CHARS) else ""
 
         # 게이지 (캐스팅은 항상 보라색)
         gauge = f"[{'▓' * full_count}{partial_char}{'░' * (width - full_count - (1 if partial_char else 0))}]"

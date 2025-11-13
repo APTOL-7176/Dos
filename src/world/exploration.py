@@ -473,12 +473,16 @@ class ExplorationSystem:
                 enemy = Enemy(x=x, y=y, level=self.floor_number)
                 self.enemies.append(enemy)
 
-        logger.info(f"적 {len(self.enemies)}마리 배치 완료")
+        logger.warning(f"[DEBUG] 적 {len(self.enemies)}마리 배치 완료")
+        for i, enemy in enumerate(self.enemies[:5]):  # 처음 5마리만 로그
+            logger.warning(f"[DEBUG] 적 {i+1}: 위치 ({enemy.x}, {enemy.y})")
 
     def get_enemy_at(self, x: int, y: int) -> Optional[Enemy]:
         """특정 위치의 적 가져오기"""
+        logger.warning(f"[DEBUG] get_enemy_at({x}, {y}) 호출 - 현재 적 {len(self.enemies)}마리")
         for enemy in self.enemies:
             if enemy.x == x and enemy.y == y:
+                logger.warning(f"[DEBUG] 적 발견! at ({x}, {y})")
                 return enemy
         return None
 
