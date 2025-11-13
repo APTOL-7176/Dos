@@ -42,6 +42,20 @@ class Enemy:
     level: int
     is_boss: bool = False
 
+    # AI 상태
+    spawn_x: int = None  # 생성 위치 X
+    spawn_y: int = None  # 생성 위치 Y
+    is_chasing: bool = False  # 추적 중
+    chase_turns: int = 0  # 추적 턴 수
+    max_chase_turns: int = 15  # 최대 추적 턴
+    detection_range: int = 5  # 플레이어 감지 거리
+
+    def __post_init__(self):
+        if self.spawn_x is None:
+            self.spawn_x = self.x
+        if self.spawn_y is None:
+            self.spawn_y = self.y
+
 
 @dataclass
 class Player:
@@ -158,7 +172,12 @@ class ExplorationSystem:
 
         # 타일 이벤트 체크
         tile = self.dungeon.get_tile(new_x, new_y)
-        return self._check_tile_event(tile)
+        result = self._check_tile_event(tile)
+
+        # 플레이어가 움직인 후 모든 적 움직임
+        self._move_all_enemies()
+
+        return result
 
     def _check_tile_event(self, tile: Tile) -> ExplorationResult:
         """타일 이벤트 확인"""
@@ -440,3 +459,69 @@ class ExplorationSystem:
         if enemy in self.enemies:
             self.enemies.remove(enemy)
             logger.info(f"적 제거: ({enemy.x}, {enemy.y})")
+
+    def _move_all_enemies(self):
+        """모든 적 움직임 처리"""
+        for enemy in self.enemies:
+            self._move_enemy(enemy)
+
+    def _move_enemy(self, enemy: Enemy):
+        """단일 적 움직임"""
+        # 플레이어와의 거리 계산
+        distance = abs(enemy.x - self.player.x) + abs(enemy.y - self.player.y)
+
+        # 플레이어 감지
+        if distance <= enemy.detection_range:
+            enemy.is_chasing = True
+            enemy.chase_turns = 0
+
+        # 추적 중일 때
+        if enemy.is_chasing:
+            enemy.chase_turns += 1
+
+            # 너무 오래 추적하면 포기하고 원래 위치로 복귀
+            if enemy.chase_turns > enemy.max_chase_turns:
+                enemy.is_chasing = False
+                enemy.chase_turns = 0
+
+            # 추적 중이면 플레이어 방향으로 이동
+            if enemy.is_chasing:
+                self._move_enemy_towards(enemy, self.player.x, self.player.y)
+        else:
+            # 원래 위치로 복귀
+            if enemy.x != enemy.spawn_x or enemy.y != enemy.spawn_y:
+                self._move_enemy_towards(enemy, enemy.spawn_x, enemy.spawn_y)
+
+    def _move_enemy_towards(self, enemy: Enemy, target_x: int, target_y: int):
+        """적을 목표 위치로 한 칸 이동"""
+        # 이동 방향 결정 (맨하탄 거리 기반)
+        dx = 0
+        dy = 0
+
+        if enemy.x < target_x:
+            dx = 1
+        elif enemy.x > target_x:
+            dx = -1
+
+        if enemy.y < target_y:
+            dy = 1
+        elif enemy.y > target_y:
+            dy = -1
+
+        # 대각선 이동 or 직선 이동 선택
+        # 50% 확률로 X축 우선, 50% 확률로 Y축 우선
+        if random.random() < 0.5 and dx != 0:
+            new_x, new_y = enemy.x + dx, enemy.y
+        elif dy != 0:
+            new_x, new_y = enemy.x, enemy.y + dy
+        elif dx != 0:
+            new_x, new_y = enemy.x + dx, enemy.y
+        else:
+            return  # 이미 목표 위치에 도착
+
+        # 이동 가능 여부 확인
+        if self.dungeon.is_walkable(new_x, new_y):
+            # 다른 적과 겹치지 않는지 확인
+            if not self.get_enemy_at(new_x, new_y):
+                enemy.x = new_x
+                enemy.y = new_y
