@@ -83,11 +83,7 @@ class InputHandler(tcod.event.EventDispatch[Optional[GameAction]]):
             tcod.event.KeySym.ESCAPE: GameAction.ESCAPE,
             tcod.event.KeySym.RETURN: GameAction.MENU,  # Enter: 메뉴/확정
 
-            # 메뉴/인벤토리
-            tcod.event.KeySym.m: GameAction.MENU,
-            tcod.event.KeySym.i: GameAction.OPEN_INVENTORY,
-
-            # Z: 확인, X: 취소
+            # Z: 확인, X: 취소 (KeySym으로 처리)
             tcod.event.KeySym.z: GameAction.CONFIRM,
             tcod.event.KeySym.x: GameAction.CANCEL,
         }
@@ -132,8 +128,8 @@ class InputHandler(tcod.event.EventDispatch[Optional[GameAction]]):
         # KeySym으로 먼저 확인
         action = self.key_bindings.get(event.sym)
 
-        # 문자 키로 확인 (mod가 없을 때만)
-        if not action and event.mod == 0:
+        # 문자 키로 확인
+        if not action:
             # Unicode 문자로 변환 시도
             try:
                 char = chr(event.sym)
@@ -143,6 +139,8 @@ class InputHandler(tcod.event.EventDispatch[Optional[GameAction]]):
 
         if action:
             self.logger.debug(f"키 입력: {event.sym} -> {action.value}")
+        else:
+            self.logger.debug(f"키 입력 무시: {event.sym} (문자: {chr(event.sym) if event.sym < 128 else 'N/A'})")
 
         return action
 

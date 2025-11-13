@@ -67,10 +67,13 @@ class WorldUI:
 
         # 인벤토리 열기
         if action == GameAction.MENU or action == GameAction.OPEN_INVENTORY:
+            logger.debug(f"인벤토리 열기 요청 - inventory: {self.inventory is not None}, party: {self.party is not None}, console: {console is not None}, context: {context is not None}")
             if self.inventory and self.party and console and context:
                 from src.ui.inventory_ui import open_inventory
                 open_inventory(console, context, self.inventory, self.party)
                 return False
+            else:
+                logger.warning("인벤토리를 열 수 없음 - 필요한 객체가 없습니다")
 
         # 이동
         dx, dy = 0, 0
