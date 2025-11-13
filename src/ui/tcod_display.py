@@ -101,9 +101,11 @@ class TCODDisplay:
             # Windows 시스템 폰트 (고정폭 우선 - 공백 제거)
             windows_fonts = os.path.join(os.environ.get("WINDIR", "C:\\Windows"), "Fonts")
             font_paths = [
-                str(project_root / "GalmuriMono9.ttf"),             # 프로젝트 내 D2Coding TTF (1순위!)
-                str(project_root / "GalmuriMono9.ttc"),             # 프로젝트 내 D2Coding TTC
-                os.path.join(windows_fonts, "GalmuriMono9.ttf"),    # 시스템 D2Coding TTF
+                str(project_root / "dalmoori.ttf"),                 # 프로젝트 내 달무리 폰트 (1순위!)
+                str(project_root / "GalmuriMono9.ttf"),             # 프로젝트 내 갈무리모노
+                str(project_root / "GalmuriMono9.ttc"),             # 프로젝트 내 갈무리모노 TTC
+                os.path.join(windows_fonts, "dalmoori.ttf"),        # 시스템 달무리
+                os.path.join(windows_fonts, "GalmuriMono9.ttf"),    # 시스템 갈무리모노
                 os.path.join(windows_fonts, "HTSMGOT.TTF"),     # 함초롬돋움 (고정폭)
                 os.path.join(windows_fonts, "gulim.ttf"),       # 굴림 (TTF 버전)
                 os.path.join(windows_fonts, "batang.ttf"),      # 바탕 (TTF 버전)
@@ -114,6 +116,8 @@ class TCODDisplay:
         else:
             # Linux/Mac 시스템 폰트
             font_paths = [
+                str(project_root / "dalmoori.ttf"),              # 프로젝트 내 달무리 폰트 (1순위!)
+                str(project_root / "GalmuriMono9.ttf"),          # 프로젝트 내 갈무리모노
                 "/usr/share/fonts/opentype/unifont/unifont.otf",  # Unifont (유니코드 전체)
                 "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",  # WenQuanYi (CJK)
                 "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",  # Noto Sans CJK
