@@ -70,9 +70,23 @@ class WorldUI:
             self.quit_requested = True
             return True
 
-        # 인벤토리 열기
-        if action == GameAction.MENU or action == GameAction.OPEN_INVENTORY:
-            logger.warning(f"[DEBUG] 인벤토리 열기 요청 - inventory: {self.inventory is not None}, party: {self.party is not None}, console: {console is not None}, context: {context is not None}")
+        # 메뉴 열기 (M키)
+        if action == GameAction.MENU:
+            logger.warning(f"[DEBUG] 메뉴 열기 요청")
+            if self.inventory is not None and self.party is not None and console is not None and context is not None:
+                from src.ui.game_menu import open_game_menu, MenuOption
+                logger.warning("[DEBUG] 게임 메뉴 열기")
+                result = open_game_menu(console, context, self.inventory, self.party)
+                if result == MenuOption.QUIT:
+                    self.quit_requested = True
+                    return True
+                return False
+            else:
+                logger.warning(f"메뉴를 열 수 없음 - inventory={self.inventory is not None}, party={self.party is not None}, console={console is not None}, context={context is not None}")
+
+        # 인벤토리 열기 (I키)
+        if action == GameAction.OPEN_INVENTORY:
+            logger.warning(f"[DEBUG] 인벤토리 열기 요청")
             if self.inventory is not None and self.party is not None and console is not None and context is not None:
                 from src.ui.inventory_ui import open_inventory
                 logger.warning("[DEBUG] 인벤토리 열기 시도")
@@ -206,7 +220,7 @@ class WorldUI:
         console.print(
             5,
             self.screen_height - 2,
-            "방향키: 이동  Z: 계단 이용  M: 인벤토리  ESC: 종료",
+            "방향키: 이동  Z: 계단 이용  M: 메뉴  I: 인벤토리  ESC: 종료",
             fg=(180, 180, 180)
         )
 
