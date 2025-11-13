@@ -12,6 +12,7 @@ from src.world.map_renderer import MapRenderer
 from src.ui.input_handler import InputHandler, GameAction
 from src.ui.gauge_renderer import GaugeRenderer
 from src.core.logger import get_logger, Loggers
+from src.audio.audio_manager import play_bgm
 
 
 logger = get_logger(Loggers.UI)
@@ -184,16 +185,16 @@ class WorldUI:
         console.print(x, y, "[파티 상태]", fg=(100, 255, 100))
 
         for i, member in enumerate(self.exploration.player.party[:4]):
-            my = y + 2 + i * 3
+            my = y + 2 + i * 2
 
-            # 이름
+            # 이름과 HP 게이지를 한 줄에 표시
             console.print(x, my, f"{i+1}. {member.name[:10]}", fg=(255, 255, 255))
 
-            # HP 게이지 (작게)
+            # HP 게이지 (가로, 간단)
             hp_bar, hp_color = self.gauge_renderer.render_bar(
                 member.current_hp, member.max_hp, width=10, show_numbers=False
             )
-            console.print(x + 3, my + 1, f"HP:{hp_bar}", fg=hp_color)
+            console.print(x + 14, my, f"HP:{hp_bar}", fg=hp_color)
 
         # 인벤토리 정보
         inv_y = y + 15
@@ -227,6 +228,21 @@ def run_exploration(
     handler = InputHandler()
 
     logger.info(f"탐험 시작: {exploration.floor_number}층")
+
+    # 층마다 다른 BGM 재생
+    floor = exploration.floor_number
+    if floor <= 5:
+        # 초반 층: 일반 던전 BGM
+        play_bgm("dungeon_normal")
+    elif floor <= 10:
+        # 중반 층: 탐색 던전 BGM
+        play_bgm("dungeon_search")
+    elif floor <= 15:
+        # 중후반 층: 어두운 던전 BGM
+        play_bgm("dungeon_dark")
+    else:
+        # 후반 층: 위험한 분위기
+        play_bgm("danger")
 
     while True:
         # 렌더링
