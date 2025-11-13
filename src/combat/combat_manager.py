@@ -507,7 +507,7 @@ class CombatManager:
     def _is_defeated(self, character: Any) -> bool:
         """캐릭터가 전투 불능 상태인지 확인"""
         if hasattr(character, "is_alive"):
-            return not character.is_alive()
+            return not character.is_alive
         if hasattr(character, "current_hp"):
             return character.current_hp <= 0
         return False
