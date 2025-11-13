@@ -52,10 +52,10 @@ class GaugeRenderer:
         partial_index = int(partial * 8)
         partial_char = BLOCK_CHARS[partial_index] if partial_index > 0 else ""
 
-        # 게이지 문자열 생성
+        # 게이지 문자열 생성 (공백 없이)
         gauge = FULL_BLOCK * full_count
         gauge += partial_char
-        gauge += EMPTY_BLOCK * (width - full_count - (1 if partial_char else 0))
+        # 빈 공간은 표시하지 않음 (trailing spaces 제거)
 
         # 색상 계산
         if color_gradient:
@@ -107,10 +107,10 @@ class GaugeRenderer:
         partial_index = int(partial * 8)
         partial_char = BLOCK_CHARS[partial_index] if partial_index > 0 else ""
 
-        # 게이지 문자열
+        # 게이지 문자열 (공백 없이)
         gauge = FULL_BLOCK * full_count
         gauge += partial_char
-        gauge += EMPTY_BLOCK * (width - full_count - (1 if partial_char else 0))
+        # 빈 공간은 표시하지 않음 (trailing spaces 제거)
 
         # 색상
         if custom_color:

@@ -351,7 +351,7 @@ class CombatUI:
 
     def _check_ready_combatants(self):
         """행동 가능한 전투원 확인"""
-        ready = self.combat_manager.atb.get_ready_combatants()
+        ready = self.combat_manager.atb.get_action_order()
 
         if not ready:
             return
