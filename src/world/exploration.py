@@ -160,9 +160,13 @@ class ExplorationSystem:
 
         # 적과의 충돌 확인 (이동 전에!)
         enemy = self.get_enemy_at(new_x, new_y)
+        logger.warning(f"[DEBUG] 적 충돌 체크 at ({new_x}, {new_y}): enemy={enemy is not None}")
         if enemy:
+            logger.warning(f"[DEBUG] 적 발견! 전투 트리거 at ({enemy.x}, {enemy.y})")
             # 플레이어는 이동하지 않고 전투만 트리거
-            return self._trigger_combat_with_enemy(enemy)
+            combat_result = self._trigger_combat_with_enemy(enemy)
+            logger.warning(f"[DEBUG] 전투 결과: event={combat_result.event}")
+            return combat_result
 
         # 이동
         self.player.x = new_x
