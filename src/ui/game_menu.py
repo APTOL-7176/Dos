@@ -191,8 +191,9 @@ def open_game_menu(
                         continue
 
                     elif result == MenuOption.OPTIONS:
-                        # TODO: 설정 메뉴 구현
-                        show_message(console, context, "설정 기능은 아직 구현되지 않았습니다.")
+                        from src.ui.settings_ui import open_settings
+                        open_settings(console, context)
+                        # 설정에서 돌아온 후 메뉴 계속
                         continue
 
                     elif result == MenuOption.RETURN:

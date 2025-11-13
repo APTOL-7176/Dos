@@ -329,13 +329,17 @@ def main() -> int:
                 # TODO: 세이브 로드
                 break
             elif menu_result == MenuResult.SHOP:
-                logger.info("상점 열기 (구현 예정)")
-                # TODO: 상점 UI
-                break
+                logger.info("상점 열기")
+                from src.ui.shop_ui import open_shop
+                # 상점은 골드가 필요하므로 임시로 None 전달 (메인 메뉴에서는 골드가 없음)
+                # TODO: 메타 진행용 별빛의 파편 같은 별도 화폐 시스템 구현
+                open_shop(display.console, display.context, inventory=None)
+                continue
             elif menu_result == MenuResult.SETTINGS:
-                logger.info("설정 열기 (구현 예정)")
-                # TODO: 설정 UI
-                break
+                logger.info("설정 열기")
+                from src.ui.settings_ui import open_settings
+                open_settings(display.console, display.context)
+                continue
 
         # 정리
         display.close()
