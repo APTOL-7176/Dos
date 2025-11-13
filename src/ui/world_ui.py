@@ -70,13 +70,14 @@ class WorldUI:
 
         # 인벤토리 열기
         if action == GameAction.MENU or action == GameAction.OPEN_INVENTORY:
-            logger.debug(f"인벤토리 열기 요청 - inventory: {self.inventory is not None}, party: {self.party is not None}, console: {console is not None}, context: {context is not None}")
+            logger.warning(f"[DEBUG] 인벤토리 열기 요청 - inventory: {self.inventory is not None}, party: {self.party is not None}, console: {console is not None}, context: {context is not None}")
             if self.inventory and self.party and console and context:
                 from src.ui.inventory_ui import open_inventory
+                logger.warning("[DEBUG] 인벤토리 열기 시도")
                 open_inventory(console, context, self.inventory, self.party)
                 return False
             else:
-                logger.warning("인벤토리를 열 수 없음 - 필요한 객체가 없습니다")
+                logger.warning(f"인벤토리를 열 수 없음 - inventory={self.inventory is not None}, party={self.party is not None}, console={console is not None}, context={context is not None}")
 
         # 이동
         dx, dy = 0, 0
@@ -92,9 +93,11 @@ class WorldUI:
 
         if dx != 0 or dy != 0:
             result = self.exploration.move_player(dx, dy)
+            logger.warning(f"[DEBUG] 이동 결과: event={result.event}")
             self._handle_exploration_result(result)
             # 전투가 트리거되면 즉시 루프 탈출
             if self.combat_requested:
+                logger.warning(f"[DEBUG] 전투 요청됨! 루프 탈출")
                 return True
 
         # 계단 이동
@@ -119,14 +122,18 @@ class WorldUI:
 
     def _handle_exploration_result(self, result: ExplorationResult):
         """탐험 결과 처리"""
+        logger.warning(f"[DEBUG] 탐험 결과: event={result.event}, message={result.message}")
+
         if result.message:
             self.add_message(result.message)
 
         if result.event == ExplorationEvent.COMBAT:
+            logger.warning(f"[DEBUG] 전투 이벤트 감지! combat_requested를 True로 설정")
             self.combat_requested = True
             # 전투에 참여할 적들 저장
             if result.data and "enemies" in result.data:
                 self.combat_enemies = result.data["enemies"]
+                logger.warning(f"[DEBUG] 적 {len(self.combat_enemies)}마리 저장됨")
 
         elif result.event == ExplorationEvent.TRAP_TRIGGERED:
             # 함정 데미지는 이미 적용됨
