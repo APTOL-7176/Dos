@@ -29,6 +29,7 @@ class TileType(Enum):
     KEY = "key"  # 열쇠
     PUZZLE = "puzzle"  # 퍼즐
     SHOP = "shop"  # 상점
+    ITEM = "item"  # 떨어진 아이템/장비
 
 
 @dataclass
@@ -156,6 +157,12 @@ class Tile:
             self.transparent = True
             self.char = "$"
             self.fg_color = (255, 215, 0)
+
+        elif self.tile_type == TileType.ITEM:
+            self.walkable = True
+            self.transparent = True
+            self.char = "i"
+            self.fg_color = (255, 255, 100)
 
     def unlock(self):
         """문 잠금 해제"""
