@@ -149,9 +149,20 @@ class WorldUI:
             view_height=35
         )
 
-        # 플레이어 위치 표시
-        screen_x = player.x - max(0, player.x - 40)
-        screen_y = 5 + (player.y - max(0, player.y - 20))
+        # 적 위치 표시
+        camera_x = max(0, player.x - 40)
+        camera_y = max(0, player.y - 20)
+        for enemy in self.exploration.enemies:
+            enemy_screen_x = enemy.x - camera_x
+            enemy_screen_y = 5 + (enemy.y - camera_y)
+            if 0 <= enemy_screen_x < self.screen_width and 0 <= enemy_screen_y < 40:
+                # 적 색상: 보스는 빨강, 일반 적은 주황색
+                enemy_color = (255, 50, 50) if enemy.is_boss else (255, 150, 50)
+                console.print(enemy_screen_x, enemy_screen_y, "E", fg=enemy_color)
+
+        # 플레이어 위치 표시 (적 위에 덮어씀)
+        screen_x = player.x - camera_x
+        screen_y = 5 + (player.y - camera_y)
         if 0 <= screen_x < self.screen_width and 0 <= screen_y < 40:
             console.print(screen_x, screen_y, "@", fg=(255, 255, 100))
 

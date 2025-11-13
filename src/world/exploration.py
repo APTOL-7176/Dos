@@ -35,6 +35,29 @@ class ExplorationEvent(Enum):
 
 
 @dataclass
+class Enemy:
+    """적 엔티티"""
+    x: int
+    y: int
+    level: int
+    is_boss: bool = False
+
+    # AI 상태
+    spawn_x: int = None  # 생성 위치 X
+    spawn_y: int = None  # 생성 위치 Y
+    is_chasing: bool = False  # 추적 중
+    chase_turns: int = 0  # 추적 턴 수
+    max_chase_turns: int = 15  # 최대 추적 턴
+    detection_range: int = 5  # 플레이어 감지 거리
+
+    def __post_init__(self):
+        if self.spawn_x is None:
+            self.spawn_x = self.x
+        if self.spawn_y is None:
+            self.spawn_y = self.y
+
+
+@dataclass
 class Player:
     """플레이어 정보"""
     x: int
@@ -77,6 +100,10 @@ class ExplorationSystem:
         self.fov_system = FOVSystem(default_radius=3)
         self.floor_number = 1
         self.explored_tiles = set()
+        self.enemies: List[Enemy] = []  # 적 리스트
+
+        # 적 배치
+        self._spawn_enemies()
 
         # 초기 FOV 계산
         self.update_fov()
@@ -138,9 +165,19 @@ class ExplorationSystem:
         # FOV 업데이트
         self.update_fov()
 
+        # 적과의 충돌 확인
+        enemy = self.get_enemy_at(new_x, new_y)
+        if enemy:
+            return self._trigger_combat_with_enemy(enemy)
+
         # 타일 이벤트 체크
         tile = self.dungeon.get_tile(new_x, new_y)
-        return self._check_tile_event(tile)
+        result = self._check_tile_event(tile)
+
+        # 플레이어가 움직인 후 모든 적 움직임
+        self._move_all_enemies()
+
+        return result
 
     def _check_tile_event(self, tile: Tile) -> ExplorationResult:
         """타일 이벤트 확인"""
@@ -183,9 +220,7 @@ class ExplorationSystem:
                 message="⚠ 보스의 기운이 느껴집니다..."
             )
 
-        # 랜덤 전투 조우 (5% 확률)
-        if tile.tile_type == TileType.FLOOR and random.random() < 0.05:
-            return self._trigger_combat()
+        # 랜덤 전투 조우 제거 (이제 적 엔티티와의 충돌로만 전투 발생)
 
         return ExplorationResult(
             success=True,
@@ -328,7 +363,7 @@ class ExplorationSystem:
             )
 
     def _trigger_combat(self) -> ExplorationResult:
-        """전투 조우"""
+        """전투 조우 (랜덤)"""
         # 적 생성 (층수에 따라)
         num_enemies = min(4, 1 + self.floor_number // 3)
 
@@ -339,6 +374,40 @@ class ExplorationSystem:
             event=ExplorationEvent.COMBAT,
             message=f"⚔ 적 출현! {num_enemies}마리!",
             data={"num_enemies": num_enemies, "floor": self.floor_number}
+        )
+
+    def _trigger_combat_with_enemy(self, enemy: Enemy) -> ExplorationResult:
+        """적 엔티티와의 전투"""
+        # 주변 3칸 이내의 다른 적들을 찾아서 함께 전투
+        nearby_enemies = [enemy]  # 조우한 적 포함
+        search_radius = 3
+
+        for other_enemy in self.enemies:
+            if other_enemy != enemy:
+                # 거리 계산 (맨하탄 거리)
+                distance = abs(other_enemy.x - enemy.x) + abs(other_enemy.y - enemy.y)
+                if distance <= search_radius:
+                    nearby_enemies.append(other_enemy)
+
+        # 최대 4마리까지 (너무 많으면 어려움)
+        nearby_enemies = nearby_enemies[:4]
+        num_enemies = len(nearby_enemies)
+
+        # 보스 포함 여부 확인
+        has_boss = any(e.is_boss for e in nearby_enemies)
+
+        logger.info(f"적과 조우! {num_enemies}마리 (레벨 {enemy.level})")
+
+        return ExplorationResult(
+            success=True,
+            event=ExplorationEvent.COMBAT,
+            message=f"⚔ 적과 조우! {num_enemies}마리" + (" (보스 포함!)" if has_boss else ""),
+            data={
+                "num_enemies": num_enemies,
+                "floor": self.floor_number,
+                "enemies": nearby_enemies,  # 전투에 참여하는 적들
+                "enemy_level": max(e.level for e in nearby_enemies)
+            }
         )
 
     def descend_floor(self):
@@ -354,3 +423,105 @@ class ExplorationSystem:
         if self.floor_number > 1:
             self.floor_number -= 1
             logger.info(f"층 이동: {self.floor_number}층")
+
+    def _spawn_enemies(self):
+        """적 배치"""
+        # 층 수에 따라 적 수 결정 (2-6마리)
+        num_enemies = min(6, 2 + self.floor_number // 2)
+
+        # 플레이어 시작 위치 주변을 제외한 바닥 타일에 적 배치
+        possible_positions = []
+        for x in range(self.dungeon.width):
+            for y in range(self.dungeon.height):
+                tile = self.dungeon.get_tile(x, y)
+                if (tile and tile.tile_type == TileType.FLOOR and
+                    abs(x - self.player.x) > 3 and abs(y - self.player.y) > 3):
+                    possible_positions.append((x, y))
+
+        # 랜덤하게 적 배치
+        if possible_positions:
+            spawn_positions = random.sample(possible_positions, min(num_enemies, len(possible_positions)))
+            for x, y in spawn_positions:
+                enemy = Enemy(x=x, y=y, level=self.floor_number)
+                self.enemies.append(enemy)
+
+        logger.info(f"적 {len(self.enemies)}마리 배치 완료")
+
+    def get_enemy_at(self, x: int, y: int) -> Optional[Enemy]:
+        """특정 위치의 적 가져오기"""
+        for enemy in self.enemies:
+            if enemy.x == x and enemy.y == y:
+                return enemy
+        return None
+
+    def remove_enemy(self, enemy: Enemy):
+        """적 제거 (전투 승리 후)"""
+        if enemy in self.enemies:
+            self.enemies.remove(enemy)
+            logger.info(f"적 제거: ({enemy.x}, {enemy.y})")
+
+    def _move_all_enemies(self):
+        """모든 적 움직임 처리"""
+        for enemy in self.enemies:
+            self._move_enemy(enemy)
+
+    def _move_enemy(self, enemy: Enemy):
+        """단일 적 움직임"""
+        # 플레이어와의 거리 계산
+        distance = abs(enemy.x - self.player.x) + abs(enemy.y - self.player.y)
+
+        # 플레이어 감지
+        if distance <= enemy.detection_range:
+            enemy.is_chasing = True
+            enemy.chase_turns = 0
+
+        # 추적 중일 때
+        if enemy.is_chasing:
+            enemy.chase_turns += 1
+
+            # 너무 오래 추적하면 포기하고 원래 위치로 복귀
+            if enemy.chase_turns > enemy.max_chase_turns:
+                enemy.is_chasing = False
+                enemy.chase_turns = 0
+
+            # 추적 중이면 플레이어 방향으로 이동
+            if enemy.is_chasing:
+                self._move_enemy_towards(enemy, self.player.x, self.player.y)
+        else:
+            # 원래 위치로 복귀
+            if enemy.x != enemy.spawn_x or enemy.y != enemy.spawn_y:
+                self._move_enemy_towards(enemy, enemy.spawn_x, enemy.spawn_y)
+
+    def _move_enemy_towards(self, enemy: Enemy, target_x: int, target_y: int):
+        """적을 목표 위치로 한 칸 이동"""
+        # 이동 방향 결정 (맨하탄 거리 기반)
+        dx = 0
+        dy = 0
+
+        if enemy.x < target_x:
+            dx = 1
+        elif enemy.x > target_x:
+            dx = -1
+
+        if enemy.y < target_y:
+            dy = 1
+        elif enemy.y > target_y:
+            dy = -1
+
+        # 대각선 이동 or 직선 이동 선택
+        # 50% 확률로 X축 우선, 50% 확률로 Y축 우선
+        if random.random() < 0.5 and dx != 0:
+            new_x, new_y = enemy.x + dx, enemy.y
+        elif dy != 0:
+            new_x, new_y = enemy.x, enemy.y + dy
+        elif dx != 0:
+            new_x, new_y = enemy.x + dx, enemy.y
+        else:
+            return  # 이미 목표 위치에 도착
+
+        # 이동 가능 여부 확인
+        if self.dungeon.is_walkable(new_x, new_y):
+            # 다른 적과 겹치지 않는지 확인
+            if not self.get_enemy_at(new_x, new_y):
+                enemy.x = new_x
+                enemy.y = new_y
