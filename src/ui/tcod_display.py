@@ -86,6 +86,7 @@ class TCODDisplay:
         """TCOD 초기화"""
         # 한글 지원 TrueType 폰트 로드
         font_size = self.config.get("display.font_size", 32)
+        char_spacing_adjust = self.config.get("display.char_spacing_adjust", 2)
 
         import platform
         import os
@@ -124,9 +125,11 @@ class TCODDisplay:
         for font_path in font_paths:
             try:
                 if Path(font_path).exists():
-                    # D2Coding은 이중폭 폰트 (한글 2칸, 영문 1칸)
-                    # 하지만 tcod는 단일 크기 셀만 지원하므로 절반 너비 사용
-                    char_width = font_size // 2  # 절반 너비
+                    # 타일 크기 설정
+                    # char_spacing_adjust를 사용하여 글자 간격 조정
+                    # 양수: 타일을 더 넓게 만들어 글자가 타일을 가득 채움 (간격 감소)
+                    # 음수: 타일을 더 좁게 만들어 간격 증가
+                    char_width = font_size // 2 + char_spacing_adjust
                     char_height = font_size // 2
 
                     self.tileset = tcod.tileset.load_truetype_font(
@@ -134,7 +137,7 @@ class TCODDisplay:
                         char_width,
                         char_height
                     )
-                    self.logger.info(f"폰트 로드 성공: {font_path} (셀: {char_width}x{char_height})")
+                    self.logger.info(f"폰트 로드 성공: {font_path} (셀: {char_width}x{char_height}, 간격 조정: {char_spacing_adjust})")
                     break
             except Exception as e:
                 self.logger.debug(f"폰트 로드 시도 실패 ({font_path}): {e}")
