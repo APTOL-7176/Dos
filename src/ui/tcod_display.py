@@ -84,21 +84,35 @@ class TCODDisplay:
 
     def _initialize_tcod(self) -> None:
         """TCOD 초기화"""
-        # 타일셋 로드
-        tileset_path = self.config.get("display.tileset", "assets/fonts/dejavu10x10_gs_tc.png")
+        # 한글 지원 TrueType 폰트 로드
+        font_size = self.config.get("display.font_size", 16)
 
-        # 기본 타일셋 사용 (파일이 없을 경우)
-        try:
-            self.tileset = tcod.tileset.load_tilesheet(
-                tileset_path, 32, 8, tcod.tileset.CHARMAP_TCOD
-            )
-        except Exception as e:
-            self.logger.warning(f"타일셋 로드 실패, 기본 폰트 사용: {e}")
-            self.tileset = tcod.tileset.load_tilesheet(
-                Path(__file__).parent / "dejavu10x10_gs_tc.png",
-                32, 8,
-                tcod.tileset.CHARMAP_TCOD
-            ) if False else None  # 임시로 None
+        # 시스템 폰트 우선순위 목록 (한글 지원)
+        font_paths = [
+            "/usr/share/fonts/opentype/unifont/unifont.otf",  # Unifont (유니코드 전체 지원)
+            "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",  # WenQuanYi (CJK 지원)
+            "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",  # 폴백
+        ]
+
+        self.tileset = None
+        for font_path in font_paths:
+            try:
+                if Path(font_path).exists():
+                    self.tileset = tcod.tileset.load_truetype_font(
+                        font_path,
+                        font_size,
+                        font_size
+                    )
+                    self.logger.info(f"폰트 로드 성공: {font_path}")
+                    break
+            except Exception as e:
+                self.logger.warning(f"폰트 로드 실패 ({font_path}): {e}")
+                continue
+
+        # 폴백: 기본 폰트
+        if not self.tileset:
+            self.logger.warning("한글 폰트 로드 실패, 기본 터미널 폰트 사용 (한글 미지원 가능)")
+            self.tileset = None
 
         # 콘솔 생성
         self.console = tcod.console.Console(self.screen_width, self.screen_height)

@@ -20,8 +20,9 @@ display:
   screen_width: 80
   screen_height: 50
 
-  # 타일셋
-  tileset: "assets/fonts/dejavu10x10_gs_tc.png"  # tcod 기본 타일셋
+  # 한글 폰트 설정
+  font_size: 16  # TrueType 폰트 크기 (픽셀)
+  tileset: "assets/fonts/dejavu10x10_gs_tc.png"  # tcod 기본 타일셋 (사용 안 함)
 
   # 렌더링
   fullscreen: false
