@@ -296,11 +296,152 @@ class CombatManager:
         **kwargs
     ) -> Dict[str, Any]:
         """스킬 실행"""
-        # TODO: 스킬 시스템 연동
-        return {
+        if not skill:
+            return {"action": "skill", "error": "no_skill"}
+
+        result = {
             "action": "skill",
-            "skill_name": getattr(skill, "name", "Unknown") if skill else "Unknown"
+            "skill_name": getattr(skill, "name", "Unknown"),
+            "targets": []
         }
+
+        # 적 스킬인지 확인
+        try:
+            from src.combat.enemy_skills import EnemySkill, SkillTargetType
+
+            if isinstance(skill, EnemySkill):
+                # 적 스킬 실행
+                result.update(self._execute_enemy_skill(actor, target, skill, **kwargs))
+                return result
+        except ImportError:
+            pass
+
+        # 일반 스킬 실행 (플레이어 스킬)
+        # TODO: 플레이어 스킬 시스템 연동
+        result["error"] = "player_skill_not_implemented"
+        return result
+
+    def _execute_enemy_skill(
+        self,
+        actor: Any,
+        target: Any,
+        skill: 'EnemySkill',
+        **kwargs
+    ) -> Dict[str, Any]:
+        """
+        적 스킬 실행
+
+        Args:
+            actor: 스킬 사용자 (적)
+            target: 대상 (단일 또는 리스트)
+            skill: 적 스킬
+            **kwargs: 추가 옵션
+
+        Returns:
+            실행 결과
+        """
+        from src.combat.enemy_skills import SkillTargetType
+
+        result = {
+            "targets": [],
+            "effects": []
+        }
+
+        # MP/HP 코스트 지불
+        if hasattr(actor, 'current_mp'):
+            actor.current_mp = max(0, actor.current_mp - skill.mp_cost)
+        if hasattr(actor, 'current_hp'):
+            actor.current_hp = max(1, actor.current_hp - skill.hp_cost)
+
+        # 대상 결정
+        targets = []
+        if skill.target_type == SkillTargetType.SELF:
+            targets = [actor]
+        elif skill.target_type == SkillTargetType.ALL_ALLIES:
+            # 아군 전체
+            targets = [e for e in self.enemies if getattr(e, 'is_alive', True)]
+        elif skill.target_type == SkillTargetType.ALL_ENEMIES:
+            # 적 전체
+            targets = [a for a in self.allies if getattr(a, 'is_alive', True)]
+        elif target:
+            # 단일 대상
+            if isinstance(target, list):
+                targets = target
+            else:
+                targets = [target]
+
+        # 각 대상에게 스킬 효과 적용
+        for tgt in targets:
+            target_result = {"target": getattr(tgt, 'name', 'Unknown')}
+
+            # 데미지 적용
+            if skill.damage > 0:
+                # 스킬 특수 처리: 페로 카오스 (HP를 1로)
+                if skill.skill_id == "heartless_angel":
+                    if hasattr(tgt, 'current_hp'):
+                        damage = tgt.current_hp - 1
+                        tgt.current_hp = 1
+                        target_result["hp_damage"] = damage
+                        target_result["special"] = "hp_to_1"
+                else:
+                    # 일반 데미지 계산
+                    if skill.is_magical:
+                        base_damage = int(skill.damage + actor.magic_attack * skill.damage_multiplier)
+                        defense = getattr(tgt, 'magic_defense', 0)
+                    else:
+                        base_damage = int(skill.damage + actor.physical_attack * skill.damage_multiplier)
+                        defense = getattr(tgt, 'physical_defense', 0)
+
+                    # 방어력 적용
+                    final_damage = max(1, base_damage - defense // 2)
+
+                    # BRV 데미지
+                    if skill.brv_damage > 0:
+                        if hasattr(tgt, 'current_brv'):
+                            brv_dmg = min(skill.brv_damage, tgt.current_brv)
+                            tgt.current_brv = max(0, tgt.current_brv - brv_dmg)
+                            target_result["brv_damage"] = brv_dmg
+
+                    # HP 데미지
+                    if skill.hp_attack or not skill.brv_damage:
+                        if hasattr(tgt, 'take_damage'):
+                            actual_damage = tgt.take_damage(final_damage)
+                        elif hasattr(tgt, 'current_hp'):
+                            actual_damage = min(final_damage, tgt.current_hp)
+                            tgt.current_hp -= actual_damage
+                        else:
+                            actual_damage = final_damage
+                        target_result["hp_damage"] = actual_damage
+
+            # 힐링 적용
+            if skill.heal_amount > 0:
+                if hasattr(tgt, 'heal'):
+                    healed = tgt.heal(skill.heal_amount)
+                elif hasattr(tgt, 'current_hp') and hasattr(tgt, 'max_hp'):
+                    healed = min(skill.heal_amount, tgt.max_hp - tgt.current_hp)
+                    tgt.current_hp += healed
+                else:
+                    healed = skill.heal_amount
+                target_result["healing"] = healed
+
+            # 버프 적용
+            if skill.buff_stats:
+                target_result["buffs"] = skill.buff_stats
+                # TODO: 실제 버프 시스템 연동
+
+            # 디버프 적용
+            if skill.debuff_stats:
+                target_result["debuffs"] = skill.debuff_stats
+                # TODO: 실제 디버프 시스템 연동
+
+            # 상태이상 적용
+            if skill.status_effects:
+                target_result["status_effects"] = skill.status_effects
+                # TODO: 실제 상태이상 시스템 연동
+
+            result["targets"].append(target_result)
+
+        return result
 
     def _execute_item(self, actor: Any, target: Optional[Any] = None, **kwargs) -> Dict[str, Any]:
         """아이템 사용"""
@@ -431,6 +572,78 @@ class CombatManager:
                 return self.allies
             else:
                 return self.enemies
+
+    def execute_enemy_turn(self, enemy: Any) -> Optional[Dict[str, Any]]:
+        """
+        적 턴 실행 (AI 사용)
+
+        Args:
+            enemy: 적 캐릭터
+
+        Returns:
+            행동 결과
+        """
+        try:
+            from src.ai.enemy_ai import create_ai_for_enemy
+
+            # 적 AI 생성
+            ai = create_ai_for_enemy(enemy)
+
+            # AI가 행동 결정
+            allies = self.enemies  # 적 입장에서 아군
+            enemies = self.allies  # 적 입장에서 적군
+
+            action_decision = ai.decide_action(allies, enemies)
+
+            if not action_decision:
+                # 결정 실패 시 기본 공격
+                target = self.get_valid_targets(enemy, ActionType.BRV_ATTACK)
+                if target:
+                    return self.execute_action(
+                        enemy,
+                        ActionType.BRV_ATTACK,
+                        target=target[0]
+                    )
+                return None
+
+            # AI 결정에 따라 행동 실행
+            action_type_str = action_decision.get("type", "attack")
+            target = action_decision.get("target")
+            skill = action_decision.get("skill")
+
+            if action_type_str == "skill":
+                # 스킬 사용
+                return self.execute_action(
+                    enemy,
+                    ActionType.SKILL,
+                    target=target,
+                    skill=skill
+                )
+            elif action_type_str == "defend":
+                # 방어
+                return self.execute_action(
+                    enemy,
+                    ActionType.DEFEND
+                )
+            else:
+                # 일반 공격
+                return self.execute_action(
+                    enemy,
+                    ActionType.BRV_ATTACK,
+                    target=target
+                )
+
+        except ImportError as e:
+            self.logger.warning(f"AI 시스템 로드 실패: {e}, 기본 공격 사용")
+            # AI 없으면 기본 공격
+            target = self.get_valid_targets(enemy, ActionType.BRV_ATTACK)
+            if target:
+                return self.execute_action(
+                    enemy,
+                    ActionType.BRV_ATTACK,
+                    target=target[0]
+                )
+            return None
 
 
 # 전역 인스턴스
