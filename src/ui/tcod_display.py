@@ -94,14 +94,14 @@ class TCODDisplay:
         font_paths = []
 
         if platform.system() == "Windows":
-            # Windows 시스템 폰트
+            # Windows 시스템 폰트 (조밀한 폰트 우선)
             windows_fonts = os.path.join(os.environ.get("WINDIR", "C:\\Windows"), "Fonts")
             font_paths = [
+                os.path.join(windows_fonts, "gulim.ttc"),       # 굴림 (조밀, 1순위)
+                os.path.join(windows_fonts, "batang.ttc"),      # 바탕 (조밀)
+                os.path.join(windows_fonts, "malgunbd.ttf"),    # 맑은 고딕 Bold (더 진함)
                 os.path.join(windows_fonts, "malgun.ttf"),      # 맑은 고딕
-                os.path.join(windows_fonts, "malgunbd.ttf"),    # 맑은 고딕 Bold
-                os.path.join(windows_fonts, "gulim.ttc"),       # 굴림
-                os.path.join(windows_fonts, "batang.ttc"),      # 바탕
-                os.path.join(windows_fonts, "msyh.ttc"),        # Microsoft YaHei (중국어지만 한글도 지원)
+                os.path.join(windows_fonts, "msyh.ttc"),        # Microsoft YaHei
                 os.path.join(windows_fonts, "consola.ttf"),     # Consolas (폴백)
             ]
         else:
@@ -118,8 +118,8 @@ class TCODDisplay:
         for font_path in font_paths:
             try:
                 if Path(font_path).exists():
-                    # 정사각형 셀로 설정 (간격 최소화)
-                    # 한글은 정사각형 비율이 가장 적합
+                    # 정사각형 셀로 설정
+                    # 폰트 크기는 셀 크기와 동일하게 설정하여 간격 최소화
                     char_width = font_size
                     char_height = font_size
 
@@ -128,7 +128,7 @@ class TCODDisplay:
                         char_width,
                         char_height
                     )
-                    self.logger.info(f"폰트 로드 성공: {font_path} ({char_width}x{char_height})")
+                    self.logger.info(f"폰트 로드 성공: {font_path} (셀: {char_width}x{char_height})")
                     break
             except Exception as e:
                 self.logger.debug(f"폰트 로드 시도 실패 ({font_path}): {e}")
