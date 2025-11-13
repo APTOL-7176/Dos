@@ -213,6 +213,9 @@ class ExplorationSystem:
         elif tile.tile_type == TileType.KEY:
             return self._handle_key(tile)
 
+        elif tile.tile_type == TileType.ITEM:
+            return self._handle_item(tile)
+
         elif tile.tile_type == TileType.BOSS_ROOM:
             return ExplorationResult(
                 success=True,
@@ -320,6 +323,24 @@ class ExplorationSystem:
             event=ExplorationEvent.CHEST_FOUND,
             message=f"📦 보물상자 발견! {loot_id} 획득!",
             data={"item": loot_id}
+        )
+
+    def _handle_item(self, tile: Tile) -> ExplorationResult:
+        """떨어진 아이템 처리"""
+        item_id = tile.loot_id or "random_item"
+        self.player.inventory.append(item_id)
+
+        logger.info(f"아이템 획득: {item_id}")
+
+        # 아이템 제거
+        tile.tile_type = TileType.FLOOR
+        tile.loot_id = None
+
+        return ExplorationResult(
+            success=True,
+            event=ExplorationEvent.ITEM_FOUND,
+            message=f"✨ 아이템 발견! {item_id} 획득!",
+            data={"item": item_id}
         )
 
     def _handle_key(self, tile: Tile) -> ExplorationResult:

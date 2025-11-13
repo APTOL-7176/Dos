@@ -356,6 +356,10 @@ class DungeonGenerator:
         # 보물상자
         self._place_chests(dungeon, num_chests)
 
+        # 떨어진 아이템/장비
+        num_items = min(15, 3 + floor_number // 2)
+        self._place_items(dungeon, num_items)
+
         # 텔레포터
         self._place_teleporters(dungeon, num_teleporters)
 
@@ -411,6 +415,15 @@ class DungeonGenerator:
             if pos:
                 loot_id = f"chest_{i}"
                 dungeon.set_tile(pos[0], pos[1], TileType.CHEST, loot_id=loot_id)
+
+    def _place_items(self, dungeon: DungeonMap, num_items: int):
+        """떨어진 아이템/장비 배치"""
+        for i in range(num_items):
+            room = random.choice(dungeon.rooms)
+            pos = self._get_random_floor_pos(dungeon, room)
+            if pos:
+                item_id = f"item_{i}"
+                dungeon.set_tile(pos[0], pos[1], TileType.ITEM, loot_id=item_id)
 
     def _place_teleporters(self, dungeon: DungeonMap, num_pairs: int):
         """텔레포터 배치 (쌍으로)"""

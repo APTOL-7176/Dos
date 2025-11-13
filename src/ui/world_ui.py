@@ -66,7 +66,7 @@ class WorldUI:
             return True
 
         # 인벤토리 열기
-        if action == GameAction.MENU:
+        if action == GameAction.MENU or action == GameAction.OPEN_INVENTORY:
             if self.inventory and self.party and console and context:
                 from src.ui.inventory_ui import open_inventory
                 open_inventory(console, context, self.inventory, self.party)
@@ -87,6 +87,9 @@ class WorldUI:
         if dx != 0 or dy != 0:
             result = self.exploration.move_player(dx, dy)
             self._handle_exploration_result(result)
+            # 전투가 트리거되면 즉시 루프 탈출
+            if self.combat_requested:
+                return True
 
         # 계단 이동
         elif action == GameAction.CONFIRM:
