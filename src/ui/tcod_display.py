@@ -140,12 +140,6 @@ class TCODDisplay:
                         font_render_width,
                         font_render_height
                     )
-                    # 셀 크기 재조정 (폰트가 셀을 넘치도록)
-                    self.tileset = self.tileset.remap(
-                        columns=self.tileset.tiles.shape[1],
-                        rows=self.tileset.tiles.shape[0],
-                        charmap=self.tileset.charmap
-                    )
                     self.logger.info(f"폰트 로드 성공: {font_path} (셀: {char_width}x{char_height}, 간격 조정: {char_spacing_adjust})")
                     break
             except Exception as e:
