@@ -81,6 +81,9 @@ class DungeonMap:
         self.teleporters: Dict[Tuple[int, int], Tuple[int, int]] = {}  # src -> dst
         self.boss_room: Optional[Rect] = None
 
+        # 채집 오브젝트
+        self.harvestables: List[Any] = []  # HarvestableObject 리스트
+
         # 타일 초기화
         self._initialize_tiles()
 
@@ -155,6 +158,9 @@ class DungeonGenerator:
 
         # 기믹 배치
         self._place_gimmicks(dungeon, floor_number)
+
+        # 채집 오브젝트 배치
+        self._place_harvestables(dungeon, floor_number)
 
         logger.info(f"던전 생성 완료: {len(dungeon.rooms)}개 방")
         return dungeon
@@ -487,3 +493,38 @@ class DungeonGenerator:
             attempts += 1
 
         return None
+
+    def _place_harvestables(self, dungeon: DungeonMap, floor_number: int):
+        """
+        채집 오브젝트 배치
+
+        Args:
+            dungeon: 던전 맵
+            floor_number: 층 번호
+        """
+        try:
+            from src.gathering.harvestable import HarvestableGenerator
+
+            # 층별 개수 결정 (3~8개)
+            count = random.randint(3, 8)
+
+            # 채집 오브젝트 생성
+            harvestables = HarvestableGenerator.generate_for_floor(floor_number, count)
+
+            # 방에 배치
+            for harvestable in harvestables:
+                if not dungeon.rooms:
+                    break
+
+                # 랜덤 방 선택
+                room = random.choice(dungeon.rooms)
+                pos = self._get_random_floor_pos(dungeon, room, avoid_center=True)
+
+                if pos:
+                    harvestable.x, harvestable.y = pos
+                    dungeon.harvestables.append(harvestable)
+
+            logger.info(f"채집 오브젝트 {len(dungeon.harvestables)}개 배치")
+
+        except ImportError as e:
+            logger.warning(f"채집 시스템 로드 실패: {e}")
