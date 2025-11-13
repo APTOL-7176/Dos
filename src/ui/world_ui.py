@@ -73,7 +73,7 @@ class WorldUI:
         # 인벤토리 열기
         if action == GameAction.MENU or action == GameAction.OPEN_INVENTORY:
             logger.warning(f"[DEBUG] 인벤토리 열기 요청 - inventory: {self.inventory is not None}, party: {self.party is not None}, console: {console is not None}, context: {context is not None}")
-            if self.inventory and self.party and console and context:
+            if self.inventory is not None and self.party is not None and console is not None and context is not None:
                 from src.ui.inventory_ui import open_inventory
                 logger.warning("[DEBUG] 인벤토리 열기 시도")
                 open_inventory(console, context, self.inventory, self.party)
