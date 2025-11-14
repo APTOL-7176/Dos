@@ -71,8 +71,8 @@ combat:
 
   # 데미지 계산
   damage:
-    brv_multiplier: 1.5  # BRV 공격 기본 배율
-    hp_multiplier: 0.4  # HP 공격 기본 배율 (BRV → HP 변환 비율, 8배로 증가)
+    brv_multiplier: 4.5  # BRV 공격 기본 배율 (3배 증가)
+    hp_multiplier: 1.2  # HP 공격 기본 배율 (3배 증가)
     physical_defense_reduction: 0.5  # 방어력 1당 데미지 감소
     magical_defense_reduction: 0.5  # 정신력 1당 데미지 감소
     critical_multiplier: 1.5  # 크리티컬 데미지 배율
