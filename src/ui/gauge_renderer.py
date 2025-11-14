@@ -1,7 +1,7 @@
 """
 게이지 렌더러
 
-그래픽 기반 게이지 (특수문자 불필요)
+픽셀 단위 부드러운 게이지 (그라디언트 색상 활용)
 """
 
 from typing import Tuple
@@ -23,7 +23,7 @@ class GaugeRenderer:
         color_gradient: bool = True
     ) -> None:
         """
-        게이지 바 렌더링 (그래픽 방식)
+        게이지 바 렌더링 (픽셀 단위 부드러운 효과)
 
         Args:
             console: TCOD 콘솔
@@ -57,10 +57,24 @@ class GaugeRenderer:
         # 배경 (빈 부분)
         console.draw_rect(x, y, width, 1, ord(" "), bg=bg_color)
 
-        # 전경 (채워진 부분) - 반올림으로 정확도 향상
-        filled_width = round(ratio * width)
-        if filled_width > 0:
-            console.draw_rect(x, y, filled_width, 1, ord(" "), bg=fg_color)
+        # 픽셀 단위 채우기
+        filled_exact = ratio * width  # 정확한 픽셀 위치
+        filled_full = int(filled_exact)  # 완전히 채워진 칸 수
+        filled_partial = filled_exact - filled_full  # 부분 채움 비율 (0.0~1.0)
+
+        # 완전히 채워진 부분
+        if filled_full > 0:
+            console.draw_rect(x, y, filled_full, 1, ord(" "), bg=fg_color)
+
+        # 부분적으로 채워진 마지막 칸 (그라디언트 색상)
+        if filled_partial > 0.0 and filled_full < width:
+            # fg_color와 bg_color 사이의 중간 색상 계산
+            partial_color = (
+                int(bg_color[0] + (fg_color[0] - bg_color[0]) * filled_partial),
+                int(bg_color[1] + (fg_color[1] - bg_color[1]) * filled_partial),
+                int(bg_color[2] + (fg_color[2] - bg_color[2]) * filled_partial)
+            )
+            console.draw_rect(x + filled_full, y, 1, 1, ord(" "), bg=partial_color)
 
         # 숫자 표시
         if show_numbers:
@@ -79,7 +93,7 @@ class GaugeRenderer:
         custom_color: Tuple[int, int, int] = None
     ) -> None:
         """
-        퍼센트 게이지 렌더링
+        퍼센트 게이지 렌더링 (픽셀 단위 부드러운 효과)
 
         Args:
             console: TCOD 콘솔
@@ -110,10 +124,23 @@ class GaugeRenderer:
         # 배경
         console.draw_rect(x, y, width, 1, ord(" "), bg=bg_color)
 
-        # 전경 - 반올림으로 정확도 향상
-        filled_width = round(ratio * width)
-        if filled_width > 0:
-            console.draw_rect(x, y, filled_width, 1, ord(" "), bg=fg_color)
+        # 픽셀 단위 채우기
+        filled_exact = ratio * width
+        filled_full = int(filled_exact)
+        filled_partial = filled_exact - filled_full
+
+        # 완전히 채워진 부분
+        if filled_full > 0:
+            console.draw_rect(x, y, filled_full, 1, ord(" "), bg=fg_color)
+
+        # 부분적으로 채워진 마지막 칸
+        if filled_partial > 0.0 and filled_full < width:
+            partial_color = (
+                int(bg_color[0] + (fg_color[0] - bg_color[0]) * filled_partial),
+                int(bg_color[1] + (fg_color[1] - bg_color[1]) * filled_partial),
+                int(bg_color[2] + (fg_color[2] - bg_color[2]) * filled_partial)
+            )
+            console.draw_rect(x + filled_full, y, 1, 1, ord(" "), bg=partial_color)
 
         # 퍼센트 표시
         if show_percent:
@@ -131,7 +158,7 @@ class GaugeRenderer:
         skill_name: str = ""
     ) -> None:
         """
-        캐스팅 게이지 렌더링
+        캐스팅 게이지 렌더링 (픽셀 단위 부드러운 효과)
 
         Args:
             console: TCOD 콘솔
@@ -158,10 +185,23 @@ class GaugeRenderer:
         # 배경
         console.draw_rect(bar_x, y, bar_width, 1, ord(" "), bg=bg_color)
 
-        # 전경 - 반올림으로 정확도 향상
-        filled_width = round(ratio * bar_width)
-        if filled_width > 0:
-            console.draw_rect(bar_x, y, filled_width, 1, ord(" "), bg=fg_color)
+        # 픽셀 단위 채우기
+        filled_exact = ratio * bar_width
+        filled_full = int(filled_exact)
+        filled_partial = filled_exact - filled_full
+
+        # 완전히 채워진 부분
+        if filled_full > 0:
+            console.draw_rect(bar_x, y, filled_full, 1, ord(" "), bg=fg_color)
+
+        # 부분적으로 채워진 마지막 칸
+        if filled_partial > 0.0 and filled_full < bar_width:
+            partial_color = (
+                int(bg_color[0] + (fg_color[0] - bg_color[0]) * filled_partial),
+                int(bg_color[1] + (fg_color[1] - bg_color[1]) * filled_partial),
+                int(bg_color[2] + (fg_color[2] - bg_color[2]) * filled_partial)
+            )
+            console.draw_rect(bar_x + filled_full, y, 1, 1, ord(" "), bg=partial_color)
 
         # 진행도 표시
         percent_text = f"{int(ratio * 100)}%"
@@ -179,7 +219,7 @@ class GaugeRenderer:
         maximum: float
     ) -> None:
         """
-        ATB 게이지 렌더링
+        ATB 게이지 렌더링 (픽셀 단위 부드러운 효과)
 
         Args:
             console: TCOD 콘솔
@@ -201,10 +241,23 @@ class GaugeRenderer:
         # 배경
         console.draw_rect(x, y, width, 1, ord(" "), bg=bg_color)
 
-        # 전경 - 반올림으로 정확도 향상
-        filled_width = round(ratio * width)
-        if filled_width > 0:
-            console.draw_rect(x, y, filled_width, 1, ord(" "), bg=fg_color)
+        # 픽셀 단위 채우기
+        filled_exact = ratio * width
+        filled_full = int(filled_exact)
+        filled_partial = filled_exact - filled_full
+
+        # 완전히 채워진 부분
+        if filled_full > 0:
+            console.draw_rect(x, y, filled_full, 1, ord(" "), bg=fg_color)
+
+        # 부분적으로 채워진 마지막 칸
+        if filled_partial > 0.0 and filled_full < width:
+            partial_color = (
+                int(bg_color[0] + (fg_color[0] - bg_color[0]) * filled_partial),
+                int(bg_color[1] + (fg_color[1] - bg_color[1]) * filled_partial),
+                int(bg_color[2] + (fg_color[2] - bg_color[2]) * filled_partial)
+            )
+            console.draw_rect(x + filled_full, y, 1, 1, ord(" "), bg=partial_color)
 
         # 행동 가능 임계값 표시 (세로선)
         threshold_ratio = threshold / maximum
