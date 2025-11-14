@@ -382,8 +382,9 @@ class Character:
         from src.character.skills.skill_manager import get_skill_manager
         skill_manager = get_skill_manager()
 
-        # 한글 직업명 → 영문 스킬 접두사 매핑
+        # 한글/영문 직업명 → 영문 스킬 접두사 매핑
         skill_prefix_map = {
+            # 한글 직업명
             "전사": "warrior_",
             "아크메이지": "archmage_",
             "궁수": "archer_",
@@ -418,6 +419,41 @@ class Character:
             "해커": "hacker_",
             "저격수": "sniper_",
             "흡혈귀": "vampire_",
+            # 영문 직업명 (하위호환성)
+            "warrior": "warrior_",
+            "archmage": "archmage_",
+            "archer": "archer_",
+            "rogue": "rogue_",
+            "paladin": "paladin_",
+            "dark_knight": "dk_",
+            "monk": "monk_",
+            "bard": "bard_",
+            "necromancer": "necro_",
+            "dragon_knight": "dragon_knight_",
+            "sword_saint": "sword_saint_",
+            "elementalist": "elementalist_",
+            "assassin": "assassin_",
+            "engineer": "engineer_",
+            "shaman": "shaman_",
+            "pirate": "pirate_",
+            "samurai": "samurai_",
+            "druid": "druid_",
+            "philosopher": "philosopher_",
+            "time_mage": "time_mage_",
+            "alchemist": "alchemist_",
+            "gladiator": "gladiator_",
+            "knight": "knight_",
+            "priest": "priest_",
+            "spellblade": "spellblade_",
+            "dimensionist": "dimensionist_",
+            "berserker": "berserker_",
+            "mage": "mage_",
+            "battle_mage": "bmage_",
+            "cleric": "cleric_",
+            "breaker": "breaker_",
+            "hacker": "hacker_",
+            "sniper": "sniper_",
+            "vampire": "vampire_",
         }
 
         # 스킬 접두사 가져오기
