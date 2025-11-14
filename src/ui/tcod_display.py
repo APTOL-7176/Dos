@@ -102,23 +102,25 @@ class TCODDisplay:
             # Windows 시스템 폰트 (고정폭 우선 - 공백 제거)
             windows_fonts = os.path.join(os.environ.get("WINDIR", "C:\\Windows"), "Fonts")
             font_paths = [
-                str(project_root / "DOSMyungjo.ttf"),                 # 프로젝트 내 DOS명조 폰트 (1순위!)
-                str(project_root / "GalmuriMono9.ttf"),             # 프로젝트 내 갈무리모노
-                str(project_root / "GalmuriMono9.ttc"),             # 프로젝트 내 갈무리모노 TTC
-                os.path.join(windows_fonts, "dalmoori.ttf"),        # 시스템 달무리
-                os.path.join(windows_fonts, "GalmuriMono9.ttf"),    # 시스템 갈무리모노
-                os.path.join(windows_fonts, "HTSMGOT.TTF"),     # 함초롬돋움 (고정폭)
-                os.path.join(windows_fonts, "gulim.ttf"),       # 굴림 (TTF 버전)
-                os.path.join(windows_fonts, "batang.ttf"),      # 바탕 (TTF 버전)
-                os.path.join(windows_fonts, "malgunbd.ttf"),    # 맑은 고딕 Bold
-                os.path.join(windows_fonts, "malgun.ttf"),      # 맑은 고딕
-                os.path.join(windows_fonts, "msyh.ttf"),        # Microsoft YaHei
+                str(project_root / "dalmoori.ttf"),              # 달무리 (특수문자 완벽 지원!)
+                str(project_root / "DOSMyungjo.ttf"),            # DOS명조 (특수문자 없음)
+                str(project_root / "GalmuriMono9.ttf"),          # 갈무리모노
+                str(project_root / "GalmuriMono9.ttc"),          # 갈무리모노 TTC
+                os.path.join(windows_fonts, "dalmoori.ttf"),     # 시스템 달무리
+                os.path.join(windows_fonts, "GalmuriMono9.ttf"), # 시스템 갈무리모노
+                os.path.join(windows_fonts, "HTSMGOT.TTF"),      # 함초롬돋움 (고정폭)
+                os.path.join(windows_fonts, "gulim.ttf"),        # 굴림 (TTF 버전)
+                os.path.join(windows_fonts, "batang.ttf"),       # 바탕 (TTF 버전)
+                os.path.join(windows_fonts, "malgunbd.ttf"),     # 맑은 고딕 Bold
+                os.path.join(windows_fonts, "malgun.ttf"),       # 맑은 고딕
+                os.path.join(windows_fonts, "msyh.ttf"),         # Microsoft YaHei
             ]
         else:
             # Linux/Mac 시스템 폰트
             font_paths = [
-                str(project_root / "DOSMyungjo.ttf"),              # 프로젝트 내 DOS명조 폰트 (1순위!)
-                str(project_root / "GalmuriMono9.ttf"),          # 프로젝트 내 갈무리모노
+                str(project_root / "dalmoori.ttf"),              # 달무리 (특수문자 완벽 지원!)
+                str(project_root / "DOSMyungjo.ttf"),            # DOS명조 (특수문자 없음)
+                str(project_root / "GalmuriMono9.ttf"),          # 갈무리모노
                 "/usr/share/fonts/opentype/unifont/unifont.otf",  # Unifont (유니코드 전체)
                 "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",  # WenQuanYi (CJK)
                 "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",  # Noto Sans CJK
