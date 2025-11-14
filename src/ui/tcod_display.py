@@ -102,6 +102,7 @@ class TCODDisplay:
             # Windows 시스템 폰트 (고정폭 우선 - 공백 제거)
             windows_fonts = os.path.join(os.environ.get("WINDIR", "C:\\Windows"), "Fonts")
             font_paths = [
+                str(project_root / "GalmuriMono9.bdf"),          # 갈무리모노 비트맵 (1순위!)
                 str(project_root / "dalmoori.ttf"),              # 달무리 (특수문자 완벽 지원!)
                 str(project_root / "DOSMyungjo.ttf"),            # DOS명조 (특수문자 없음)
                 str(project_root / "GalmuriMono9.ttf"),          # 갈무리모노
@@ -118,6 +119,7 @@ class TCODDisplay:
         else:
             # Linux/Mac 시스템 폰트
             font_paths = [
+                str(project_root / "GalmuriMono9.bdf"),          # 갈무리모노 비트맵 (1순위!)
                 str(project_root / "dalmoori.ttf"),              # 달무리 (특수문자 완벽 지원!)
                 str(project_root / "DOSMyungjo.ttf"),            # DOS명조 (특수문자 없음)
                 str(project_root / "GalmuriMono9.ttf"),          # 갈무리모노
@@ -141,28 +143,41 @@ class TCODDisplay:
 
                 self.logger.info(f"  → 파일 발견! 로딩 시도...")
 
-                # 타일 크기 설정
-                # 폰트를 의도적으로 넓게 렌더링해서 문자들이 겹치도록 함
-                char_height = font_size // 2
-                # char_spacing_adjust만큼 폰트를 넓게 만들어 문자가 겹치게 함
-                char_width = char_height + char_spacing_adjust
+                # BDF 비트맵 폰트 vs TrueType 폰트 구분
+                if font_path.lower().endswith('.bdf'):
+                    # BDF 비트맵 폰트 (크기 고정)
+                    self.logger.info(f"  → BDF 비트맵 폰트 감지")
+                    self.tileset = tcod.tileset.load_bdf(font_path)
 
-                # 유니코드 전체 범위 포함하여 로드
-                # TCOD는 폰트의 모든 글리프를 자동으로 로드
-                self.tileset = tcod.tileset.load_truetype_font(
-                    font_path,
-                    char_width,
-                    char_height,
-                )
+                    # 타일셋을 전역 기본값으로 설정
+                    tcod.tileset.set_default(self.tileset)
 
-                # 타일셋을 전역 기본값으로 설정 (특수문자 렌더링 보장)
-                tcod.tileset.set_default(self.tileset)
+                    self.logger.info(
+                        f"  ✓ 비트맵 폰트 로드 성공: {font_path}\n"
+                        f"    셀 크기: {self.tileset.tile_width}x{self.tileset.tile_height}"
+                    )
+                else:
+                    # TrueType/OpenType 폰트
+                    self.logger.info(f"  → TrueType 폰트 감지")
 
-                # 폰트 로드 성공
-                self.logger.info(
-                    f"  ✓ 폰트 로드 성공: {font_path}\n"
-                    f"    셀 크기: {char_width}x{char_height}"
-                )
+                    # 타일 크기 설정
+                    char_height = font_size // 2
+                    char_width = char_height + char_spacing_adjust
+
+                    self.tileset = tcod.tileset.load_truetype_font(
+                        font_path,
+                        char_width,
+                        char_height,
+                    )
+
+                    # 타일셋을 전역 기본값으로 설정
+                    tcod.tileset.set_default(self.tileset)
+
+                    self.logger.info(
+                        f"  ✓ TrueType 폰트 로드 성공: {font_path}\n"
+                        f"    셀 크기: {char_width}x{char_height}"
+                    )
+
                 break
 
             except Exception as e:
