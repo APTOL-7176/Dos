@@ -238,10 +238,11 @@ class WorldUI:
             console.print(x, my, f"{i+1}. {member.name[:10]}", fg=(255, 255, 255))
 
             # HP 게이지 (가로, 간단)
-            hp_bar, hp_color = self.gauge_renderer.render_bar(
-                member.current_hp, member.max_hp, width=10, show_numbers=False
+            console.print(x + 14, my, "HP:", fg=(200, 200, 200))
+            self.gauge_renderer.render_bar(
+                console, x + 17, my, 10,
+                member.current_hp, member.max_hp, show_numbers=False
             )
-            console.print(x + 14, my, f"HP:{hp_bar}", fg=hp_color)
 
         # 인벤토리 정보
         inv_y = y + 15
