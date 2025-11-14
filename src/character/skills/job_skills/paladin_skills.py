@@ -33,7 +33,7 @@ def create_paladin_skills():
         ShieldEffect(base_amount=50, multiplier=1.0, stat_name="holy_power"),
         GimmickEffect(GimmickOperation.CONSUME, "holy_power", 2)
     ]
-    divine_shield.costs = [MPCost(30), StackCost("holy_power", 2)]
+    divine_shield.costs = [MPCost(8), StackCost("holy_power", 2)]
     divine_shield.target_type = "self"
     divine_shield.cooldown = 4
     
@@ -44,7 +44,7 @@ def create_paladin_skills():
         DamageEffect(DamageType.BRV, 1.3),
         GimmickEffect(GimmickOperation.ADD, "holy_power", 1, max_value=5)
     ]
-    consecration.costs = [MPCost(25)]
+    consecration.costs = [MPCost(6)]
     consecration.cooldown = 3
     
     # 5. 성스러운 빛
@@ -53,7 +53,7 @@ def create_paladin_skills():
         HealEffect(HealType.HP, percentage=0.35),
         GimmickEffect(GimmickOperation.ADD, "holy_power", 1, max_value=5)
     ]
-    holy_light.costs = [MPCost(30)]
+    holy_light.costs = [MPCost(8)]
     holy_light.target_type = "ally"
     holy_light.cooldown = 2
     
@@ -63,7 +63,7 @@ def create_paladin_skills():
         DamageEffect(DamageType.BRV_HP, 2.0, gimmick_bonus={"field": "holy_power", "multiplier": 0.25}),
         GimmickEffect(GimmickOperation.ADD, "holy_power", 1, max_value=5)
     ]
-    hammer.costs = [MPCost(35)]
+    hammer.costs = [MPCost(9)]
     hammer.cooldown = 3
     
     # 7. 축복
@@ -73,7 +73,7 @@ def create_paladin_skills():
         BuffEffect(BuffType.SPIRIT_UP, 0.3, duration=4, is_party_wide=True),
         GimmickEffect(GimmickOperation.ADD, "holy_power", 1, max_value=5)
     ]
-    blessing.costs = [MPCost(40)]
+    blessing.costs = [MPCost(10)]
     blessing.target_type = "party"
     blessing.cooldown = 5
     
@@ -85,7 +85,7 @@ def create_paladin_skills():
         ShieldEffect(base_amount=80),
         GimmickEffect(GimmickOperation.CONSUME, "holy_power", 3)
     ]
-    avenging_wrath.costs = [MPCost(50), StackCost("holy_power", 3)]
+    avenging_wrath.costs = [MPCost(12), StackCost("holy_power", 3)]
     avenging_wrath.target_type = "self"
     avenging_wrath.cooldown = 6
     
@@ -99,7 +99,7 @@ def create_paladin_skills():
         BuffEffect(BuffType.DEFENSE_UP, 0.4, duration=5, is_party_wide=True),
         GimmickEffect(GimmickOperation.SET, "holy_power", 0)
     ]
-    ultimate.costs = [MPCost(100)]
+    ultimate.costs = [MPCost(25)]
     ultimate.is_ultimate = True
     ultimate.cooldown = 10
     

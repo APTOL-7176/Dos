@@ -31,7 +31,7 @@ def create_pirate_skills():
         DamageEffect(DamageType.BRV, 1.8),
         GimmickEffect(GimmickOperation.ADD, "gold", 2, max_value=10)
     ]
-    treasure_hunt.costs = [MPCost(25)]
+    treasure_hunt.costs = [MPCost(6)]
     treasure_hunt.cooldown = 2
 
     # 4. 럼주 마시기
@@ -41,7 +41,7 @@ def create_pirate_skills():
         BuffEffect(BuffType.SPEED_UP, 0.3, duration=4),
         GimmickEffect(GimmickOperation.CONSUME, "gold", 2)
     ]
-    drink_rum.costs = [MPCost(28), StackCost("gold", 2)]
+    drink_rum.costs = [MPCost(7), StackCost("gold", 2)]
     drink_rum.target_type = "self"
     drink_rum.cooldown = 3
 
@@ -51,7 +51,7 @@ def create_pirate_skills():
         DamageEffect(DamageType.BRV_HP, 2.0, gimmick_bonus={"field": "gold", "multiplier": 0.25}),
         GimmickEffect(GimmickOperation.CONSUME, "gold", 3)
     ]
-    cannon_fire.costs = [MPCost(40), StackCost("gold", 3)]
+    cannon_fire.costs = [MPCost(10), StackCost("gold", 3)]
     cannon_fire.cooldown = 3
     cannon_fire.is_aoe = True
 
@@ -61,7 +61,7 @@ def create_pirate_skills():
         GimmickEffect(GimmickOperation.SET, "gold", 10),
         BuffEffect(BuffType.DEFENSE_UP, 0.3, duration=3)
     ]
-    store_treasure.costs = [MPCost(35)]
+    store_treasure.costs = [MPCost(9)]
     store_treasure.target_type = "self"
     store_treasure.cooldown = 5
 
@@ -72,7 +72,7 @@ def create_pirate_skills():
         DamageEffect(DamageType.HP, 1.5),
         GimmickEffect(GimmickOperation.CONSUME, "gold", 5)
     ]
-    gold_bomb.costs = [MPCost(50), StackCost("gold", 5)]
+    gold_bomb.costs = [MPCost(12), StackCost("gold", 5)]
     gold_bomb.cooldown = 4
     gold_bomb.is_aoe = True
 
@@ -83,7 +83,7 @@ def create_pirate_skills():
         DamageEffect(DamageType.HP, 2.0),
         GimmickEffect(GimmickOperation.CONSUME, "gold", 7)
     ]
-    pirate_ship_attack.costs = [MPCost(60), StackCost("gold", 7)]
+    pirate_ship_attack.costs = [MPCost(15), StackCost("gold", 7)]
     pirate_ship_attack.cooldown = 6
     pirate_ship_attack.is_aoe = True
 
@@ -96,7 +96,7 @@ def create_pirate_skills():
         BuffEffect(BuffType.ATTACK_UP, 0.6, duration=5),
         GimmickEffect(GimmickOperation.SET, "gold", 0)
     ]
-    ultimate.costs = [MPCost(100), StackCost("gold", 1)]
+    ultimate.costs = [MPCost(25), StackCost("gold", 1)]
     ultimate.is_ultimate = True
     ultimate.is_aoe = True
     ultimate.cooldown = 10

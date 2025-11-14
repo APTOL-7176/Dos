@@ -30,7 +30,7 @@ def create_mage_skills():
         DamageEffect(DamageType.BRV, 1.7),
         GimmickEffect(GimmickOperation.ADD, "lightning_element", 1, max_value=5)
     ]
-    thunder_bolt.costs = [MPCost(22)]
+    thunder_bolt.costs = [MPCost(6)]
     thunder_bolt.cooldown = 1
 
     # 4. 마법 미사일
@@ -40,7 +40,7 @@ def create_mage_skills():
                     gimmick_bonus={"field": "fire_element", "multiplier": 0.15}),
         GimmickEffect(GimmickOperation.CONSUME, "fire_element", 1)
     ]
-    magic_missile.costs = [MPCost(25)]
+    magic_missile.costs = [MPCost(6)]
     magic_missile.cooldown = 2
 
     # 5. 마나 보호막
@@ -49,7 +49,7 @@ def create_mage_skills():
         BuffEffect(BuffType.DEFENSE_UP, 0.4, duration=3),
         GimmickEffect(GimmickOperation.ADD, "ice_element", 1, max_value=5)
     ]
-    mana_shield.costs = [MPCost(28)]
+    mana_shield.costs = [MPCost(7)]
     mana_shield.target_type = "self"
     mana_shield.cooldown = 3
 
@@ -63,7 +63,7 @@ def create_mage_skills():
         GimmickEffect(GimmickOperation.CONSUME, "fire_element", 1),
         GimmickEffect(GimmickOperation.CONSUME, "ice_element", 1)
     ]
-    elemental_fusion.costs = [MPCost(35)]
+    elemental_fusion.costs = [MPCost(9)]
     elemental_fusion.cooldown = 3
 
     # 7. 비전 폭발
@@ -73,7 +73,7 @@ def create_mage_skills():
                     gimmick_bonus={"field": "lightning_element", "multiplier": 0.25}),
         GimmickEffect(GimmickOperation.CONSUME, "lightning_element", 1)
     ]
-    arcane_explosion.costs = [MPCost(40)]
+    arcane_explosion.costs = [MPCost(10)]
     arcane_explosion.cooldown = 4
     arcane_explosion.is_aoe = True
 
@@ -90,7 +90,7 @@ def create_mage_skills():
         GimmickEffect(GimmickOperation.CONSUME, "ice_element", 1),
         GimmickEffect(GimmickOperation.CONSUME, "lightning_element", 1)
     ]
-    elemental_storm.costs = [MPCost(55)]
+    elemental_storm.costs = [MPCost(14)]
     elemental_storm.cooldown = 5
     elemental_storm.is_aoe = True
 
@@ -108,7 +108,7 @@ def create_mage_skills():
         GimmickEffect(GimmickOperation.SET, "ice_element", 0),
         GimmickEffect(GimmickOperation.SET, "lightning_element", 0)
     ]
-    ultimate.costs = [MPCost(90)]
+    ultimate.costs = [MPCost(22)]
     ultimate.is_ultimate = True
     ultimate.is_aoe = True
     ultimate.cooldown = 10

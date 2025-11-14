@@ -31,7 +31,7 @@ def create_time_mage_skills():
         BuffEffect(BuffType.SPEED_UP, 0.6, duration=4),
         GimmickEffect(GimmickOperation.ADD, "time_points", 1, max_value=6)
     ]
-    haste.costs = [MPCost(30)]
+    haste.costs = [MPCost(8)]
     haste.target_type = "ally"
     haste.cooldown = 3
 
@@ -42,7 +42,7 @@ def create_time_mage_skills():
         BuffEffect(BuffType.SPEED_DOWN, 0.4, duration=4),
         GimmickEffect(GimmickOperation.ADD, "time_points", 1, max_value=6)
     ]
-    slow.costs = [MPCost(25)]
+    slow.costs = [MPCost(6)]
     slow.cooldown = 2
 
     # 5. 시간 역행
@@ -51,7 +51,7 @@ def create_time_mage_skills():
         GimmickEffect(GimmickOperation.CONSUME, "time_points", 2),
         BuffEffect(BuffType.REGEN, 0.3, duration=3)
     ]
-    time_rewind.costs = [MPCost(35), StackCost("time_points", 2)]
+    time_rewind.costs = [MPCost(9), StackCost("time_points", 2)]
     time_rewind.target_type = "ally"
     time_rewind.cooldown = 4
 
@@ -61,7 +61,7 @@ def create_time_mage_skills():
         DamageEffect(DamageType.BRV, 1.8, gimmick_bonus={"field": "time_points", "multiplier": 0.3}),
         GimmickEffect(GimmickOperation.CONSUME, "time_points", 3)
     ]
-    time_stop.costs = [MPCost(45), StackCost("time_points", 3)]
+    time_stop.costs = [MPCost(11), StackCost("time_points", 3)]
     time_stop.cooldown = 5
 
     # 7. 미래 예지
@@ -71,7 +71,7 @@ def create_time_mage_skills():
         BuffEffect(BuffType.ACCURACY_UP, 0.5, duration=3),
         GimmickEffect(GimmickOperation.CONSUME, "time_points", 4)
     ]
-    future_sight.costs = [MPCost(40), StackCost("time_points", 4)]
+    future_sight.costs = [MPCost(10), StackCost("time_points", 4)]
     future_sight.target_type = "self"
     future_sight.cooldown = 5
 
@@ -81,7 +81,7 @@ def create_time_mage_skills():
         DamageEffect(DamageType.BRV_HP, 2.5, gimmick_bonus={"field": "time_points", "multiplier": 0.5}),
         GimmickEffect(GimmickOperation.CONSUME, "time_points", 5)
     ]
-    time_warp.costs = [MPCost(60), StackCost("time_points", 5)]
+    time_warp.costs = [MPCost(15), StackCost("time_points", 5)]
     time_warp.cooldown = 6
     time_warp.is_aoe = True
 
@@ -94,7 +94,7 @@ def create_time_mage_skills():
         BuffEffect(BuffType.SPEED_UP, 0.8, duration=5),
         GimmickEffect(GimmickOperation.SET, "time_points", 0)
     ]
-    ultimate.costs = [MPCost(100), StackCost("time_points", 1)]
+    ultimate.costs = [MPCost(25), StackCost("time_points", 1)]
     ultimate.is_ultimate = True
     ultimate.cooldown = 10
 

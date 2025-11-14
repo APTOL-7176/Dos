@@ -36,7 +36,7 @@ def create_alchemist_skills():
         HealEffect(HealType.HP, percentage=0.4),
         GimmickEffect(GimmickOperation.CONSUME, "potion_stock", 2)
     ]
-    healing_potion.costs = [MPCost(25), StackCost("potion_stock", 2)]
+    healing_potion.costs = [MPCost(6), StackCost("potion_stock", 2)]
     healing_potion.target_type = "ally"
     healing_potion.cooldown = 2
     skills.append(healing_potion)
@@ -49,7 +49,7 @@ def create_alchemist_skills():
         BuffEffect(BuffType.SPEED_UP, 0.2, duration=4),
         GimmickEffect(GimmickOperation.CONSUME, "potion_stock", 3)
     ]
-    buff_potion.costs = [MPCost(35), StackCost("potion_stock", 3)]
+    buff_potion.costs = [MPCost(9), StackCost("potion_stock", 3)]
     buff_potion.target_type = "ally"
     buff_potion.cooldown = 4
     skills.append(buff_potion)
@@ -62,7 +62,7 @@ def create_alchemist_skills():
         DamageEffect(DamageType.BRV, 1.0),
         GimmickEffect(GimmickOperation.ADD, "potion_stock", 1, max_value=10)
     ]
-    poison_bomb.costs = [MPCost(30)]
+    poison_bomb.costs = [MPCost(8)]
     poison_bomb.cooldown = 3
     skills.append(poison_bomb)
     
@@ -71,7 +71,7 @@ def create_alchemist_skills():
     gather_materials.effects = [
         GimmickEffect(GimmickOperation.ADD, "potion_stock", 5, max_value=10)
     ]
-    gather_materials.costs = [MPCost(20)]
+    gather_materials.costs = [MPCost(5)]
     gather_materials.target_type = "self"
     gather_materials.cooldown = 4
     skills.append(gather_materials)
@@ -82,7 +82,7 @@ def create_alchemist_skills():
         HealEffect(HealType.MP, base_amount=100),
         GimmickEffect(GimmickOperation.CONSUME, "potion_stock", 2)
     ]
-    mana_potion.costs = [MPCost(0), StackCost("potion_stock", 2)]
+    mana_potion.costs = [MPCost(1), StackCost("potion_stock", 2)]
     mana_potion.target_type = "self"
     mana_potion.cooldown = 5
     skills.append(mana_potion)
@@ -93,7 +93,7 @@ def create_alchemist_skills():
         DamageEffect(DamageType.BRV_HP, 2.0, gimmick_bonus={"field": "potion_stock", "multiplier": 0.35}),
         GimmickEffect(GimmickOperation.CONSUME, "potion_stock", 4)
     ]
-    chain_explosion.costs = [MPCost(50), StackCost("potion_stock", 4)]
+    chain_explosion.costs = [MPCost(12), StackCost("potion_stock", 4)]
     chain_explosion.cooldown = 5
     skills.append(chain_explosion)
     
@@ -106,7 +106,7 @@ def create_alchemist_skills():
         BuffEffect(BuffType.DEFENSE_UP, 0.4, duration=5, is_party_wide=True),
         GimmickEffect(GimmickOperation.SET, "potion_stock", 10)
     ]
-    ultimate.costs = [MPCost(100)]
+    ultimate.costs = [MPCost(25)]
     ultimate.is_ultimate = True
     ultimate.target_type = "party"
     ultimate.cooldown = 10

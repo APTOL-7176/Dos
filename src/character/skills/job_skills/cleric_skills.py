@@ -32,7 +32,7 @@ def create_cleric_skills():
         HealEffect(HealType.HP, percentage=0.4),
         GimmickEffect(GimmickOperation.CONSUME, "faith_points", 1)
     ]
-    heal.costs = [MPCost(22), StackCost("faith_points", 1)]
+    heal.costs = [MPCost(6), StackCost("faith_points", 1)]
     heal.target_type = "ally"
     heal.cooldown = 1
 
@@ -43,7 +43,7 @@ def create_cleric_skills():
         BuffEffect(BuffType.REGEN, 0.2, duration=3),
         GimmickEffect(GimmickOperation.CONSUME, "faith_points", 2)
     ]
-    greater_heal.costs = [MPCost(30), StackCost("faith_points", 2)]
+    greater_heal.costs = [MPCost(8), StackCost("faith_points", 2)]
     greater_heal.target_type = "ally"
     greater_heal.cooldown = 2
 
@@ -53,7 +53,7 @@ def create_cleric_skills():
         HealEffect(HealType.HP, percentage=0.35, is_party_wide=True),
         GimmickEffect(GimmickOperation.CONSUME, "faith_points", 3)
     ]
-    mass_heal.costs = [MPCost(40), StackCost("faith_points", 3)]
+    mass_heal.costs = [MPCost(10), StackCost("faith_points", 3)]
     mass_heal.target_type = "party"
     mass_heal.cooldown = 4
 
@@ -64,7 +64,7 @@ def create_cleric_skills():
         BuffEffect(BuffType.DEFENSE_UP, 0.3, duration=4),
         BuffEffect(BuffType.REGEN, 0.25, duration=4)
     ]
-    faith_blessing.costs = [MPCost(35)]
+    faith_blessing.costs = [MPCost(9)]
     faith_blessing.target_type = "self"
     faith_blessing.cooldown = 5
 
@@ -75,7 +75,7 @@ def create_cleric_skills():
         BuffEffect(BuffType.REGEN, 0.3, duration=4),
         GimmickEffect(GimmickOperation.CONSUME, "faith_points", 4)
     ]
-    holy_barrier.costs = [MPCost(50), StackCost("faith_points", 4)]
+    holy_barrier.costs = [MPCost(12), StackCost("faith_points", 4)]
     holy_barrier.target_type = "party"
     holy_barrier.cooldown = 5
 
@@ -86,7 +86,7 @@ def create_cleric_skills():
         BuffEffect(BuffType.REGEN, 0.4, duration=5),
         GimmickEffect(GimmickOperation.CONSUME, "faith_points", 6)
     ]
-    resurrect.costs = [MPCost(70), StackCost("faith_points", 6)]
+    resurrect.costs = [MPCost(18), StackCost("faith_points", 6)]
     resurrect.target_type = "ally"
     resurrect.cooldown = 8
 
@@ -99,7 +99,7 @@ def create_cleric_skills():
         DamageEffect(DamageType.BRV, 2.0, gimmick_bonus={"field": "faith_points", "multiplier": 0.3}),
         GimmickEffect(GimmickOperation.SET, "faith_points", 0)
     ]
-    ultimate.costs = [MPCost(100), StackCost("faith_points", 1)]
+    ultimate.costs = [MPCost(25), StackCost("faith_points", 1)]
     ultimate.is_ultimate = True
     ultimate.cooldown = 10
 

@@ -32,7 +32,7 @@ def create_shaman_skills():
         BuffEffect(BuffType.ATTACK_DOWN, 0.3, duration=3),
         GimmickEffect(GimmickOperation.ADD, "curse_stacks", 2, max_value=8)
     ]
-    plague.costs = [MPCost(28)]
+    plague.costs = [MPCost(7)]
     plague.cooldown = 2
     plague.is_aoe = True
 
@@ -42,7 +42,7 @@ def create_shaman_skills():
         DamageEffect(DamageType.BRV_HP, 1.7, gimmick_bonus={"field": "curse_stacks", "multiplier": 0.2}),
         GimmickEffect(GimmickOperation.CONSUME, "curse_stacks", 2)
     ]
-    curse_transfer.costs = [MPCost(32), StackCost("curse_stacks", 2)]
+    curse_transfer.costs = [MPCost(8), StackCost("curse_stacks", 2)]
     curse_transfer.cooldown = 3
     curse_transfer.is_aoe = True
 
@@ -52,7 +52,7 @@ def create_shaman_skills():
         GimmickEffect(GimmickOperation.SET, "curse_stacks", 8),
         BuffEffect(BuffType.MAGIC_UP, 0.4, duration=3)
     ]
-    curse_accumulate.costs = [MPCost(35)]
+    curse_accumulate.costs = [MPCost(9)]
     curse_accumulate.target_type = "self"
     curse_accumulate.cooldown = 4
 
@@ -64,7 +64,7 @@ def create_shaman_skills():
         BuffEffect(BuffType.SPEED_DOWN, 0.3, duration=4),
         GimmickEffect(GimmickOperation.CONSUME, "curse_stacks", 3)
     ]
-    dark_magic.costs = [MPCost(45), StackCost("curse_stacks", 3)]
+    dark_magic.costs = [MPCost(11), StackCost("curse_stacks", 3)]
     dark_magic.cooldown = 4
 
     # 7. 영혼 흡수
@@ -73,7 +73,7 @@ def create_shaman_skills():
         DamageEffect(DamageType.BRV_HP, 2.2, gimmick_bonus={"field": "curse_stacks", "multiplier": 0.35}),
         GimmickEffect(GimmickOperation.CONSUME, "curse_stacks", 4)
     ]
-    soul_drain.costs = [MPCost(50), StackCost("curse_stacks", 4)]
+    soul_drain.costs = [MPCost(12), StackCost("curse_stacks", 4)]
     soul_drain.cooldown = 5
 
     # 8. 저주의 낙인
@@ -85,7 +85,7 @@ def create_shaman_skills():
         BuffEffect(BuffType.DEFENSE_DOWN, 0.5, duration=5),
         GimmickEffect(GimmickOperation.CONSUME, "curse_stacks", 6)
     ]
-    curse_mark.costs = [MPCost(60), StackCost("curse_stacks", 6)]
+    curse_mark.costs = [MPCost(15), StackCost("curse_stacks", 6)]
     curse_mark.cooldown = 6
 
     # 9. 궁극기: 대저주
@@ -98,7 +98,7 @@ def create_shaman_skills():
         BuffEffect(BuffType.DEFENSE_DOWN, 0.6, duration=5),
         GimmickEffect(GimmickOperation.SET, "curse_stacks", 0)
     ]
-    ultimate.costs = [MPCost(100), StackCost("curse_stacks", 1)]
+    ultimate.costs = [MPCost(25), StackCost("curse_stacks", 1)]
     ultimate.is_ultimate = True
     ultimate.is_aoe = True
     ultimate.cooldown = 10

@@ -36,7 +36,7 @@ def create_sniper_skills():
         GimmickEffect(GimmickOperation.ADD, "focus_stacks", 5, max_value=10),
         BuffEffect(BuffType.CRITICAL_UP, 0.5, duration=3)
     ]
-    perfect_focus.costs = [MPCost(30)]
+    perfect_focus.costs = [MPCost(8)]
     perfect_focus.target_type = "self"
     perfect_focus.cooldown = 5
     skills.append(perfect_focus)
@@ -47,7 +47,7 @@ def create_sniper_skills():
         DamageEffect(DamageType.BRV_HP, 2.5, gimmick_bonus={"field": "focus_stacks", "multiplier": 0.35}),
         GimmickEffect(GimmickOperation.CONSUME, "focus_stacks", 3)
     ]
-    penetrating_shot.costs = [MPCost(40), StackCost("focus_stacks", 3)]
+    penetrating_shot.costs = [MPCost(10), StackCost("focus_stacks", 3)]
     penetrating_shot.cast_time = 2.5
     penetrating_shot.cooldown = 3
     skills.append(penetrating_shot)
@@ -59,7 +59,7 @@ def create_sniper_skills():
         BuffEffect(BuffType.ACCURACY_UP, 0.5, duration=4),
         GimmickEffect(GimmickOperation.ADD, "focus_stacks", 2, max_value=10)
     ]
-    sniper_stance.costs = [MPCost(25)]
+    sniper_stance.costs = [MPCost(6)]
     sniper_stance.target_type = "self"
     sniper_stance.cooldown = 4
     skills.append(sniper_stance)
@@ -70,7 +70,7 @@ def create_sniper_skills():
         DamageEffect(DamageType.BRV, 2.0, gimmick_bonus={"field": "focus_stacks", "multiplier": 0.3}),
         GimmickEffect(GimmickOperation.ADD, "focus_stacks", 2, max_value=10)
     ]
-    weak_spot.costs = [MPCost(28)]
+    weak_spot.costs = [MPCost(7)]
     weak_spot.cast_time = 1.8
     weak_spot.cooldown = 2
     skills.append(weak_spot)
@@ -81,7 +81,7 @@ def create_sniper_skills():
         DamageEffect(DamageType.BRV_HP, 2.2, gimmick_bonus={"field": "focus_stacks", "multiplier": 0.38}),
         GimmickEffect(GimmickOperation.CONSUME, "focus_stacks", 4)
     ]
-    explosive_round.costs = [MPCost(50), StackCost("focus_stacks", 4)]
+    explosive_round.costs = [MPCost(12), StackCost("focus_stacks", 4)]
     explosive_round.cast_time = 2.2
     explosive_round.cooldown = 5
     skills.append(explosive_round)
@@ -92,7 +92,7 @@ def create_sniper_skills():
         GimmickEffect(GimmickOperation.SET, "focus_stacks", 10),
         BuffEffect(BuffType.CRITICAL_UP, 0.8, duration=2)
     ]
-    final_aim.costs = [MPCost(60)]
+    final_aim.costs = [MPCost(15)]
     final_aim.target_type = "self"
     final_aim.cooldown = 8
     skills.append(final_aim)
@@ -104,7 +104,7 @@ def create_sniper_skills():
         DamageEffect(DamageType.HP, 5.0, gimmick_bonus={"field": "focus_stacks", "multiplier": 0.5}),
         GimmickEffect(GimmickOperation.SET, "focus_stacks", 0)
     ]
-    ultimate.costs = [MPCost(100)]
+    ultimate.costs = [MPCost(25)]
     ultimate.is_ultimate = True
     ultimate.cast_time = 3.0
     ultimate.cooldown = 10

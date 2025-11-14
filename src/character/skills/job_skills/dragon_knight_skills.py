@@ -31,7 +31,7 @@ def create_dragon_knight_skills():
         DamageEffect(DamageType.BRV, 2.0, gimmick_bonus={"field": "dragon_power", "multiplier": 0.2}),
         GimmickEffect(GimmickOperation.ADD, "dragon_power", 1, max_value=5)
     ]
-    fire_breath.costs = [MPCost(28)]
+    fire_breath.costs = [MPCost(7)]
     fire_breath.cooldown = 2
     fire_breath.is_aoe = True
 
@@ -42,7 +42,7 @@ def create_dragon_knight_skills():
         DamageEffect(DamageType.HP, 1.3, gimmick_bonus={"field": "dragon_power", "multiplier": 0.35}),
         GimmickEffect(GimmickOperation.CONSUME, "dragon_power", 2)
     ]
-    burning_strike.costs = [MPCost(32), StackCost("dragon_power", 2)]
+    burning_strike.costs = [MPCost(8), StackCost("dragon_power", 2)]
     burning_strike.cooldown = 3
 
     # 5. 용의 분노
@@ -51,7 +51,7 @@ def create_dragon_knight_skills():
         GimmickEffect(GimmickOperation.SET, "dragon_power", 5),
         BuffEffect(BuffType.ATTACK_UP, 0.4, duration=4)
     ]
-    dragon_rage.costs = [MPCost(35)]
+    dragon_rage.costs = [MPCost(9)]
     dragon_rage.target_type = "self"
     dragon_rage.cooldown = 5
 
@@ -61,7 +61,7 @@ def create_dragon_knight_skills():
         BuffEffect(BuffType.DEFENSE_UP, 0.5, duration=3),
         GimmickEffect(GimmickOperation.ADD, "dragon_power", 2, max_value=5)
     ]
-    dragon_scales.costs = [MPCost(25)]
+    dragon_scales.costs = [MPCost(6)]
     dragon_scales.target_type = "self"
     dragon_scales.cooldown = 3
 
@@ -71,7 +71,7 @@ def create_dragon_knight_skills():
         DamageEffect(DamageType.BRV_HP, 1.8, gimmick_bonus={"field": "dragon_power", "multiplier": 0.4}),
         GimmickEffect(GimmickOperation.CONSUME, "dragon_power", 3)
     ]
-    inferno_burst.costs = [MPCost(45), StackCost("dragon_power", 3)]
+    inferno_burst.costs = [MPCost(11), StackCost("dragon_power", 3)]
     inferno_burst.cooldown = 4
     inferno_burst.is_aoe = True
 
@@ -82,7 +82,7 @@ def create_dragon_knight_skills():
         DamageEffect(DamageType.HP, 1.5),
         GimmickEffect(GimmickOperation.CONSUME, "dragon_power", 4)
     ]
-    dragon_wings.costs = [MPCost(55), StackCost("dragon_power", 4)]
+    dragon_wings.costs = [MPCost(14), StackCost("dragon_power", 4)]
     dragon_wings.cooldown = 6
 
     # 9. 궁극기: 진 드래곤
@@ -94,7 +94,7 @@ def create_dragon_knight_skills():
         BuffEffect(BuffType.ATTACK_UP, 0.6, duration=4),
         GimmickEffect(GimmickOperation.SET, "dragon_power", 0)
     ]
-    ultimate.costs = [MPCost(90), StackCost("dragon_power", 1)]
+    ultimate.costs = [MPCost(22), StackCost("dragon_power", 1)]
     ultimate.is_ultimate = True
     ultimate.is_aoe = True
     ultimate.cooldown = 10

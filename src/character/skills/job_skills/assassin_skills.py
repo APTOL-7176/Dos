@@ -31,7 +31,7 @@ def create_assassin_skills():
         DamageEffect(DamageType.BRV, 2.2, gimmick_bonus={"field": "stealth_points", "multiplier": 0.25}),
         GimmickEffect(GimmickOperation.ADD, "stealth_points", 1, max_value=5)
     ]
-    backstab.costs = [MPCost(25)]
+    backstab.costs = [MPCost(6)]
     backstab.cooldown = 2
 
     # 4. 은신
@@ -40,7 +40,7 @@ def create_assassin_skills():
         GimmickEffect(GimmickOperation.SET, "stealth_points", 5),
         BuffEffect(BuffType.EVASION_UP, 0.5, duration=3)
     ]
-    vanish.costs = [MPCost(30)]
+    vanish.costs = [MPCost(8)]
     vanish.target_type = "self"
     vanish.cooldown = 4
 
@@ -50,7 +50,7 @@ def create_assassin_skills():
         DamageEffect(DamageType.BRV_HP, 1.6, gimmick_bonus={"field": "stealth_points", "multiplier": 0.3}),
         GimmickEffect(GimmickOperation.CONSUME, "stealth_points", 2)
     ]
-    poison_dart.costs = [MPCost(35), StackCost("stealth_points", 2)]
+    poison_dart.costs = [MPCost(9), StackCost("stealth_points", 2)]
     poison_dart.cooldown = 3
 
     # 6. 연속 베기
@@ -61,7 +61,7 @@ def create_assassin_skills():
         DamageEffect(DamageType.BRV, 0.9),
         GimmickEffect(GimmickOperation.ADD, "stealth_points", 2, max_value=5)
     ]
-    rapid_stab.costs = [MPCost(28)]
+    rapid_stab.costs = [MPCost(7)]
     rapid_stab.cast_time = 0.7
     rapid_stab.cooldown = 2
 
@@ -72,7 +72,7 @@ def create_assassin_skills():
         BuffEffect(BuffType.DEFENSE_DOWN, 0.4, duration=4),
         GimmickEffect(GimmickOperation.CONSUME, "stealth_points", 3)
     ]
-    death_mark.costs = [MPCost(40), StackCost("stealth_points", 3)]
+    death_mark.costs = [MPCost(10), StackCost("stealth_points", 3)]
     death_mark.cooldown = 4
 
     # 8. 목 베기
@@ -81,7 +81,7 @@ def create_assassin_skills():
         DamageEffect(DamageType.BRV_HP, 2.0, gimmick_bonus={"field": "stealth_points", "multiplier": 0.5}),
         GimmickEffect(GimmickOperation.CONSUME, "stealth_points", 4)
     ]
-    throat_cut.costs = [MPCost(50), StackCost("stealth_points", 4)]
+    throat_cut.costs = [MPCost(12), StackCost("stealth_points", 4)]
     throat_cut.cooldown = 5
 
     # 9. 궁극기: 완벽한 암살
@@ -92,7 +92,7 @@ def create_assassin_skills():
         DamageEffect(DamageType.HP, 2.5, gimmick_bonus={"field": "stealth_points", "multiplier": 0.6}),
         GimmickEffect(GimmickOperation.SET, "stealth_points", 0)
     ]
-    ultimate.costs = [MPCost(80), StackCost("stealth_points", 1)]
+    ultimate.costs = [MPCost(20), StackCost("stealth_points", 1)]
     ultimate.is_ultimate = True
     ultimate.cooldown = 10
 

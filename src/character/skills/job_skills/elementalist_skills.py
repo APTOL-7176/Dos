@@ -32,7 +32,7 @@ def create_elementalist_skills():
         GimmickEffect(GimmickOperation.ADD, "spirit_count", 1, max_value=4),
         BuffEffect(BuffType.ATTACK_UP, 0.3, duration=3)
     ]
-    fire_spirit.costs = [MPCost(28)]
+    fire_spirit.costs = [MPCost(7)]
     fire_spirit.target_type = "self"
     fire_spirit.cooldown = 2
 
@@ -43,7 +43,7 @@ def create_elementalist_skills():
         GimmickEffect(GimmickOperation.ADD, "spirit_count", 1, max_value=4),
         BuffEffect(BuffType.DEFENSE_UP, 0.3, duration=3)
     ]
-    water_spirit.costs = [MPCost(28)]
+    water_spirit.costs = [MPCost(7)]
     water_spirit.target_type = "self"
     water_spirit.cooldown = 2
 
@@ -54,7 +54,7 @@ def create_elementalist_skills():
         GimmickEffect(GimmickOperation.ADD, "spirit_count", 1, max_value=4),
         BuffEffect(BuffType.SPEED_UP, 0.3, duration=3)
     ]
-    wind_spirit.costs = [MPCost(28)]
+    wind_spirit.costs = [MPCost(7)]
     wind_spirit.target_type = "self"
     wind_spirit.cooldown = 2
 
@@ -65,7 +65,7 @@ def create_elementalist_skills():
         GimmickEffect(GimmickOperation.ADD, "spirit_count", 2, max_value=4),
         BuffEffect(BuffType.DEFENSE_UP, 0.4, duration=3)
     ]
-    earth_spirit.costs = [MPCost(35)]
+    earth_spirit.costs = [MPCost(9)]
     earth_spirit.target_type = "self"
     earth_spirit.cooldown = 3
 
@@ -75,7 +75,7 @@ def create_elementalist_skills():
         DamageEffect(DamageType.BRV_HP, 2.0, gimmick_bonus={"field": "spirit_count", "multiplier": 0.5}),
         GimmickEffect(GimmickOperation.CONSUME, "spirit_count", 2)
     ]
-    spirit_fusion.costs = [MPCost(40), StackCost("spirit_count", 2)]
+    spirit_fusion.costs = [MPCost(10), StackCost("spirit_count", 2)]
     spirit_fusion.cooldown = 3
 
     # 8. 정령왕 소환
@@ -85,7 +85,7 @@ def create_elementalist_skills():
         DamageEffect(DamageType.HP, 1.8),
         GimmickEffect(GimmickOperation.CONSUME, "spirit_count", 3)
     ]
-    spirit_king.costs = [MPCost(55), StackCost("spirit_count", 3)]
+    spirit_king.costs = [MPCost(14), StackCost("spirit_count", 3)]
     spirit_king.cooldown = 5
     spirit_king.is_aoe = True
 
@@ -99,7 +99,7 @@ def create_elementalist_skills():
         BuffEffect(BuffType.MAGIC_UP, 0.5, duration=4),
         GimmickEffect(GimmickOperation.SET, "spirit_count", 0)
     ]
-    ultimate.costs = [MPCost(90), StackCost("spirit_count", 1)]
+    ultimate.costs = [MPCost(22), StackCost("spirit_count", 1)]
     ultimate.is_ultimate = True
     ultimate.is_aoe = True
     ultimate.cooldown = 10

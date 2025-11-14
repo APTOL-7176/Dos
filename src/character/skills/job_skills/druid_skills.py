@@ -34,7 +34,7 @@ def create_druid_skills():
         BuffEffect(BuffType.ATTACK_UP, 0.3, duration=4),
         GimmickEffect(GimmickOperation.ADD, "nature_points", 1, max_value=5)
     ]
-    bear_form.costs = [MPCost(28)]
+    bear_form.costs = [MPCost(7)]
     bear_form.target_type = "self"
     bear_form.cooldown = 3
 
@@ -46,7 +46,7 @@ def create_druid_skills():
         BuffEffect(BuffType.EVASION_UP, 0.4, duration=4),
         GimmickEffect(GimmickOperation.ADD, "nature_points", 1, max_value=5)
     ]
-    cat_form.costs = [MPCost(28)]
+    cat_form.costs = [MPCost(7)]
     cat_form.target_type = "self"
     cat_form.cooldown = 3
 
@@ -56,7 +56,7 @@ def create_druid_skills():
         HealEffect(HealType.HP, percentage=0.3, is_party_wide=True),
         GimmickEffect(GimmickOperation.CONSUME, "nature_points", 2)
     ]
-    healing_forest.costs = [MPCost(35), StackCost("nature_points", 2)]
+    healing_forest.costs = [MPCost(9), StackCost("nature_points", 2)]
     healing_forest.target_type = "party"
     healing_forest.cooldown = 4
 
@@ -67,7 +67,7 @@ def create_druid_skills():
         BuffEffect(BuffType.REGEN, 0.3, duration=4),
         BuffEffect(BuffType.DEFENSE_UP, 0.3, duration=4)
     ]
-    nature_blessing.costs = [MPCost(40)]
+    nature_blessing.costs = [MPCost(10)]
     nature_blessing.target_type = "self"
     nature_blessing.cooldown = 5
 
@@ -78,7 +78,7 @@ def create_druid_skills():
         BuffEffect(BuffType.SPEED_UP, 0.5, duration=3),
         GimmickEffect(GimmickOperation.CONSUME, "nature_points", 3)
     ]
-    eagle_form.costs = [MPCost(45), StackCost("nature_points", 3)]
+    eagle_form.costs = [MPCost(11), StackCost("nature_points", 3)]
     eagle_form.cooldown = 4
 
     # 8. 늑대 변신
@@ -89,7 +89,7 @@ def create_druid_skills():
         BuffEffect(BuffType.ATTACK_UP, 0.4, duration=4),
         GimmickEffect(GimmickOperation.CONSUME, "nature_points", 4)
     ]
-    wolf_form.costs = [MPCost(55), StackCost("nature_points", 4)]
+    wolf_form.costs = [MPCost(14), StackCost("nature_points", 4)]
     wolf_form.cooldown = 5
     wolf_form.is_aoe = True
 
@@ -104,7 +104,7 @@ def create_druid_skills():
         BuffEffect(BuffType.SPEED_UP, 0.6, duration=5),
         GimmickEffect(GimmickOperation.SET, "nature_points", 0)
     ]
-    ultimate.costs = [MPCost(100), StackCost("nature_points", 1)]
+    ultimate.costs = [MPCost(25), StackCost("nature_points", 1)]
     ultimate.is_ultimate = True
     ultimate.is_aoe = True
     ultimate.cooldown = 10

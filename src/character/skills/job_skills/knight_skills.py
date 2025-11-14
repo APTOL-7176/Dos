@@ -35,7 +35,7 @@ def create_knight_skills():
         ShieldEffect(base_amount=60),
         GimmickEffect(GimmickOperation.ADD, "duty_stacks", 1, max_value=5)
     ]
-    guardian_oath.costs = [MPCost(25)]
+    guardian_oath.costs = [MPCost(6)]
     guardian_oath.target_type = "ally"
     guardian_oath.cooldown = 3
     skills.append(guardian_oath)
@@ -47,7 +47,7 @@ def create_knight_skills():
         BuffEffect(BuffType.SPIRIT_UP, 0.35, duration=4),
         GimmickEffect(GimmickOperation.ADD, "duty_stacks", 1, max_value=5)
     ]
-    chivalry.costs = [MPCost(30)]
+    chivalry.costs = [MPCost(8)]
     chivalry.target_type = "self"
     chivalry.cooldown = 4
     skills.append(chivalry)
@@ -58,7 +58,7 @@ def create_knight_skills():
         ShieldEffect(base_amount=100),
         GimmickEffect(GimmickOperation.ADD, "duty_stacks", 2, max_value=5)
     ]
-    iron_will.costs = [MPCost(35)]
+    iron_will.costs = [MPCost(9)]
     iron_will.target_type = "self"
     iron_will.cooldown = 5
     skills.append(iron_will)
@@ -70,7 +70,7 @@ def create_knight_skills():
         ShieldEffect(base_amount=40),
         GimmickEffect(GimmickOperation.ADD, "duty_stacks", 1, max_value=5)
     ]
-    shield_bash.costs = [MPCost(28)]
+    shield_bash.costs = [MPCost(7)]
     shield_bash.cooldown = 2
     skills.append(shield_bash)
     
@@ -81,7 +81,7 @@ def create_knight_skills():
         BuffEffect(BuffType.DEFENSE_UP, 0.5, duration=3),
         GimmickEffect(GimmickOperation.CONSUME, "duty_stacks", 3)
     ]
-    last_stand.costs = [MPCost(50), StackCost("duty_stacks", 3)]
+    last_stand.costs = [MPCost(12), StackCost("duty_stacks", 3)]
     last_stand.target_type = "self"
     last_stand.cooldown = 6
     skills.append(last_stand)
@@ -93,7 +93,7 @@ def create_knight_skills():
         BuffEffect(BuffType.DEFENSE_UP, 0.3, duration=4, is_party_wide=True),
         GimmickEffect(GimmickOperation.ADD, "duty_stacks", 1, max_value=5)
     ]
-    devotion.costs = [MPCost(45)]
+    devotion.costs = [MPCost(11)]
     devotion.target_type = "party"
     devotion.cooldown = 6
     skills.append(devotion)
@@ -107,7 +107,7 @@ def create_knight_skills():
         BuffEffect(BuffType.DEFENSE_UP, 0.6, duration=5),
         GimmickEffect(GimmickOperation.SET, "duty_stacks", 0)
     ]
-    ultimate.costs = [MPCost(100)]
+    ultimate.costs = [MPCost(25)]
     ultimate.is_ultimate = True
     ultimate.cooldown = 10
     skills.append(ultimate)

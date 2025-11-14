@@ -31,7 +31,7 @@ def create_philosopher_skills():
         GimmickEffect(GimmickOperation.ADD, "knowledge_stacks", 2, max_value=10),
         BuffEffect(BuffType.ACCURACY_UP, 0.4, duration=3)
     ]
-    insight.costs = [MPCost(25)]
+    insight.costs = [MPCost(6)]
     insight.target_type = "self"
     insight.cooldown = 2
 
@@ -42,7 +42,7 @@ def create_philosopher_skills():
         BuffEffect(BuffType.DEFENSE_DOWN, 0.3, duration=3),
         GimmickEffect(GimmickOperation.CONSUME, "knowledge_stacks", 2)
     ]
-    pattern_recognition.costs = [MPCost(30), StackCost("knowledge_stacks", 2)]
+    pattern_recognition.costs = [MPCost(8), StackCost("knowledge_stacks", 2)]
     pattern_recognition.cooldown = 3
 
     # 5. 이론 정립
@@ -52,7 +52,7 @@ def create_philosopher_skills():
         BuffEffect(BuffType.MAGIC_UP, 0.4, duration=4),
         GimmickEffect(GimmickOperation.CONSUME, "knowledge_stacks", 3)
     ]
-    theory_establish.costs = [MPCost(35), StackCost("knowledge_stacks", 3)]
+    theory_establish.costs = [MPCost(9), StackCost("knowledge_stacks", 3)]
     theory_establish.target_type = "self"
     theory_establish.cooldown = 4
 
@@ -62,7 +62,7 @@ def create_philosopher_skills():
         GimmickEffect(GimmickOperation.SET, "knowledge_stacks", 10),
         BuffEffect(BuffType.SPEED_UP, 0.3, duration=4)
     ]
-    strategy_plan.costs = [MPCost(40)]
+    strategy_plan.costs = [MPCost(10)]
     strategy_plan.target_type = "self"
     strategy_plan.cooldown = 5
 
@@ -72,7 +72,7 @@ def create_philosopher_skills():
         DamageEffect(DamageType.BRV_HP, 2.0, gimmick_bonus={"field": "knowledge_stacks", "multiplier": 0.25}),
         GimmickEffect(GimmickOperation.CONSUME, "knowledge_stacks", 5)
     ]
-    logic_burst.costs = [MPCost(50), StackCost("knowledge_stacks", 5)]
+    logic_burst.costs = [MPCost(12), StackCost("knowledge_stacks", 5)]
     logic_burst.cooldown = 4
     logic_burst.is_aoe = True
 
@@ -83,7 +83,7 @@ def create_philosopher_skills():
         DamageEffect(DamageType.HP, 2.0),
         GimmickEffect(GimmickOperation.CONSUME, "knowledge_stacks", 7)
     ]
-    perfect_analysis.costs = [MPCost(60), StackCost("knowledge_stacks", 7)]
+    perfect_analysis.costs = [MPCost(15), StackCost("knowledge_stacks", 7)]
     perfect_analysis.cooldown = 6
 
     # 9. 궁극기: 진리 도달
@@ -96,7 +96,7 @@ def create_philosopher_skills():
         BuffEffect(BuffType.MAGIC_UP, 0.6, duration=5),
         GimmickEffect(GimmickOperation.SET, "knowledge_stacks", 0)
     ]
-    ultimate.costs = [MPCost(100), StackCost("knowledge_stacks", 1)]
+    ultimate.costs = [MPCost(25), StackCost("knowledge_stacks", 1)]
     ultimate.is_ultimate = True
     ultimate.cooldown = 10
 

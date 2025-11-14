@@ -30,7 +30,7 @@ def create_bard_skills():
     scale_up.effects = [
         GimmickEffect(GimmickOperation.ADD, "melody_stacks", 3, max_value=7)
     ]
-    scale_up.costs = [MPCost(20)]
+    scale_up.costs = [MPCost(5)]
     scale_up.target_type = "self"
     scale_up.cooldown = 3
 
@@ -40,7 +40,7 @@ def create_bard_skills():
         HealEffect(HealType.HP, percentage=0.3, is_party_wide=True),
         GimmickEffect(GimmickOperation.ADD, "melody_stacks", 1, max_value=7)
     ]
-    healing_song.costs = [MPCost(30)]
+    healing_song.costs = [MPCost(8)]
     healing_song.target_type = "party"
     healing_song.cooldown = 3
 
@@ -50,7 +50,7 @@ def create_bard_skills():
         DamageEffect(DamageType.BRV, 1.5, gimmick_bonus={"field": "melody_stacks", "multiplier": 0.3}),
         GimmickEffect(GimmickOperation.ADD, "melody_stacks", 1, max_value=7)
     ]
-    crescendo.costs = [MPCost(25)]
+    crescendo.costs = [MPCost(6)]
     crescendo.cooldown = 2
 
     # 6. 공명 (파티 버프)
@@ -59,7 +59,7 @@ def create_bard_skills():
         BuffEffect(BuffType.ATTACK_UP, 0.25, duration=3, is_party_wide=True),
         GimmickEffect(GimmickOperation.ADD, "melody_stacks", 1, max_value=7)
     ]
-    resonance.costs = [MPCost(35)]
+    resonance.costs = [MPCost(9)]
     resonance.target_type = "party"
     resonance.cooldown = 4
 
@@ -72,7 +72,7 @@ def create_bard_skills():
         GimmickEffect(GimmickOperation.SET, "melody_stacks", 0),
         GimmickEffect(GimmickOperation.ADD, "octave_completed", 1)
     ]
-    perfect_harmony.costs = [MPCost(50)]
+    perfect_harmony.costs = [MPCost(12)]
     perfect_harmony.target_type = "party"
     perfect_harmony.cooldown = 5
 
@@ -82,7 +82,7 @@ def create_bard_skills():
         DamageEffect(DamageType.BRV_HP, 1.8),
         GimmickEffect(GimmickOperation.CONSUME, "melody_stacks", 2)
     ]
-    discord.costs = [MPCost(40)]
+    discord.costs = [MPCost(10)]
     discord.cooldown = 3
 
     # 9. 궁극기: 교향곡
@@ -96,7 +96,7 @@ def create_bard_skills():
         BuffEffect(BuffType.CRITICAL_UP, 0.3, duration=5, is_party_wide=True),
         GimmickEffect(GimmickOperation.SET, "melody_stacks", 0)
     ]
-    ultimate.costs = [MPCost(100)]
+    ultimate.costs = [MPCost(25)]
     ultimate.is_ultimate = True
     ultimate.cooldown = 10
     

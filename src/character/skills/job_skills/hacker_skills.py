@@ -35,7 +35,7 @@ def create_hacker_skills():
         GimmickEffect(GimmickOperation.ADD, "debuff_count", 1, max_value=5),
         GimmickEffect(GimmickOperation.ADD, "hack_stacks", 2, max_value=10)
     ]
-    install_debuff.costs = [MPCost(25)]
+    install_debuff.costs = [MPCost(6)]
     install_debuff.cooldown = 2
     skills.append(install_debuff)
     
@@ -45,7 +45,7 @@ def create_hacker_skills():
         DamageEffect(DamageType.BRV, 1.5, gimmick_bonus={"field": "hack_stacks", "multiplier": 0.2}),
         GimmickEffect(GimmickOperation.ADD, "hack_stacks", 1, max_value=10)
     ]
-    disrupt.costs = [MPCost(28)]
+    disrupt.costs = [MPCost(7)]
     disrupt.cooldown = 2
     skills.append(disrupt)
     
@@ -58,7 +58,7 @@ def create_hacker_skills():
         DamageEffect(DamageType.BRV, 0.8),
         GimmickEffect(GimmickOperation.ADD, "hack_stacks", 2, max_value=10)
     ]
-    virus.costs = [MPCost(35)]
+    virus.costs = [MPCost(9)]
     virus.cooldown = 3
     skills.append(virus)
     
@@ -68,7 +68,7 @@ def create_hacker_skills():
         GimmickEffect(GimmickOperation.ADD, "hack_stacks", 5, max_value=10),
         BuffEffect(BuffType.SPEED_UP, 0.3, duration=3)
     ]
-    backdoor.costs = [MPCost(30)]
+    backdoor.costs = [MPCost(8)]
     backdoor.target_type = "self"
     backdoor.cooldown = 5
     skills.append(backdoor)
@@ -79,7 +79,7 @@ def create_hacker_skills():
         DamageEffect(DamageType.BRV_HP, 2.0, gimmick_bonus={"field": "hack_stacks", "multiplier": 0.35}),
         GimmickEffect(GimmickOperation.CONSUME, "hack_stacks", 3)
     ]
-    system_down.costs = [MPCost(45), StackCost("hack_stacks", 3)]
+    system_down.costs = [MPCost(11), StackCost("hack_stacks", 3)]
     system_down.cooldown = 4
     skills.append(system_down)
     
@@ -90,7 +90,7 @@ def create_hacker_skills():
         BuffEffect(BuffType.MAGIC_UP, 0.4, duration=4),
         GimmickEffect(GimmickOperation.CONSUME, "hack_stacks", 5)
     ]
-    rootkit.costs = [MPCost(55), StackCost("hack_stacks", 5)]
+    rootkit.costs = [MPCost(14), StackCost("hack_stacks", 5)]
     rootkit.cooldown = 6
     skills.append(rootkit)
     
@@ -103,7 +103,7 @@ def create_hacker_skills():
         GimmickEffect(GimmickOperation.SET, "hack_stacks", 10),
         GimmickEffect(GimmickOperation.SET, "debuff_count", 0)
     ]
-    ultimate.costs = [MPCost(100)]
+    ultimate.costs = [MPCost(25)]
     ultimate.is_ultimate = True
     ultimate.cooldown = 10
     skills.append(ultimate)

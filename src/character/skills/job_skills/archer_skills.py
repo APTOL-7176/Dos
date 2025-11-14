@@ -34,7 +34,7 @@ def create_archer_skills():
         SupportFireEffect(max_points=3, damage_per_point=20),
         BuffEffect(BuffType.ATTACK_UP, multiplier=1.15, duration=3)
     ]
-    support_fire.costs = [MPCost(25)]
+    support_fire.costs = [MPCost(6)]
     support_fire.target_type = "self"
     support_fire.cooldown = 4
     
@@ -44,7 +44,7 @@ def create_archer_skills():
         DamageEffect(DamageType.BRV, 1.5, gimmick_bonus={"field": "aim_points", "multiplier": 0.2}),
         GimmickEffect(GimmickOperation.ADD, "aim_points", 1, max_value=5)
     ]
-    piercing_arrow.costs = [MPCost(22)]
+    piercing_arrow.costs = [MPCost(6)]
     piercing_arrow.target_type = "all_enemies"
     piercing_arrow.cooldown = 2
     
@@ -54,7 +54,7 @@ def create_archer_skills():
         GimmickEffect(GimmickOperation.ADD, "aim_points", 3, max_value=5),
         BuffEffect(BuffType.CRITICAL_UP, multiplier=1.5, duration=2)
     ]
-    focus.costs = [MPCost(20)]
+    focus.costs = [MPCost(5)]
     focus.target_type = "self"
     focus.cooldown = 3
     
@@ -66,7 +66,7 @@ def create_archer_skills():
         DamageEffect(DamageType.HP, 1.0),
         GimmickEffect(GimmickOperation.ADD, "aim_points", 2, max_value=5)
     ]
-    rapid_arrows.costs = [MPCost(30)]
+    rapid_arrows.costs = [MPCost(8)]
     rapid_arrows.cast_time = 0.8
     rapid_arrows.cooldown = 3
     
@@ -76,7 +76,7 @@ def create_archer_skills():
         GimmickEffect(GimmickOperation.ADD, "aim_points", 2, max_value=5),
         BuffEffect(BuffType.ACCURACY_UP, multiplier=1.3, duration=4)
     ]
-    accuracy_up.costs = [MPCost(18)]
+    accuracy_up.costs = [MPCost(4)]
     accuracy_up.target_type = "self"
     accuracy_up.cooldown = 4
     
@@ -86,7 +86,7 @@ def create_archer_skills():
         DamageEffect(DamageType.HP, 2.0, gimmick_bonus={"field": "aim_points", "multiplier": 0.4}),
         GimmickEffect(GimmickOperation.CONSUME, "aim_points", 3)
     ]
-    headshot.costs = [MPCost(40), StackCost("aim_points", 3)]
+    headshot.costs = [MPCost(10), StackCost("aim_points", 3)]
     headshot.cooldown = 5
     
     # 9. 궁극기: 천공 사격
@@ -97,7 +97,7 @@ def create_archer_skills():
         DamageEffect(DamageType.HP, 2.5),
         GimmickEffect(GimmickOperation.SET, "aim_points", 0)
     ]
-    heaven_piercer.costs = [MPCost(80), StackCost("aim_points", 1)]
+    heaven_piercer.costs = [MPCost(20), StackCost("aim_points", 1)]
     heaven_piercer.is_ultimate = True
     heaven_piercer.cooldown = 10
     

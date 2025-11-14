@@ -34,7 +34,7 @@ def create_breaker_skills():
         BuffEffect(BuffType.ATTACK_UP, 0.4, duration=4),
         GimmickEffect(GimmickOperation.ADD, "break_power", 2, max_value=10)
     ]
-    brv_focus.costs = [MPCost(25)]
+    brv_focus.costs = [MPCost(6)]
     brv_focus.target_type = "self"
     brv_focus.cooldown = 3
     skills.append(brv_focus)
@@ -47,7 +47,7 @@ def create_breaker_skills():
         DamageEffect(DamageType.BRV, 1.5),
         GimmickEffect(GimmickOperation.ADD, "break_power", 2, max_value=10)
     ]
-    multi_strike.costs = [MPCost(30)]
+    multi_strike.costs = [MPCost(8)]
     multi_strike.cooldown = 2
     skills.append(multi_strike)
     
@@ -57,7 +57,7 @@ def create_breaker_skills():
         GimmickEffect(GimmickOperation.ADD, "break_power", 5, max_value=10),
         BuffEffect(BuffType.CRITICAL_UP, 0.3, duration=3)
     ]
-    break_enhance.costs = [MPCost(35)]
+    break_enhance.costs = [MPCost(9)]
     break_enhance.target_type = "self"
     break_enhance.cooldown = 5
     skills.append(break_enhance)
@@ -68,7 +68,7 @@ def create_breaker_skills():
         DamageEffect(DamageType.BRV, 3.0, gimmick_bonus={"field": "break_power", "multiplier": 0.3}),
         GimmickEffect(GimmickOperation.ADD, "break_power", 1, max_value=10)
     ]
-    mega_crush.costs = [MPCost(40)]
+    mega_crush.costs = [MPCost(10)]
     mega_crush.cooldown = 3
     skills.append(mega_crush)
     
@@ -78,7 +78,7 @@ def create_breaker_skills():
         DamageEffect(DamageType.BRV, 2.2, gimmick_bonus={"field": "break_power", "multiplier": 0.25}),
         GimmickEffect(GimmickOperation.CONSUME, "break_power", 3)
     ]
-    break_wave.costs = [MPCost(45), StackCost("break_power", 3)]
+    break_wave.costs = [MPCost(11), StackCost("break_power", 3)]
     break_wave.cooldown = 4
     skills.append(break_wave)
     
@@ -88,7 +88,7 @@ def create_breaker_skills():
         DamageEffect(DamageType.BRV_HP, 2.5, gimmick_bonus={"field": "break_power", "multiplier": 0.4}),
         GimmickEffect(GimmickOperation.CONSUME, "break_power", 5)
     ]
-    total_break.costs = [MPCost(55), StackCost("break_power", 5)]
+    total_break.costs = [MPCost(14), StackCost("break_power", 5)]
     total_break.cooldown = 6
     skills.append(total_break)
     
@@ -101,7 +101,7 @@ def create_breaker_skills():
         BuffEffect(BuffType.ATTACK_UP, 0.6, duration=5),
         GimmickEffect(GimmickOperation.SET, "break_power", 0)
     ]
-    ultimate.costs = [MPCost(100)]
+    ultimate.costs = [MPCost(25)]
     ultimate.is_ultimate = True
     ultimate.cooldown = 10
     skills.append(ultimate)
