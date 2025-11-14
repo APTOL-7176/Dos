@@ -44,9 +44,10 @@ def create_dark_knight_skills():
     skills[-1].cooldown = 3
 
     skills.append(Skill("dk_dark_buster", "어둠 파쇄", "방어 무시 공격"))
-    skills[-1].effects = [DamageEffect(DamageType.BRV_HP, 2.2, ignore_defense=0.3, gimmick_bonus={"field": "darkness", "multiplier": 0.4}), GimmickEffect(GimmickOperation.CONSUME, "darkness", 4)]
+    skills[-1].effects = [DamageEffect(DamageType.BRV_HP, 2.5, gimmick_bonus={"field": "darkness", "multiplier": 0.4}), GimmickEffect(GimmickOperation.CONSUME, "darkness", 4)]
     skills[-1].costs = [MPCost(12), StackCost("darkness", 4)]
     skills[-1].cooldown = 5
+    skills[-1].sfx = ("combat", "attack_physical")
 
     skills.append(Skill("dk_dark_explosion", "어둠 폭발", "광역 어둠 폭발"))
     skills[-1].effects = [DamageEffect(DamageType.BRV_HP, 2.5, gimmick_bonus={"field": "darkness", "multiplier": 0.5}), LifestealEffect(0.3), GimmickEffect(GimmickOperation.CONSUME, "darkness", 5)]

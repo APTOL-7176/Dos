@@ -272,6 +272,98 @@ class GaugeRenderer:
             console.print(threshold_x, y, "|", fg=(255, 255, 100))
 
     @staticmethod
+    def render_atb_with_cast(
+        console: tcod.console.Console,
+        x: int,
+        y: int,
+        width: int,
+        atb_current: float,
+        atb_threshold: float,
+        atb_maximum: float,
+        cast_progress: float = 0.0,
+        is_casting: bool = False
+    ) -> None:
+        """
+        ATB 게이지와 캐스팅 진행도를 함께 렌더링
+
+        Args:
+            console: TCOD 콘솔
+            x, y: 게이지 위치
+            width: 게이지 너비
+            atb_current: 현재 ATB 값
+            atb_threshold: 행동 가능 임계값
+            atb_maximum: 최대 ATB 값
+            cast_progress: 캐스팅 진행도 (0.0 ~ 1.0)
+            is_casting: 캐스팅 중 여부
+        """
+        if atb_maximum <= 0:
+            atb_ratio = 0.0
+        else:
+            atb_ratio = min(1.0, atb_current / atb_maximum)
+
+        # ATB 색상 (파란색)
+        atb_fg = (100, 150, 255)
+        atb_bg = (50, 75, 125)
+
+        # 캐스팅 색상 (보라색/자홍색)
+        cast_fg = (200, 100, 255)
+        cast_bg = (100, 50, 125)
+
+        # 배경
+        console.draw_rect(x, y, width, 1, ord(" "), bg=atb_bg)
+
+        # ATB 게이지 그리기
+        atb_filled_exact = atb_ratio * width
+        atb_filled_full = int(atb_filled_exact)
+        atb_filled_partial = atb_filled_exact - atb_filled_full
+
+        # ATB 완전히 채워진 부분
+        if atb_filled_full > 0:
+            console.draw_rect(x, y, atb_filled_full, 1, ord(" "), bg=atb_fg)
+
+        # ATB 부분적으로 채워진 마지막 칸
+        if atb_filled_partial > 0.0 and atb_filled_full < width:
+            partial_color = (
+                int(atb_bg[0] + (atb_fg[0] - atb_bg[0]) * atb_filled_partial),
+                int(atb_bg[1] + (atb_fg[1] - atb_bg[1]) * atb_filled_partial),
+                int(atb_bg[2] + (atb_fg[2] - atb_bg[2]) * atb_filled_partial)
+            )
+            console.draw_rect(x + atb_filled_full, y, 1, 1, ord(" "), bg=partial_color)
+
+        # 캐스팅 중이면 캐스팅 진행도를 오버레이
+        if is_casting and cast_progress > 0.0:
+            cast_filled_exact = cast_progress * width
+            cast_filled_full = int(cast_filled_exact)
+            cast_filled_partial = cast_filled_exact - cast_filled_full
+
+            # 캐스팅 완전히 채워진 부분 (오버레이)
+            if cast_filled_full > 0:
+                console.draw_rect(x, y, cast_filled_full, 1, ord(" "), bg=cast_fg)
+
+            # 캐스팅 부분적으로 채워진 마지막 칸
+            if cast_filled_partial > 0.0 and cast_filled_full < width:
+                partial_color = (
+                    int(cast_bg[0] + (cast_fg[0] - cast_bg[0]) * cast_filled_partial),
+                    int(cast_bg[1] + (cast_fg[1] - cast_bg[1]) * cast_filled_partial),
+                    int(cast_bg[2] + (cast_fg[2] - cast_bg[2]) * cast_filled_partial)
+                )
+                console.draw_rect(x + cast_filled_full, y, 1, 1, ord(" "), bg=partial_color)
+
+        # 행동 가능 임계값 표시 (세로선)
+        threshold_ratio = atb_threshold / atb_maximum
+        threshold_x = x + int(threshold_ratio * width)
+        if 0 <= threshold_x < x + width:
+            console.print(threshold_x, y, "|", fg=(255, 255, 100))
+
+        # 텍스트 표시
+        if is_casting:
+            text = f"캐스팅 {int(cast_progress * 100)}%"
+        else:
+            text = f"{int(atb_ratio * 100)}%"
+        text_x = x + (width - len(text)) // 2
+        console.print(text_x, y, text, fg=(255, 255, 255))
+
+    @staticmethod
     def render_status_icons(status_effects: dict) -> str:
         """
         상태이상 아이콘 렌더링

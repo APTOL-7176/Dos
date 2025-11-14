@@ -192,14 +192,26 @@ class ATBSystem:
         if is_player_turn:
             return
 
+        # 캐스팅 시스템 가져오기
+        from src.combat.casting_system import get_casting_system
+        casting_system = get_casting_system()
+
         for combatant, gauge in self.gauges.items():
-            if not gauge.can_act:  # 아직 행동 불가능한 경우만 증가
-                # 상태이상 효과가 반영된 속도 사용
-                effective_speed = gauge.get_effective_speed()
+            # 상태이상 효과가 반영된 속도 사용
+            effective_speed = gauge.get_effective_speed()
 
-                # ATB 업데이트 속도를 1/5로 느리게 조정 (로그라이크_2 방식)
-                increase = (effective_speed * delta_time) / 5.0
+            # ATB 업데이트 속도를 1/5로 느리게 조정 (로그라이크_2 방식)
+            increase = (effective_speed * delta_time) / 5.0
 
+            # 캐스팅 중인지 확인
+            is_casting = casting_system.is_casting(combatant)
+            gauge.is_casting = is_casting
+
+            if is_casting:
+                # 캐스팅 중이면 캐스팅 진행도 업데이트 (ATB는 증가하지 않음)
+                casting_system.update(combatant, int(increase))
+            elif not gauge.can_act:
+                # 캐스팅 중이 아니고 행동 불가능한 경우에만 ATB 증가
                 gauge.increase(increase)
 
                 # 행동 가능 상태가 되면 이벤트 발행

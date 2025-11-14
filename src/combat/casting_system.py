@@ -2,6 +2,8 @@
 캐스팅 시스템
 
 일부 강력한 스킬은 캐스팅 시간이 필요
+ATB 기반 캐스팅: cast_time은 ATB 비율 (0.0~1.0)
+예: 0.3 = ATB 30%, 0.5 = ATB 50%, 1.0 = ATB 100%
 """
 
 from dataclasses import dataclass
@@ -28,22 +30,23 @@ class CastingInfo:
     caster: Any  # 시전자
     skill: Any  # 스킬
     target: Optional[Any]  # 대상
-    cast_time: float  # 총 시전 시간
-    elapsed_time: float = 0.0  # 경과 시간
+    cast_time_ratio: float  # ATB 비율 (0.0~1.0, 예: 0.3 = 30%)
+    required_atb: int = 0  # 필요한 ATB 포인트
+    accumulated_atb: int = 0  # 축적된 ATB 포인트
     state: CastingState = CastingState.CASTING
     interruptible: bool = True  # 중단 가능 여부
 
     @property
     def progress(self) -> float:
         """진행도 (0.0 ~ 1.0)"""
-        if self.cast_time <= 0:
+        if self.required_atb <= 0:
             return 1.0
-        return min(1.0, self.elapsed_time / self.cast_time)
+        return min(1.0, self.accumulated_atb / self.required_atb)
 
     @property
     def is_complete(self) -> bool:
         """완료 여부"""
-        return self.elapsed_time >= self.cast_time
+        return self.accumulated_atb >= self.required_atb
 
 
 class CastingSystem:
@@ -58,7 +61,8 @@ class CastingSystem:
         caster: Any,
         skill: Any,
         target: Optional[Any],
-        cast_time: float,
+        cast_time_ratio: float,
+        atb_threshold: int = 1000,
         interruptible: bool = True
     ) -> CastingInfo:
         """
@@ -68,7 +72,8 @@ class CastingSystem:
             caster: 시전자
             skill: 스킬
             target: 대상
-            cast_time: 시전 시간
+            cast_time_ratio: ATB 비율 (0.0~1.0, 예: 0.3 = ATB 30%)
+            atb_threshold: ATB 행동 임계값 (기본 1000)
             interruptible: 중단 가능 여부
 
         Returns:
@@ -78,48 +83,54 @@ class CastingSystem:
         if caster in self.active_casts:
             self.cancel_cast(caster, "새로운 시전 시작")
 
+        # 필요한 ATB 포인트 계산 (ATB 비율 * 임계값)
+        required_atb = int(cast_time_ratio * atb_threshold)
+
         cast_info = CastingInfo(
             caster=caster,
             skill=skill,
             target=target,
-            cast_time=cast_time,
+            cast_time_ratio=cast_time_ratio,
+            required_atb=required_atb,
             interruptible=interruptible
         )
 
         self.active_casts[caster] = cast_info
 
+        caster_name = getattr(caster, 'name', str(caster))
         skill_name = getattr(skill, 'name', str(skill))
-        logger.info(f"{caster.name}가 {skill_name} 시전 시작 (시간: {cast_time:.1f}초)")
+        logger.info(f"{caster_name}가 {skill_name} 시전 시작 (ATB: {cast_time_ratio*100:.0f}% = {required_atb} 포인트)")
 
         return cast_info
 
-    def update(self, delta_time: float):
+    def update(self, caster: Any, atb_increase: int):
         """
-        캐스팅 업데이트
+        특정 시전자의 캐스팅 업데이트 (ATB 기반)
 
         Args:
-            delta_time: 경과 시간 (초)
+            caster: 시전자
+            atb_increase: 증가한 ATB 포인트
         """
-        completed_casters = []
+        if caster not in self.active_casts:
+            return
 
-        for caster, cast_info in self.active_casts.items():
-            if cast_info.state != CastingState.CASTING:
-                continue
+        cast_info = self.active_casts[caster]
+        if cast_info.state != CastingState.CASTING:
+            return
 
-            # 경과 시간 증가
-            cast_info.elapsed_time += delta_time
+        # ATB 축적
+        cast_info.accumulated_atb += atb_increase
 
-            # 완료 체크
-            if cast_info.is_complete:
-                cast_info.state = CastingState.CAST_COMPLETE
-                completed_casters.append(caster)
-                self.cast_queue.append(cast_info)
+        # 완료 체크
+        if cast_info.is_complete:
+            cast_info.state = CastingState.CAST_COMPLETE
+            self.cast_queue.append(cast_info)
 
-                skill_name = getattr(cast_info.skill, 'name', str(cast_info.skill))
-                logger.info(f"{caster.name}의 {skill_name} 시전 완료!")
+            caster_name = getattr(caster, 'name', str(caster))
+            skill_name = getattr(cast_info.skill, 'name', str(cast_info.skill))
+            logger.info(f"{caster_name}의 {skill_name} 시전 완료!")
 
-        # 완료된 캐스팅 제거
-        for caster in completed_casters:
+            # 완료된 캐스팅 제거
             del self.active_casts[caster]
 
     def cancel_cast(self, caster: Any, reason: str = "중단됨"):
@@ -135,12 +146,13 @@ class CastingSystem:
 
         cast_info = self.active_casts[caster]
 
+        caster_name = getattr(caster, 'name', str(caster))
         if not cast_info.interruptible:
-            logger.debug(f"{caster.name}의 시전은 중단 불가")
+            logger.debug(f"{caster_name}의 시전은 중단 불가")
             return
 
         skill_name = getattr(cast_info.skill, 'name', str(cast_info.skill))
-        logger.info(f"{caster.name}의 {skill_name} 시전 중단: {reason}")
+        logger.info(f"{caster_name}의 {skill_name} 시전 중단: {reason}")
 
         cast_info.state = CastingState.INTERRUPTED
         del self.active_casts[caster]

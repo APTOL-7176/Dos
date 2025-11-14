@@ -643,13 +643,23 @@ class CombatUI:
             brv_text = f"{int(ally.current_brv)}/{int(max_brv)}"
             console.print(13 + (10 - len(brv_text)) // 2, y + 2, brv_text, fg=(255, 255, 255))
 
-            # ATB 게이지 (더 정밀)
+            # ATB 게이지 (캐스팅 진행도 포함)
             gauge = self.combat_manager.atb.get_gauge(ally)
             atb_value = gauge.current if gauge else 0
+
+            # 캐스팅 정보 확인
+            cast_info = casting_system.get_cast_info(ally)
+            is_casting = cast_info is not None
+            cast_progress = cast_info.progress if cast_info else 0.0
+
             console.print(33, y + 1, "ATB:", fg=(200, 200, 200))
-            gauge_renderer.render_percentage_bar(
+            gauge_renderer.render_atb_with_cast(
                 console, 38, y + 1, 15,
-                atb_value / 1000.0, show_percent=False, custom_color=(200, 200, 255)
+                atb_current=atb_value,
+                atb_threshold=1000,
+                atb_maximum=2000,
+                cast_progress=cast_progress,
+                is_casting=is_casting
             )
 
             # 상처 표시
@@ -657,14 +667,10 @@ class CombatUI:
             if wound_damage > 0:
                 gauge_renderer.render_wound_indicator(console, 33, y + 2, wound_damage)
 
-            # 캐스팅 표시
-            cast_info = casting_system.get_cast_info(ally)
+            # 캐스팅 중이면 스킬 이름 표시
             if cast_info:
                 skill_name = getattr(cast_info.skill, 'name', 'Unknown')
-                gauge_renderer.render_casting_bar(
-                    console, 8, y + 4, 20,
-                    cast_info.progress, skill_name=f"시전:{skill_name}"
-                )
+                console.print(8, y + 4, f"⏳ 시전: {skill_name}", fg=(200, 100, 255))
 
             # BREAK 상태 표시
             if self.combat_manager.brave.is_broken(ally):
@@ -933,6 +939,81 @@ class CombatUI:
             layers = getattr(character, 'spell_layers', 0)
             max_layers = getattr(character, 'max_spell_layers', 3)
             return f"[레이어:{layers}/{max_layers}]"
+
+        elif gimmick_type == "duty_system":
+            # 기사 - 의무
+            duty = getattr(character, 'duty_stacks', 0)
+            max_duty = getattr(character, 'max_duty_stacks', 10)
+            return f"[의무:{duty}/{max_duty}]"
+
+        elif gimmick_type == "stealth_system":
+            # 암살자 - 은신
+            stealth = getattr(character, 'stealth_points', 0)
+            max_stealth = getattr(character, 'max_stealth_points', 5)
+            return f"[은신:{stealth}/{max_stealth}]"
+
+        elif gimmick_type == "theft_system":
+            # 도적 - 절도
+            stolen = getattr(character, 'stolen_items', 0)
+            return f"[절도:{stolen}]"
+
+        elif gimmick_type == "plunder_system":
+            # 해적 - 약탈
+            gold = getattr(character, 'gold', 0)
+            return f"[골드:{gold}]"
+
+        elif gimmick_type == "iaijutsu_system":
+            # 사무라이 - 거합
+            will = getattr(character, 'will_gauge', 0)
+            max_will = getattr(character, 'max_will_gauge', 100)
+            return f"[기합:{will}/{max_will}]"
+
+        elif gimmick_type == "enchant_system":
+            # 마검사 - 마력 부여
+            mana = getattr(character, 'mana_blade', 0)
+            max_mana = getattr(character, 'max_mana_blade', 100)
+            return f"[마검:{mana}/{max_mana}]"
+
+        elif gimmick_type == "divinity_system":
+            # 프리스트/클레릭 - 신성력
+            judgment = getattr(character, 'judgment_points', 0)
+            faith = getattr(character, 'faith_points', 0)
+            return f"[심판:{judgment} 신앙:{faith}]"
+
+        elif gimmick_type == "shapeshifting_system":
+            # 드루이드 - 변신
+            nature = getattr(character, 'nature_points', 0)
+            form = getattr(character, 'current_form', None)
+            if form:
+                return f"[{form}형태 {nature}]"
+            return f"[자연:{nature}]"
+
+        elif gimmick_type == "spirit_bond":
+            # 정령술사 - 정령 친화도
+            bond = getattr(character, 'spirit_bond', 0)
+            max_bond = getattr(character, 'max_spirit_bond', 25)
+            spirits = getattr(character, 'spirit_count', 0)
+            return f"[친화:{bond}/{max_bond} 정령:{spirits}]"
+
+        elif gimmick_type == "dragon_marks":
+            # 용기사 - 용의 표식
+            marks = getattr(character, 'dragon_marks', 0)
+            max_marks = getattr(character, 'max_dragon_marks', 3)
+            power = getattr(character, 'dragon_power', 0)
+            return f"[용표:{marks}/{max_marks} 용력:{power}]"
+
+        elif gimmick_type == "arena_system":
+            # 검투사 - 투기장
+            arena = getattr(character, 'arena_points', 0)
+            glory = getattr(character, 'glory_points', 0)
+            kills = getattr(character, 'kill_count', 0)
+            return f"[투기:{arena} 영광:{glory} 처치:{kills}]"
+
+        elif gimmick_type == "break_system":
+            # 브레이커 - 파괴력
+            break_power = getattr(character, 'break_power', 0)
+            max_break = getattr(character, 'max_break_power', 10)
+            return f"[파괴:{break_power}/{max_break}]"
 
         return ""
 

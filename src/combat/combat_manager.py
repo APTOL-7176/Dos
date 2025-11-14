@@ -93,6 +93,11 @@ class CombatManager:
             self.atb.register_combatant(enemy)
             self.brave.initialize_brv(enemy)
 
+        # 캐스팅 시스템 초기화
+        from src.combat.casting_system import get_casting_system
+        casting_system = get_casting_system()
+        casting_system.clear()
+
         # 이벤트 발행
         event_bus.publish(Events.COMBAT_START, {
             "allies": allies,
@@ -116,6 +121,9 @@ class CombatManager:
         # ATB 시스템 업데이트
         is_player_turn = self.state == CombatState.PLAYER_TURN
         self.atb.update(delta_time, is_player_turn)
+
+        # 완료된 캐스팅 처리
+        self._process_completed_casts()
 
         # 승리/패배 판정
         self._check_battle_end()
@@ -522,6 +530,54 @@ class CombatManager:
         })
 
         self.turn_count += 1
+
+    def _process_completed_casts(self) -> None:
+        """완료된 캐스팅 처리"""
+        from src.combat.casting_system import get_casting_system
+        casting_system = get_casting_system()
+
+        # 완료된 캐스팅 가져오기
+        completed_casts = casting_system.get_completed_casts()
+
+        for cast_info in completed_casts:
+            caster = cast_info.caster
+            skill = cast_info.skill
+            target = cast_info.target
+
+            # 시전자가 여전히 살아있고 행동 가능한지 확인
+            if self._is_defeated(caster):
+                self.logger.info(f"{getattr(caster, 'name', 'Unknown')} 전투 불능으로 시전 취소")
+                continue
+
+            # 스킬 실행
+            self.logger.info(f"{getattr(caster, 'name', 'Unknown')}의 {skill.name} 발동!")
+
+            # 스킬 실행 (SFX 포함)
+            from src.character.skills.skill_manager import get_skill_manager
+            skill_manager = get_skill_manager()
+
+            # 캐스팅이 완료되었으므로 실제 스킬 효과를 적용
+            result = skill.execute(caster, target, context={"combat_manager": self})
+
+            if result.success:
+                # SFX 재생
+                skill_manager._play_skill_sfx(skill)
+
+                # 쿨다운 설정
+                if skill.cooldown > 0:
+                    skill_manager.set_cooldown(caster, skill.skill_id, skill.cooldown)
+
+                # ATB 소비
+                self.atb.consume_atb(caster, self.atb.threshold)
+
+                # 이벤트 발행
+                from src.core.event_bus import event_bus, Events
+                event_bus.publish(Events.SKILL_EXECUTE, {
+                    "skill": skill,
+                    "user": caster,
+                    "target": target,
+                    "result": result
+                })
 
     def _check_battle_end(self) -> None:
         """승리/패배 판정"""

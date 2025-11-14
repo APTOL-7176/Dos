@@ -74,6 +74,7 @@ class Character:
 
         # 직업 기믹 초기화
         self.gimmick_data = get_gimmick(character_class)
+        self.gimmick_type = self.gimmick_data.get("type") if self.gimmick_data else None
         self._initialize_gimmick()
 
         # 특성 (Trait) - YAML에서 로드

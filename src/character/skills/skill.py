@@ -24,6 +24,7 @@ class Skill:
         self.category = "combat"
         self.is_ultimate = False
         self.metadata = {}
+        self.sfx: Optional[Tuple[str, str]] = None  # (category, sfx_name) 튜플
 
     def can_use(self, user: Any, context: Optional[Dict[str, Any]] = None) -> Tuple[bool, str]:
         """스킬 사용 가능 여부"""
