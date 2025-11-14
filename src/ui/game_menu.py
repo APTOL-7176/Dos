@@ -207,7 +207,7 @@ def open_game_menu(
                             },
                             "inventory": {
                                 "gold": inventory.gold if inventory and hasattr(inventory, 'gold') else 0,
-                                "items": [serialize_item(item) for item in inventory.items] if inventory and hasattr(inventory, 'items') else []
+                                "items": [serialize_item(slot.item) for slot in inventory.slots] if inventory and hasattr(inventory, 'slots') else []
                             },
                             "keys": exploration.player_keys if hasattr(exploration, 'player_keys') else [],
                         }

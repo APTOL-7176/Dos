@@ -420,12 +420,12 @@ def deserialize_party_member(member_data: Dict[str, Any]) -> Any:
     return char
 
 
-def deserialize_inventory(inventory_data: Dict[str, Any]) -> Any:
+def deserialize_inventory(inventory_data: Dict[str, Any], party: List[Any] = None) -> Any:
     """인벤토리 역직렬화"""
     from src.equipment.inventory import Inventory
 
-    # 파티 없이 기본 인벤토리 생성
-    inventory = Inventory(base_weight=50.0)
+    # 파티 정보와 함께 인벤토리 생성 (최대 무게 계산용)
+    inventory = Inventory(base_weight=50.0, party=party)
 
     # 골드 복원
     inventory.gold = inventory_data.get("gold", 0)

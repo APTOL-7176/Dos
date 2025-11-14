@@ -156,10 +156,10 @@ def main() -> int:
                     floor_number = loaded_state.get("floor_number", 1)
                     logger.info(f"던전 복원 완료: {floor_number}층")
 
-                    # 인벤토리 복원
+                    # 인벤토리 복원 (파티 정보 전달로 최대 무게 계산)
                     inventory_data = loaded_state.get("inventory", {})
-                    inventory = deserialize_inventory(inventory_data)
-                    logger.info(f"인벤토리 복원 완료: 골드 {inventory.gold}")
+                    inventory = deserialize_inventory(inventory_data, party=party)
+                    logger.info(f"인벤토리 복원 완료: 골드 {inventory.gold}, 무게 {inventory.current_weight}kg/{inventory.max_weight}kg")
 
                     # 플레이어 위치 복원
                     player_pos = loaded_state.get("player_position", {"x": 0, "y": 0})
