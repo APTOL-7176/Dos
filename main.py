@@ -143,8 +143,13 @@ def main() -> int:
                     from src.world.enemy_generator import EnemyGenerator
 
                     # 파티 복원
-                    party = [deserialize_party_member(member_data) for member_data in loaded_state.get("party", [])]
-                    logger.info(f"파티 복원 완료: {len(party)}명")
+                    try:
+                        party = [deserialize_party_member(member_data) for member_data in loaded_state.get("party", [])]
+                        logger.info(f"파티 복원 완료: {len(party)}명")
+                    except Exception as e:
+                        logger.error(f"파티 복원 실패: {e}", exc_info=True)
+                        logger.error(f"파티 데이터: {loaded_state.get('party', [])}")
+                        raise
 
                     # 던전 복원
                     dungeon = deserialize_dungeon(loaded_state["dungeon"])

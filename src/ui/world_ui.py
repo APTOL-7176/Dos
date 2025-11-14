@@ -287,6 +287,9 @@ def run_exploration(
 
     logger.info(f"탐험 시작: {exploration.floor_number}층")
 
+    # 남은 이벤트 제거 (불러오기 등에서 남은 키 입력 방지)
+    tcod.event.get()
+
     # 층마다 다른 BGM 재생 (전투 후 복귀 시에는 재생하지 않음)
     if play_bgm_on_start:
         floor = exploration.floor_number

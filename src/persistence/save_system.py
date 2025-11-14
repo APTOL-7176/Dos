@@ -378,6 +378,15 @@ def deserialize_party_member(member_data: Dict[str, Any]) -> Any:
     from src.character.character import Character
     from src.character.stats import StatManager
 
+    # 데이터 유효성 검사
+    if not isinstance(member_data, dict):
+        raise TypeError(f"member_data는 딕셔너리여야 합니다. 받은 타입: {type(member_data)}")
+
+    required_fields = ["name", "character_class", "level"]
+    missing_fields = [field for field in required_fields if field not in member_data]
+    if missing_fields:
+        raise KeyError(f"필수 필드 누락: {missing_fields}. 데이터: {member_data}")
+
     # Character 객체 생성
     char = Character(
         name=member_data["name"],
