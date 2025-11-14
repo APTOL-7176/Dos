@@ -12,6 +12,7 @@ class BuffType:
     CRITICAL_UP = "critical_up"
     ACCURACY_UP = "accuracy_up"
     EVASION_UP = "evasion_up"
+    LUCK = "luck"  # 행운 증가
 
     # 디버프 (감소)
     ATTACK_DOWN = "attack_down"
@@ -22,6 +23,9 @@ class BuffType:
     CRITICAL_DOWN = "critical_down"
     ACCURACY_DOWN = "accuracy_down"
     EVASION_DOWN = "evasion_down"
+
+    # 특수 버프
+    REGEN = "regen"  # HP 재생
 
 class BuffEffect(SkillEffect):
     """버프 효과"""
