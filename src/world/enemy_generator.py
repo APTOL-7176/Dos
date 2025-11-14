@@ -44,27 +44,27 @@ class EnemyTemplate:
 
 # 적 템플릿 데이터베이스
 ENEMY_TEMPLATES = {
-    # Lv 1-5 (밸런스 개선: 초반 적들 강화)
+    # Lv 1-5 (밸런스 개선: 평균 HP=200, MP=40, ATK=55, DEF=45, MATK=55, MDEF=45, SPD=55, LUK=10, ACC=65, EVA=12)
     "slime": EnemyTemplate(
         "slime", "슬라임", 1,
-        hp=60, mp=10,  # HP 2배 증가, MP 2배 증가
-        physical_attack=15, physical_defense=10,  # 공격력/방어력 약 2배 증가
-        magic_attack=10, magic_defense=12,  # 마법 방어력 강화
-        speed=8, luck=5, accuracy=50, evasion=8  # 속도와 명중률 개선
+        hp=180, mp=35,  # 마법형 적 - HP 약간 낮음
+        physical_attack=45, physical_defense=40,  # 물리 약함
+        magic_attack=65, magic_defense=55,  # 마법 특화
+        speed=50, luck=8, accuracy=62, evasion=10
     ),
     "goblin": EnemyTemplate(
         "goblin", "고블린", 2,
-        hp=80, mp=15,  # HP 증가
-        physical_attack=20, physical_defense=12,  # 물리 공격력 강화
-        magic_attack=10, magic_defense=10,
-        speed=10, luck=6, accuracy=55, evasion=10  # 속도 개선
+        hp=200, mp=35,  # 균형형 적
+        physical_attack=60, physical_defense=45,  # 물리 중심
+        magic_attack=50, magic_defense=42,
+        speed=55, luck=10, accuracy=65, evasion=12
     ),
     "wolf": EnemyTemplate(
         "wolf", "늑대", 3,
-        hp=90, mp=10,  # HP 증가
-        physical_attack=25, physical_defense=15,  # 공격력 강화
-        magic_attack=8, magic_defense=12,
-        speed=15, luck=8, accuracy=58, evasion=15  # 속도와 회피력 강화
+        hp=220, mp=30,  # 물리형 적 - HP 높음
+        physical_attack=65, physical_defense=50,  # 물리 특화
+        magic_attack=40, magic_defense=38,  # 마법 약함
+        speed=60, luck=12, accuracy=68, evasion=15  # 빠른 속도
     ),
 
     # Lv 6-10

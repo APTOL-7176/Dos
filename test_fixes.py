@@ -21,33 +21,56 @@ def test_enemy_balance():
 
     # 슬라임 스탯 확인
     slime = ENEMY_TEMPLATES["slime"]
-    print(f"\n슬라임 (Lv {slime.level}):")
-    print(f"  HP: {slime.hp} (이전: 30)")
-    print(f"  물리 공격력: {slime.physical_attack} (이전: 8)")
-    print(f"  물리 방어력: {slime.physical_defense} (이전: 5)")
-    print(f"  속도: {slime.speed} (이전: 5)")
+    print(f"\n슬라임 (Lv {slime.level}) - 마법형:")
+    print(f"  HP: {slime.hp}, MP: {slime.mp}")
+    print(f"  물리 공격력: {slime.physical_attack}, 물리 방어력: {slime.physical_defense}")
+    print(f"  마법 공격력: {slime.magic_attack}, 마법 방어력: {slime.magic_defense}")
+    print(f"  속도: {slime.speed}, 행운: {slime.luck}, 명중: {slime.accuracy}, 회피: {slime.evasion}")
 
     # 고블린 스탯 확인
     goblin = ENEMY_TEMPLATES["goblin"]
-    print(f"\n고블린 (Lv {goblin.level}):")
-    print(f"  HP: {goblin.hp} (이전: 45)")
-    print(f"  물리 공격력: {goblin.physical_attack} (이전: 12)")
-    print(f"  물리 방어력: {goblin.physical_defense} (이전: 8)")
-    print(f"  속도: {goblin.speed} (이전: 8)")
+    print(f"\n고블린 (Lv {goblin.level}) - 균형형:")
+    print(f"  HP: {goblin.hp}, MP: {goblin.mp}")
+    print(f"  물리 공격력: {goblin.physical_attack}, 물리 방어력: {goblin.physical_defense}")
+    print(f"  마법 공격력: {goblin.magic_attack}, 마법 방어력: {goblin.magic_defense}")
+    print(f"  속도: {goblin.speed}, 행운: {goblin.luck}, 명중: {goblin.accuracy}, 회피: {goblin.evasion}")
 
     # 늑대 스탯 확인
     wolf = ENEMY_TEMPLATES["wolf"]
-    print(f"\n늑대 (Lv {wolf.level}):")
-    print(f"  HP: {wolf.hp} (이전: 55)")
-    print(f"  물리 공격력: {wolf.physical_attack} (이전: 15)")
-    print(f"  물리 방어력: {wolf.physical_defense} (이전: 10)")
-    print(f"  속도: {wolf.speed} (이전: 12)")
+    print(f"\n늑대 (Lv {wolf.level}) - 물리형:")
+    print(f"  HP: {wolf.hp}, MP: {wolf.mp}")
+    print(f"  물리 공격력: {wolf.physical_attack}, 물리 방어력: {wolf.physical_defense}")
+    print(f"  마법 공격력: {wolf.magic_attack}, 마법 방어력: {wolf.magic_defense}")
+    print(f"  속도: {wolf.speed}, 행운: {wolf.luck}, 명중: {wolf.accuracy}, 회피: {wolf.evasion}")
 
-    # 검증
-    assert slime.hp >= 60, "슬라임 HP가 너무 낮습니다"
-    assert slime.physical_attack >= 15, "슬라임 공격력이 너무 낮습니다"
-    assert goblin.hp >= 80, "고블린 HP가 너무 낮습니다"
-    assert wolf.hp >= 90, "늑대 HP가 너무 낮습니다"
+    # 평균 계산
+    avg_hp = (slime.hp + goblin.hp + wolf.hp) / 3
+    avg_mp = (slime.mp + goblin.mp + wolf.mp) / 3
+    avg_patk = (slime.physical_attack + goblin.physical_attack + wolf.physical_attack) / 3
+    avg_pdef = (slime.physical_defense + goblin.physical_defense + wolf.physical_defense) / 3
+    avg_matk = (slime.magic_attack + goblin.magic_attack + wolf.magic_attack) / 3
+    avg_mdef = (slime.magic_defense + goblin.magic_defense + wolf.magic_defense) / 3
+    avg_spd = (slime.speed + goblin.speed + wolf.speed) / 3
+    avg_luck = (slime.luck + goblin.luck + wolf.luck) / 3
+    avg_acc = (slime.accuracy + goblin.accuracy + wolf.accuracy) / 3
+    avg_eva = (slime.evasion + goblin.evasion + wolf.evasion) / 3
+
+    print(f"\n=== 1-3레벨 적 평균 스탯 ===")
+    print(f"  HP: {avg_hp:.1f} (목표: 200)")
+    print(f"  MP: {avg_mp:.1f} (목표: 40)")
+    print(f"  물리 공격력: {avg_patk:.1f} (목표: 55)")
+    print(f"  물리 방어력: {avg_pdef:.1f} (목표: 45)")
+    print(f"  마법 공격력: {avg_matk:.1f} (목표: 55)")
+    print(f"  마법 방어력: {avg_mdef:.1f} (목표: 45)")
+    print(f"  속도: {avg_spd:.1f} (목표: 55)")
+    print(f"  행운: {avg_luck:.1f} (목표: 10)")
+    print(f"  명중: {avg_acc:.1f} (목표: 65)")
+    print(f"  회피: {avg_eva:.1f} (목표: 12)")
+
+    # 검증 (평균이 목표치에 가까운지)
+    assert abs(avg_hp - 200) < 30, f"평균 HP가 목표치에서 너무 벗어남: {avg_hp:.1f}"
+    assert abs(avg_patk - 55) < 15, f"평균 물리 공격력이 목표치에서 너무 벗어남: {avg_patk:.1f}"
+    assert abs(avg_spd - 55) < 10, f"평균 속도가 목표치에서 너무 벗어남: {avg_spd:.1f}"
 
     print("\n✓ 적 밸런싱 테스트 통과!")
 
