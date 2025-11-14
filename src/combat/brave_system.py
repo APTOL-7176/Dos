@@ -282,7 +282,9 @@ class BraveSystem:
 
         # BRV 소비
         brv_consumed = attacker.current_brv
+        self.logger.warning(f"[HP 공격] {attacker.name} BRV 리셋 전: {attacker.current_brv}")
         attacker.current_brv = 0
+        self.logger.warning(f"[HP 공격] {attacker.name} BRV 리셋 후: {attacker.current_brv}")
 
         event_bus.publish(Events.CHARACTER_BRV_CHANGE, {
             "character": attacker,
@@ -296,7 +298,8 @@ class BraveSystem:
             {
                 "brv_consumed": brv_consumed,
                 "hp_damage": hp_damage,
-                "is_break_bonus": is_defender_broken
+                "is_break_bonus": is_defender_broken,
+                "attacker_brv_after": attacker.current_brv
             }
         )
 

@@ -242,6 +242,12 @@ class CombatManager:
         # brave.hp_attack()이 take_damage()를 내부적으로 호출함
         hp_result = self.brave.hp_attack(attacker, defender, hp_multiplier)
 
+        # HP 공격 후 BRV 확실히 0으로 리셋 (이중 체크)
+        self.logger.warning(f"[combat_manager] HP 공격 후 {attacker.name} BRV: {attacker.current_brv}")
+        if attacker.current_brv != 0:
+            self.logger.error(f"[combat_manager] BRV가 0이 아님! 강제 리셋 실행")
+            attacker.current_brv = 0
+
         # wound damage 계산 (BREAK 보너스)
         wound_damage = 0
         if is_break and hp_result["hp_damage"] > 0:
@@ -485,8 +491,8 @@ class CombatManager:
         Args:
             actor: 행동한 캐릭터
         """
-        # 턴 시작 시 INT BRV 회복
-        self.brave.recover_int_brv(actor)
+        # 턴 종료 시에는 BRV 회복하지 않음 (HP 공격 후 BRV가 0인 상태 유지)
+        # BRV 회복은 다음 턴 시작 시에 처리됨
 
         # 이벤트 발행
         event_bus.publish(Events.COMBAT_TURN_END, {
