@@ -101,7 +101,7 @@ class TCODDisplay:
             # Windows 시스템 폰트 (고정폭 우선 - 공백 제거)
             windows_fonts = os.path.join(os.environ.get("WINDIR", "C:\\Windows"), "Fonts")
             font_paths = [
-                str(project_root / "dalmoori.ttf"),                 # 프로젝트 내 달무리 폰트 (1순위!)
+                str(project_root / "DOSMyungjo.ttf"),                 # 프로젝트 내 DOS명조 폰트 (1순위!)
                 str(project_root / "GalmuriMono9.ttf"),             # 프로젝트 내 갈무리모노
                 str(project_root / "GalmuriMono9.ttc"),             # 프로젝트 내 갈무리모노 TTC
                 os.path.join(windows_fonts, "dalmoori.ttf"),        # 시스템 달무리
@@ -116,7 +116,7 @@ class TCODDisplay:
         else:
             # Linux/Mac 시스템 폰트
             font_paths = [
-                str(project_root / "dalmoori.ttf"),              # 프로젝트 내 달무리 폰트 (1순위!)
+                str(project_root / "DOSMyungjo.ttf"),              # 프로젝트 내 DOS명조 폰트 (1순위!)
                 str(project_root / "GalmuriMono9.ttf"),          # 프로젝트 내 갈무리모노
                 "/usr/share/fonts/opentype/unifont/unifont.otf",  # Unifont (유니코드 전체)
                 "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",  # WenQuanYi (CJK)
@@ -135,12 +135,38 @@ class TCODDisplay:
                     # char_spacing_adjust만큼 폰트를 넓게 만들어 문자가 겹치게 함
                     char_width = char_height + char_spacing_adjust
 
+                    # 유니코드 전체 범위 포함하여 로드
+                    # TCOD는 폰트의 모든 글리프를 자동으로 로드
                     self.tileset = tcod.tileset.load_truetype_font(
                         font_path,
                         char_width,
-                        char_height
+                        char_height,
                     )
-                    self.logger.info(f"폰트 로드 성공: {font_path} (셀: {char_width}x{char_height}, 오버랩: {char_spacing_adjust}px)")
+
+                    # 타일셋을 전역 기본값으로 설정 (특수문자 렌더링 보장)
+                    tcod.tileset.set_default(self.tileset)
+
+                    # 특수문자 포함 여부 확인
+                    box_chars = "╔═╗║╚╝"  # Box Drawing: U+2554, U+2550, U+2557, U+2551, U+255A, U+255D
+                    block_chars = "█"      # Block Element: U+2588
+                    special_chars_found = []
+
+                    for char in box_chars + block_chars:
+                        code_point = ord(char)
+                        # charmap에 해당 문자가 있는지 확인
+                        if code_point in self.tileset.charmap:
+                            special_chars_found.append(f"{char}(U+{code_point:04X})")
+
+                    if special_chars_found:
+                        self.logger.info(
+                            f"폰트 로드 성공: {font_path} (셀: {char_width}x{char_height})\n"
+                            f"  특수문자 지원 확인: {', '.join(special_chars_found)}"
+                        )
+                    else:
+                        self.logger.warning(
+                            f"폰트 로드: {font_path} (셀: {char_width}x{char_height})\n"
+                            f"  경고: 박스/블록 문자가 폰트에 없을 수 있음"
+                        )
                     break
             except Exception as e:
                 self.logger.debug(f"폰트 로드 시도 실패 ({font_path}): {e}")
