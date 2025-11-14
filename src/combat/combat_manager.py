@@ -144,6 +144,17 @@ class CombatManager:
         self.current_actor = actor
         result = {}
 
+        # 턴 시작 처리
+        # 1. BREAK 상태 해제
+        if self.brave.is_broken(actor):
+            self.logger.debug(f"{actor.name}의 BREAK 상태 해제")
+            self.brave.clear_break_state(actor)
+
+        # 2. INT BRV 회복
+        int_brv_recovered = self.brave.recover_int_brv(actor)
+        if int_brv_recovered > 0:
+            self.logger.debug(f"{actor.name}이(가) INT BRV {int_brv_recovered} 회복")
+
         self.logger.debug(
             f"행동 실행: {actor.name} → {action_type.value}",
             {"target": getattr(target, "name", None) if target else None}

@@ -244,19 +244,22 @@ class CombatUI:
 
     def _handle_target_select(self, action: GameAction) -> bool:
         """대상 선택 입력 처리"""
-        enemies = [e for e in self.combat_manager.enemies if e.is_alive]
+        enemies = self.combat_manager.enemies
+        alive_indices = [i for i, e in enumerate(enemies) if e.is_alive]
 
-        if not enemies:
+        if not alive_indices:
             return False
 
-        if action == GameAction.MOVE_UP:
-            self.target_cursor = (self.target_cursor - 1) % len(enemies)
-        elif action == GameAction.MOVE_DOWN:
-            self.target_cursor = (self.target_cursor + 1) % len(enemies)
-        elif action == GameAction.MOVE_LEFT:
-            self.target_cursor = (self.target_cursor - 1) % len(enemies)
-        elif action == GameAction.MOVE_RIGHT:
-            self.target_cursor = (self.target_cursor + 1) % len(enemies)
+        if action == GameAction.MOVE_UP or action == GameAction.MOVE_LEFT:
+            # 이전 살아있는 적으로 이동
+            current_pos = alive_indices.index(self.target_cursor) if self.target_cursor in alive_indices else 0
+            new_pos = (current_pos - 1) % len(alive_indices)
+            self.target_cursor = alive_indices[new_pos]
+        elif action == GameAction.MOVE_DOWN or action == GameAction.MOVE_RIGHT:
+            # 다음 살아있는 적으로 이동
+            current_pos = alive_indices.index(self.target_cursor) if self.target_cursor in alive_indices else 0
+            new_pos = (current_pos + 1) % len(alive_indices)
+            self.target_cursor = alive_indices[new_pos]
         elif action == GameAction.CONFIRM:
             self.selected_target = enemies[self.target_cursor]
             self._execute_current_action()
@@ -323,7 +326,12 @@ class CombatUI:
             self.state = CombatUIState.ACTION_MENU
             return
 
-        self.target_cursor = 0
+        # 첫 번째 살아있는 적의 인덱스로 커서 설정
+        for i, enemy in enumerate(self.combat_manager.enemies):
+            if enemy.is_alive:
+                self.target_cursor = i
+                break
+
         self.state = CombatUIState.TARGET_SELECT
 
     def _execute_current_action(self):
@@ -560,6 +568,11 @@ class CombatUI:
 
             # 이름 + 상태
             name_color = (255, 255, 255) if ally.is_alive else (100, 100, 100)
+
+            # 현재 행동 중인 캐릭터 표시
+            turn_indicator = "▶ " if ally == self.current_actor else "  "
+            console.print(3, y, turn_indicator, fg=(255, 255, 100))
+
             console.print(5, y, f"{i+1}. {ally.name}", fg=name_color)
 
             # 상태이상 아이콘
@@ -657,13 +670,21 @@ class CombatUI:
             # 이름
             name_color = (255, 255, 255) if enemy.is_alive else (100, 100, 100)
 
-            # 대상 선택 커서
-            cursor = "▶ " if (
-                self.state == CombatUIState.TARGET_SELECT and
-                i == self.target_cursor
-            ) else "  "
+            # 대상 선택 커서 또는 턴 표시
+            if enemy == self.current_actor:
+                # 현재 행동 중인 적
+                cursor = "⚔ "
+                cursor_color = (255, 100, 100)
+            elif self.state == CombatUIState.TARGET_SELECT and i == self.target_cursor:
+                # 타겟팅 중
+                cursor = "▶ "
+                cursor_color = (255, 255, 100)
+            else:
+                cursor = "  "
+                cursor_color = name_color
 
-            console.print(x, y, f"{cursor}{chr(65+i)}. {enemy.name}", fg=name_color)
+            console.print(x, y, cursor, fg=cursor_color)
+            console.print(x + 2, y, f"{chr(65+i)}. {enemy.name}", fg=name_color)
 
             # 상태이상
             status_effects = getattr(enemy, 'status_effects', {})
