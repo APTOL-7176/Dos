@@ -13,6 +13,7 @@ from src.core.event_bus import event_bus, Events
 from src.combat.atb_system import get_atb_system, ATBSystem
 from src.combat.brave_system import get_brave_system, BraveSystem
 from src.combat.damage_calculator import get_damage_calculator, DamageCalculator
+from src.audio import play_sfx
 
 
 class CombatState(Enum):
@@ -193,6 +194,9 @@ class CombatManager:
         **kwargs
     ) -> Dict[str, Any]:
         """BRV 공격 실행"""
+        # SFX 재생
+        play_sfx("combat", "attack_physical")
+
         # 스킬 배율
         skill_multiplier = getattr(skill, "brv_multiplier", 1.0) if skill else 1.0
 
@@ -224,6 +228,9 @@ class CombatManager:
         if attacker.current_brv <= 0:
             self.logger.warning(f"{attacker.name}: BRV가 0이라 HP 공격 불가")
             return {"action": "hp_attack", "error": "no_brv"}
+
+        # SFX 재생 (높은 데미지)
+        play_sfx("combat", "damage_high")
 
         # 스킬 배율
         hp_multiplier = getattr(skill, "hp_multiplier", 1.0) if skill else 1.0
