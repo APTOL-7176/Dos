@@ -270,10 +270,14 @@ def run_exploration(
     context: tcod.context.Context,
     exploration: ExplorationSystem,
     inventory=None,
-    party=None
+    party=None,
+    play_bgm_on_start: bool = True
 ) -> str:
     """
     탐험 실행
+
+    Args:
+        play_bgm_on_start: 탐험 시작 시 BGM 재생 여부 (기본 True, 전투 후 복귀 시 False)
 
     Returns:
         "quit", "combat", "floor_up", "floor_down"
@@ -283,20 +287,21 @@ def run_exploration(
 
     logger.info(f"탐험 시작: {exploration.floor_number}층")
 
-    # 층마다 다른 BGM 재생
-    floor = exploration.floor_number
-    if floor <= 5:
-        # 초반 층: 일반 던전 BGM
-        play_bgm("dungeon_normal")
-    elif floor <= 10:
-        # 중반 층: 탐색 던전 BGM
-        play_bgm("dungeon_search")
-    elif floor <= 15:
-        # 중후반 층: 어두운 던전 BGM
-        play_bgm("dungeon_dark")
-    else:
-        # 후반 층: 위험한 분위기
-        play_bgm("danger")
+    # 층마다 다른 BGM 재생 (전투 후 복귀 시에는 재생하지 않음)
+    if play_bgm_on_start:
+        floor = exploration.floor_number
+        if floor <= 5:
+            # 초반 층: 일반 던전 BGM
+            play_bgm("dungeon_normal")
+        elif floor <= 10:
+            # 중반 층: 탐색 던전 BGM
+            play_bgm("dungeon_search")
+        elif floor <= 15:
+            # 중후반 층: 어두운 던전 BGM
+            play_bgm("dungeon_dark")
+        else:
+            # 후반 층: 위험한 분위기
+            play_bgm("danger")
 
     while True:
         # 렌더링

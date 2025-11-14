@@ -167,6 +167,9 @@ def main() -> int:
                     # 키 복원
                     exploration.player_keys = loaded_state.get("keys", [])
 
+                    # BGM 제어 플래그 (첫 탐험 시작 및 층 변경 시에만 재생)
+                    play_dungeon_bgm = True
+
                     # 탐험 계속 (새 게임과 동일한 루프)
                     while True:
                         result, data = run_exploration(
@@ -174,7 +177,8 @@ def main() -> int:
                             display.context,
                             exploration,
                             inventory,
-                            party
+                            party,
+                            play_bgm_on_start=play_dungeon_bgm
                         )
 
                         logger.info(f"탐험 결과: {result}")
@@ -236,12 +240,16 @@ def main() -> int:
 
                                 inventory.add_gold(rewards.get("gold", 0))
 
+                                # 전투 후 복귀 시 BGM 재생 안 함
+                                play_dungeon_bgm = False
                                 continue
                             elif combat_result == CombatState.DEFEAT:
                                 logger.info("❌ 패배... 게임 오버")
                                 break
                             else:
                                 logger.info("🏃 도망쳤다")
+                                # 도망 후 복귀 시 BGM 재생 안 함
+                                play_dungeon_bgm = False
                                 continue
 
                         elif result == "floor_down":
@@ -251,6 +259,8 @@ def main() -> int:
                             dungeon_gen = DungeonGenerator(width=80, height=50)
                             dungeon = dungeon_gen.generate(floor_number)
                             exploration = ExplorationSystem(dungeon, party, floor_number, inventory)
+                            # 층 변경 시 BGM 재생
+                            play_dungeon_bgm = True
                             continue
                         elif result == "floor_up":
                             if floor_number > 1:
@@ -260,6 +270,8 @@ def main() -> int:
                                 dungeon_gen = DungeonGenerator(width=80, height=50)
                                 dungeon = dungeon_gen.generate(floor_number)
                                 exploration = ExplorationSystem(dungeon, party, floor_number, inventory)
+                                # 층 변경 시 BGM 재생
+                                play_dungeon_bgm = True
                                 continue
                             else:
                                 logger.info("🎉 던전 탈출 성공!")
@@ -368,6 +380,9 @@ def main() -> int:
                             dungeon = dungeon_gen.generate(floor_number)
                             exploration = ExplorationSystem(dungeon, party, floor_number, inventory)
 
+                            # BGM 제어 플래그 (첫 탐험 시작 및 층 변경 시에만 재생)
+                            play_dungeon_bgm = True
+
                             while True:
                                 # 탐험 시작 (기존 exploration 객체 재사용)
                                 result, data = run_exploration(
@@ -375,7 +390,8 @@ def main() -> int:
                                     display.context,
                                     exploration,
                                     inventory,
-                                    party
+                                    party,
+                                    play_bgm_on_start=play_dungeon_bgm
                                 )
 
                                 logger.info(f"탐험 결과: {result}")
@@ -447,12 +463,16 @@ def main() -> int:
                                         # 골드 추가
                                         inventory.add_gold(rewards.get("gold", 0))
 
+                                        # 전투 후 복귀 시 BGM 재생 안 함
+                                        play_dungeon_bgm = False
                                         continue  # 탐험 계속
                                     elif combat_result == CombatState.DEFEAT:
                                         logger.info("❌ 패배... 게임 오버")
                                         break
                                     else:
                                         logger.info("🏃 도망쳤다")
+                                        # 도망 후 복귀 시 BGM 재생 안 함
+                                        play_dungeon_bgm = False
                                         continue
 
                                 elif result == "floor_down":
@@ -461,6 +481,8 @@ def main() -> int:
                                     # 새 던전 생성
                                     dungeon = dungeon_gen.generate(floor_number)
                                     exploration = ExplorationSystem(dungeon, party, floor_number, inventory)
+                                    # 층 변경 시 BGM 재생
+                                    play_dungeon_bgm = True
                                     continue
                                 elif result == "floor_up":
                                     if floor_number > 1:
@@ -469,6 +491,8 @@ def main() -> int:
                                         # 새 던전 생성
                                         dungeon = dungeon_gen.generate(floor_number)
                                         exploration = ExplorationSystem(dungeon, party, floor_number, inventory)
+                                        # 층 변경 시 BGM 재생
+                                        play_dungeon_bgm = True
                                         continue
                                     else:
                                         logger.info("🎉 던전 탈출 성공!")
