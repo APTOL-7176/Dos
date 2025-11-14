@@ -4,16 +4,17 @@ archetype: BRV 파괴 특화
 base_stats:
   hp: 195
   mp: 38
-  init_brv: 1180
+  init_brv: 130
   speed: 68
   physical_attack: 81
   physical_defense: 62
   magic_attack: 35
   magic_defense: 48
+  max_brv: 475
 stat_growth:
   hp: 13.0
   mp: 3.8
-  init_brv: 68
+  init_brv: 4.6
   strength: 6.2
   defense: 4.5
   magic: 2.5
@@ -22,6 +23,12 @@ stat_growth:
   luck: 4.2
   accuracy: 3.8
   evasion: 2.0
+  max_brv: 2.8
+gimmick:
+  type: break_system
+  name: 브레이크 특화
+  description: BREAK를 유발하고 파괴력을 축적하는 시스템
+  max_break_power: 10
 traits:
 - id: brv_crusher
   name: BRV 파쇄자

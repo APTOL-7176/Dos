@@ -4,16 +4,17 @@ archetype: 하이브리드 딜러
 base_stats:
   hp: 168
   mp: 56
-  init_brv: 1050
+  init_brv: 119
   speed: 70
   physical_attack: 61
   physical_defense: 49
   magic_attack: 74
   magic_defense: 52
+  max_brv: 456
 stat_growth:
   hp: 11.5
   mp: 5.5
-  init_brv: 56
+  init_brv: 4.2
   strength: 4.8
   defense: 3.2
   magic: 6.2
@@ -22,6 +23,7 @@ stat_growth:
   luck: 3.5
   accuracy: 3.5
   evasion: 2.5
+  max_brv: 2.5
 traits:
 - id: rune_explosion
   name: 룬 폭발
@@ -43,6 +45,12 @@ traits:
   name: 룬 공명
   description: 룬 스택 5개 이상 시 모든 공격이 물리+마법 하이브리드로 계산
   type: conditional
+gimmick:
+  type: rune_system
+  name: 마법 룬
+  description: 공격 시 룬을 각인하여 강력한 폭발 마법 발동
+  max_rune_stacks: 5
+
 skills:
 - engrave_rune
 - rune_burst

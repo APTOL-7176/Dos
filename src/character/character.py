@@ -15,6 +15,7 @@ from src.character.character_loader import (
     get_skills,
     get_bonuses
 )
+from src.character.trait_effects import get_trait_effect_manager
 from src.core.event_bus import event_bus, Events
 from src.core.logger import get_logger
 
@@ -174,16 +175,18 @@ class Character:
             self.stance_focus = 0
             self.available_stances = [s['id'] for s in self.gimmick_data.get('stances', [])]
 
-        # 아크메이지 / 마법사 - 원소 카운트
+        # 아크메이지 / 마법사 - 원소 카운터 시스템
+        # 화염/빙결/번개 원소를 각각 최대 5개까지 축적하여 강력한 복합 마법 시전
         elif gimmick_type == "elemental_counter":
-            self.fire_count = 0
-            self.ice_count = 0
-            self.lightning_count = 0
+            self.fire_element = 0
+            self.ice_element = 0
+            self.lightning_element = 0
 
-        # 궁수 - 조준 포인트
+        # 궁수/저격수 - 조준 포인트
         elif gimmick_type == "aim_system":
             self.aim_points = 0
             self.max_aim_points = self.gimmick_data.get("max_aim", 5)
+            self.focus_stacks = 0  # 집중 스택 (저격수가 사용하는 별칭)
 
         # 도적 - 베놈 파워
         elif gimmick_type == "venom_system":
@@ -206,11 +209,13 @@ class Character:
         elif gimmick_type == "rage_system":
             self.rage_stacks = 0
             self.max_rage_stacks = self.gimmick_data.get("max_rage", 10)
+            self.shield_amount = 0  # 분노 방패량
 
         # 몽크 - 기 에너지
         elif gimmick_type == "ki_system":
             self.ki_energy = 0
             self.max_ki_energy = self.gimmick_data.get("max_ki", 100)
+            self.chakra_points = 0  # 차크라 포인트 (스킬에서 사용)
             self.combo_count = 0
             self.strike_marks = 0
 
@@ -220,6 +225,7 @@ class Character:
             self.max_melody_stacks = self.gimmick_data.get("max_melody", 7)
             self.melody_notes = []
             self.current_melody = ""
+            self.octave_completed = False  # 옥타브 완성 여부
 
         # 네크로맨서 - 네크로 에너지
         elif gimmick_type == "necro_system":
@@ -227,26 +233,138 @@ class Character:
             self.max_necro_energy = self.gimmick_data.get("max_necro", 50)
             self.soul_power = 0
             self.undead_count = 0
+            self.corpse_count = 0  # 시체 개수 (스킬에서 사용)
+            self.minion_count = 0  # 미니언 개수 (스킬에서 사용)
 
         # 정령술사 - 정령 친화도
         elif gimmick_type == "spirit_bond":
             self.spirit_bond = 0
             self.max_spirit_bond = self.gimmick_data.get("max_bond", 25)
+            self.spirit_count = 0  # 정령 개수 (스킬에서 사용)
 
         # 시간술사 - 시간 기록점
         elif gimmick_type == "time_system":
             self.time_marks = 0
             self.max_time_marks = self.gimmick_data.get("max_marks", 7)
+            self.time_points = 0  # 시간 포인트 (스킬에서 사용하는 별칭)
 
         # 용기사 - 용의 표식
         elif gimmick_type == "dragon_marks":
             self.dragon_marks = 0
             self.max_dragon_marks = self.gimmick_data.get("max_marks", 3)
+            self.dragon_power = 0  # 용의 힘 (스킬에서 사용하는 별칭)
 
         # 검투사 - 투기장 포인트
         elif gimmick_type == "arena_system":
             self.arena_points = 0
             self.max_arena_points = self.gimmick_data.get("max_points", 20)
+            self.glory_points = 0  # 영광 포인트 (스킬에서 사용하는 별칭)
+            self.kill_count = 0  # 처치 카운트
+            self.parry_active = False  # 패리 활성화 여부
+
+        # 브레이커 - 파괴력 축적
+        elif gimmick_type == "break_system":
+            self.break_power = 0
+            self.max_break_power = self.gimmick_data.get("max_break_power", 10)
+
+        # 다크나이트 - 어둠의 힘
+        elif gimmick_type == "darkness_system":
+            self.darkness = 0
+            self.max_darkness = self.gimmick_data.get("max_darkness", 100)
+
+        # 기사 - 의무 스택
+        elif gimmick_type == "duty_system":
+            self.duty_stacks = 0
+            self.max_duty_stacks = self.gimmick_data.get("max_duty_stacks", 10)
+
+        # 팔라딘 - 성스러운 힘
+        elif gimmick_type == "holy_system":
+            self.holy_power = 0
+            self.max_holy_power = self.gimmick_data.get("max_holy_power", 100)
+
+        # 암살자 - 은신
+        elif gimmick_type == "stealth_system":
+            self.stealth_points = 0
+            self.max_stealth_points = self.gimmick_data.get("max_stealth_points", 5)
+
+        # 도적 - 절도
+        elif gimmick_type == "theft_system":
+            self.stolen_items = 0
+            self.max_stolen_items = self.gimmick_data.get("max_stolen_items", 10)
+            self.evasion_active = False
+
+        # 해적 - 약탈
+        elif gimmick_type == "plunder_system":
+            self.gold = 0
+            self.max_gold = self.gimmick_data.get("max_gold", 1000)
+            self.gold_per_hit = self.gimmick_data.get("gold_per_hit", 10)
+
+        # 엔지니어 - 구조물
+        elif gimmick_type == "construct_system":
+            self.machine_parts = 0
+            self.max_machine_parts = self.gimmick_data.get("max_machine_parts", 100)
+
+        # 사무라이 - 거합
+        elif gimmick_type == "iaijutsu_system":
+            self.will_gauge = 0
+            self.max_will_gauge = self.gimmick_data.get("max_will_gauge", 100)
+
+        # 배틀메이지 - 룬
+        elif gimmick_type == "rune_system":
+            self.rune_stacks = 0
+            self.max_rune_stacks = self.gimmick_data.get("max_rune_stacks", 5)
+
+        # 마검사 - 마력 부여
+        elif gimmick_type == "enchant_system":
+            self.mana_blade = 0
+            self.max_mana_blade = self.gimmick_data.get("max_mana_blade", 100)
+
+        # 차원술사 - 차원 조작
+        elif gimmick_type == "dimension_system":
+            self.dimension_points = 0
+            self.max_dimension_points = self.gimmick_data.get("max_dimension_points", 100)
+
+        # 프리스트/클레릭 - 신성력
+        elif gimmick_type == "divinity_system":
+            self.judgment_points = 0
+            self.max_judgment_points = self.gimmick_data.get("max_judgment_points", 100)
+            self.faith_points = 0
+            self.max_faith_points = self.gimmick_data.get("max_faith_points", 100)
+
+        # 드루이드 - 변신
+        elif gimmick_type == "shapeshifting_system":
+            self.nature_points = 0
+            self.max_nature_points = self.gimmick_data.get("max_nature_points", 100)
+            self.current_form = None
+            self.available_forms = self.gimmick_data.get("forms", ["bear", "panther", "eagle"])
+
+        # 샤먼 - 토템
+        elif gimmick_type == "totem_system":
+            self.curse_stacks = 0
+            self.max_curse_stacks = self.gimmick_data.get("max_curse_stacks", 10)
+
+        # 뱀파이어 - 흡혈
+        elif gimmick_type == "blood_system":
+            self.blood_pool = 0
+            self.max_blood_pool = self.gimmick_data.get("max_blood_pool", 100)
+            self.lifesteal_boost = self.gimmick_data.get("lifesteal_base", 0.15)
+
+        # 연금술사 - 연금술
+        elif gimmick_type == "alchemy_system":
+            self.potion_stock = 0
+            self.max_potion_stock = self.gimmick_data.get("max_potion_stock", 10)
+
+        # 철학자 - 지혜
+        elif gimmick_type == "wisdom_system":
+            self.knowledge_stacks = 0
+            self.max_knowledge_stacks = self.gimmick_data.get("max_knowledge_stacks", 10)
+
+        # 해커 - 해킹
+        elif gimmick_type == "hack_system":
+            self.hack_stacks = 0
+            self.max_hack_stacks = self.gimmick_data.get("max_hack_stacks", 5)
+            self.debuff_count = 0
+            self.max_debuff_count = self.gimmick_data.get("max_debuff_count", 10)
 
         self.logger.debug(f"{self.character_class} 기믹 초기화: {gimmick_type}")
 
@@ -489,6 +607,155 @@ class Character:
         })
 
         return item
+
+    # ===== Trait (특성) 관련 =====
+
+    def activate_trait(self, trait_id: str) -> bool:
+        """
+        특성 활성화
+
+        Args:
+            trait_id: 특성 ID
+
+        Returns:
+            성공 여부
+        """
+        # 이미 활성화된 특성인지 확인
+        if any(
+            (t if isinstance(t, str) else t.get('id')) == trait_id
+            for t in self.active_traits
+        ):
+            self.logger.warning(f"특성 {trait_id}는 이미 활성화되어 있습니다")
+            return False
+
+        # 사용 가능한 특성인지 확인
+        # available_traits는 딕셔너리 리스트: [{'id': 'xxx', 'name': 'xxx', ...}, ...]
+        available_trait_ids = [
+            t['id'] if isinstance(t, dict) else t
+            for t in self.available_traits
+        ]
+
+        # trait_id가 available_trait_ids에 있거나, passives.yaml에 정의된 패시브 특성이면 허용
+        if trait_id not in available_trait_ids:
+            # 패시브 특성인지 확인 (passives.yaml의 특성들)
+            from src.character.trait_effects import get_trait_effect_manager
+            trait_manager = get_trait_effect_manager()
+            if trait_id not in trait_manager.trait_definitions:
+                self.logger.warning(f"특성 {trait_id}는 사용할 수 없습니다")
+                return False
+
+        # 특성 활성화
+        self.active_traits.append(trait_id)
+        self.logger.info(f"특성 활성화: {trait_id}")
+
+        # 특성 효과 적용 (패시브 스탯 보너스 등)
+        self._apply_trait_stat_bonuses()
+
+        return True
+
+    def deactivate_trait(self, trait_id: str) -> bool:
+        """
+        특성 비활성화
+
+        Args:
+            trait_id: 특성 ID
+
+        Returns:
+            성공 여부
+        """
+        # 활성화된 특성 찾기
+        for i, trait in enumerate(self.active_traits):
+            if (trait if isinstance(trait, str) else trait.get('id')) == trait_id:
+                self.active_traits.pop(i)
+                self.logger.info(f"특성 비활성화: {trait_id}")
+                return True
+
+        self.logger.warning(f"특성 {trait_id}는 활성화되어 있지 않습니다")
+        return False
+
+    def _apply_trait_stat_bonuses(self) -> None:
+        """
+        활성화된 특성의 스탯 보너스 적용
+        """
+        trait_manager = get_trait_effect_manager()
+
+        # 각 스탯에 대해 trait 보너스 계산
+        stat_names = [
+            "hp", "mp", "init_brv", "physical_attack", "physical_defense",
+            "magic_attack", "magic_defense", "speed", "accuracy", "evasion"
+        ]
+
+        for stat_name in stat_names:
+            # 기본 스탯 값 가져오기
+            if stat_name == "hp":
+                base_value = self.stat_manager.get_value(Stats.HP)
+            elif stat_name == "mp":
+                base_value = self.stat_manager.get_value(Stats.MP)
+            elif stat_name == "init_brv":
+                base_value = self.stat_manager.get_value(Stats.INIT_BRV)
+            elif stat_name == "physical_attack":
+                base_value = self.stat_manager.get_value(Stats.STRENGTH)
+            elif stat_name == "physical_defense":
+                base_value = self.stat_manager.get_value(Stats.DEFENSE)
+            elif stat_name == "magic_attack":
+                base_value = self.stat_manager.get_value(Stats.MAGIC)
+            elif stat_name == "magic_defense":
+                base_value = self.stat_manager.get_value(Stats.SPIRIT)
+            elif stat_name == "speed":
+                base_value = self.stat_manager.get_value(Stats.SPEED)
+            elif stat_name == "accuracy":
+                base_value = self.stat_manager.get_value(Stats.ACCURACY)
+            elif stat_name == "evasion":
+                base_value = self.stat_manager.get_value(Stats.EVASION)
+            else:
+                continue
+
+            # Trait 보너스 계산
+            bonus_value = trait_manager.calculate_stat_bonus(self, stat_name, base_value)
+
+            # 보너스가 있으면 StatManager에 적용
+            if bonus_value != base_value:
+                bonus_diff = bonus_value - base_value
+                stat_enum = self._stat_name_to_enum(stat_name)
+                if stat_enum:
+                    self.stat_manager.add_bonus(stat_enum, f"trait_{stat_name}", bonus_diff)
+
+    def _stat_name_to_enum(self, stat_name: str) -> Optional[Stats]:
+        """스탯 이름을 Stats enum으로 변환"""
+        mapping = {
+            "hp": Stats.HP,
+            "mp": Stats.MP,
+            "init_brv": Stats.INIT_BRV,
+            "physical_attack": Stats.STRENGTH,
+            "physical_defense": Stats.DEFENSE,
+            "magic_attack": Stats.MAGIC,
+            "magic_defense": Stats.SPIRIT,
+            "speed": Stats.SPEED,
+            "accuracy": Stats.ACCURACY,
+            "evasion": Stats.EVASION
+        }
+        return mapping.get(stat_name)
+
+    def get_trait_bonus(self, trait_type: str = "damage") -> float:
+        """
+        특정 타입의 trait 보너스 가져오기
+
+        Args:
+            trait_type: 보너스 타입 (damage, critical, mp_cost 등)
+
+        Returns:
+            보너스 값
+        """
+        trait_manager = get_trait_effect_manager()
+
+        if trait_type == "damage":
+            return trait_manager.calculate_damage_multiplier(self)
+        elif trait_type == "critical":
+            return trait_manager.calculate_critical_bonus(self)
+        elif trait_type == "break":
+            return trait_manager.calculate_break_bonus(self)
+        else:
+            return 0.0
 
     # ===== 유틸리티 =====
 

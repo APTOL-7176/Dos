@@ -4,16 +4,17 @@ archetype: 물리 딜러/탱커
 base_stats:
   hp: 210
   mp: 32
-  init_brv: 1200
+  init_brv: 135
   physical_attack: 60
   physical_defense: 60
   magic_attack: 40
   magic_defense: 60
   speed: 60
+  max_brv: 490
 stat_growth:
   hp: 15
   mp: 3
-  init_brv: 70
+  init_brv: 4.7
   strength: 4.5
   defense: 4.0
   magic: 2.0
@@ -22,6 +23,7 @@ stat_growth:
   luck: 2.0
   accuracy: 1.5
   evasion: 1.0
+  max_brv: 2.8
 gimmick:
   type: stance_system
   name: 6단계 스탠스

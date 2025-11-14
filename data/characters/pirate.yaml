@@ -4,16 +4,17 @@ archetype: 보물 사냥꾼
 base_stats:
   hp: 164
   mp: 37
-  init_brv: 980
+  init_brv: 120
   speed: 77
   physical_attack: 74
   physical_defense: 52
   magic_attack: 34
   magic_defense: 41
+  max_brv: 458
 stat_growth:
   hp: 11.5
   mp: 3.8
-  init_brv: 52
+  init_brv: 4.2
   strength: 4.2
   defense: 3.0
   magic: 2.0
@@ -22,6 +23,7 @@ stat_growth:
   luck: 5.0
   accuracy: 2.2
   evasion: 2.0
+  max_brv: 2.5
 traits:
 - id: treasure_hunter
   name: 보물 사냥꾼
@@ -43,6 +45,13 @@ traits:
   name: 비열한 전투
   description: 공격 시 20% 확률로 적 디버프 (랜덤)
   type: trigger
+gimmick:
+  type: plunder_system
+  name: 약탈과 재물
+  description: 전투에서 골드를 획득하고 소모하여 강력한 해적 기술 사용
+  gold_per_hit: 10
+  max_gold: 1000
+
 skills:
 - cutlass_slash
 - pistol_shot

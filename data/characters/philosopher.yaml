@@ -4,16 +4,17 @@ archetype: 논리 조작
 base_stats:
   hp: 107
   mp: 97
-  init_brv: 860
+  init_brv: 104
   speed: 49
   physical_attack: 38
   physical_defense: 54
   magic_attack: 76
   magic_defense: 86
+  max_brv: 434
 stat_growth:
   hp: 8.5
   mp: 6.5
-  init_brv: 45
+  init_brv: 3.6
   strength: 2.0
   defense: 2.0
   magic: 5.0
@@ -22,6 +23,7 @@ stat_growth:
   luck: 4.0
   accuracy: 2.0
   evasion: 2.5
+  max_brv: 2.2
 traits:
 - id: logical_paradox
   name: 논리적 역설
@@ -43,6 +45,12 @@ traits:
   name: 깨달음
   description: MP 70% 이상일 때 경험치 획득 +30%
   type: passive
+gimmick:
+  type: wisdom_system
+  name: 지혜의 축적
+  description: 전투 중 지식을 축적하여 현자의 돌의 힘 사용
+  max_knowledge_stacks: 10
+
 skills:
 - logical_argument
 - confuse_mind

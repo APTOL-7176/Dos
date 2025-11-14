@@ -4,16 +4,17 @@ archetype: 반격 전문가
 base_stats:
   hp: 172
   mp: 29
-  init_brv: 1060
+  init_brv: 140
   speed: 64
   physical_attack: 79
   physical_defense: 56
   magic_attack: 41
   magic_defense: 48
+  max_brv: 500
 stat_growth:
   hp: 13
   mp: 3.5
-  init_brv: 56
+  init_brv: 4.9
   strength: 4.5
   defense: 4.5
   magic: 1.8
@@ -22,6 +23,7 @@ stat_growth:
   luck: 3.0
   accuracy: 2.0
   evasion: 1.8
+  max_brv: 2.9
 traits:
 - id: counter_attack
   name: 반격
@@ -43,6 +45,12 @@ traits:
   name: 복수의 일격
   description: 피격 횟수만큼 공격력 증가 (1회당 +10%)
   type: trigger
+gimmick:
+  type: arena_system
+  name: 투기장의 영광
+  description: 적을 처치하고 공격을 막아내며 영광 포인트 획득. 영광으로 강력한 기술 사용
+  max_glory_points: 100
+
 skills:
 - shield_bash
 - counter_stance

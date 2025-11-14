@@ -4,16 +4,17 @@ archetype: 속도형 딜러
 base_stats:
   hp: 150
   mp: 41
-  init_brv: 950
+  init_brv: 110
   physical_attack: 64
   physical_defense: 43
   magic_attack: 38
   magic_defense: 49
   speed: 93
+  max_brv: 442
 stat_growth:
   hp: 10
   mp: 4
-  init_brv: 50
+  init_brv: 3.9
   strength: 4.0
   defense: 2.5
   magic: 2.0
@@ -22,6 +23,7 @@ stat_growth:
   luck: 4.0
   accuracy: 2.5
   evasion: 2.0
+  max_brv: 2.3
 traits:
 - id: shadow_step
   name: 그림자 걸음
@@ -43,6 +45,12 @@ traits:
   name: 치명적 기교
   description: 크리티컬 데미지 50% 증가
   type: passive
+gimmick:
+  type: theft_system
+  name: 절도와 회피
+  description: 적의 아이템을 훔치고 회피 태세를 유지. 훔친 아이템으로 특수 기술 사용
+  max_stolen_items: 10
+
 skills:
 - backstab
 - shadow_strike

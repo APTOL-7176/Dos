@@ -4,16 +4,17 @@ archetype: 명예의 전사
 base_stats:
   hp: 167
   mp: 43
-  init_brv: 1040
+  init_brv: 125
   speed: 67
   physical_attack: 74
   physical_defense: 58
   magic_attack: 45
   magic_defense: 53
+  max_brv: 465
 stat_growth:
   hp: 12
   mp: 4
-  init_brv: 56
+  init_brv: 4.4
   strength: 4.6
   defense: 3.8
   magic: 2.2
@@ -22,6 +23,7 @@ stat_growth:
   luck: 3.0
   accuracy: 2.3
   evasion: 1.8
+  max_brv: 2.6
 traits:
 - id: bushido
   name: 무사도
@@ -43,6 +45,12 @@ traits:
   name: 강철 의지
   description: HP 1로 생존 효과 (전투당 1회)
   type: trigger
+gimmick:
+  type: iaijutsu_system
+  name: 거합의 도
+  description: 의지를 집중하여 완벽한 발도 기술 수행. 의지 게이지로 특수 기술 사용
+  max_will_gauge: 100
+
 skills:
 - quick_draw
 - cross_slash

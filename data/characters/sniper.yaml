@@ -4,16 +4,17 @@ archetype: 초고화력 원거리
 base_stats:
   hp: 151
   mp: 43
-  init_brv: 1020
+  init_brv: 115
   speed: 62
   physical_attack: 92
   physical_defense: 41
   magic_attack: 48
   magic_defense: 43
+  max_brv: 450
 stat_growth:
   hp: 10.0
   mp: 4.2
-  init_brv: 56
+  init_brv: 4.0
   strength: 6.5
   defense: 2.5
   magic: 3.2
@@ -22,6 +23,7 @@ stat_growth:
   luck: 7.0
   accuracy: 5.5
   evasion: 2.0
+  max_brv: 2.4
 traits:
 - id: perfect_aim
   name: 완벽한 조준
@@ -43,6 +45,12 @@ traits:
   name: 안정된 손
   description: 공격 시 명중률 무시 (100% 적중), 단 이동 시 다음 턴 비활성화
   type: conditional
+gimmick:
+  type: aim_system
+  name: 저격 집중
+  description: 집중력을 높여 완벽한 저격 수행. 집중 스택에 비례한 데미지 증가
+  max_focus_stacks: 5
+
 skills:
 - precise_aim
 - headshot

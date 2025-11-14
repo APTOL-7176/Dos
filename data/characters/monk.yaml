@@ -4,16 +4,17 @@ archetype: 내공 전사
 base_stats:
   hp: 172
   mp: 58
-  init_brv: 980
+  init_brv: 122
   speed: 76
   physical_attack: 82
   physical_defense: 59
   magic_attack: 51
   magic_defense: 64
+  max_brv: 462
 stat_growth:
   hp: 11
   mp: 5.5
-  init_brv: 52
+  init_brv: 4.3
   strength: 4.2
   defense: 3.0
   magic: 2.2
@@ -22,6 +23,7 @@ stat_growth:
   luck: 3.2
   accuracy: 2.5
   evasion: 2.2
+  max_brv: 2.6
 traits:
 - id: inner_power
   name: 내공 순환
@@ -43,6 +45,13 @@ traits:
   name: 반격의 자세
   description: 회피 성공 시 30% 확률로 반격
   type: trigger
+gimmick:
+  type: ki_system
+  name: 기 에너지
+  description: 차크라를 개방하고 콤보를 쌓아 강력한 기공 기술 사용
+  max_chakra_points: 7
+  max_combo_count: 10
+
 skills:
 - palm_strike
 - chakra_burst

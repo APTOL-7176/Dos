@@ -4,16 +4,17 @@ archetype: 생존 특화
 base_stats:
   hp: 186
   mp: 48
-  init_brv: 1080
+  init_brv: 121
   speed: 69
   physical_attack: 68
   physical_defense: 55
   magic_attack: 63
   magic_defense: 59
+  max_brv: 460
 stat_growth:
   hp: 13.5
   mp: 4.5
-  init_brv: 58
+  init_brv: 4.2
   strength: 5.2
   defense: 3.8
   magic: 5.0
@@ -22,6 +23,7 @@ stat_growth:
   luck: 3.0
   accuracy: 3.5
   evasion: 2.8
+  max_brv: 2.5
 traits:
 - id: blood_hunger
   name: 피의 갈증
@@ -43,6 +45,13 @@ traits:
   name: 진홍의 광란
   description: 흡혈로 회복 시 20% 확률로 즉시 추가 공격
   type: trigger
+gimmick:
+  type: blood_system
+  name: 혈액 마법
+  description: 피를 흡수하여 블러드 풀을 채우고 강력한 흡혈 마법 사용
+  max_blood_pool: 100
+  lifesteal_base: 0.15
+
 skills:
 - blood_drain
 - blood_lance

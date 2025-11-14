@@ -4,16 +4,17 @@ archetype: 변신 술사
 base_stats:
   hp: 175
   mp: 71
-  init_brv: 960
+  init_brv: 115
   speed: 59
   physical_attack: 53
   physical_defense: 48
   magic_attack: 81
   magic_defense: 69
+  max_brv: 448
 stat_growth:
   hp: 11
   mp: 5
-  init_brv: 50
+  init_brv: 4.0
   strength: 3.5
   defense: 3.2
   magic: 4.0
@@ -22,6 +23,7 @@ stat_growth:
   luck: 3.0
   accuracy: 2.0
   evasion: 2.0
+  max_brv: 2.4
 traits:
 - id: shapeshifting
   name: 동물 변신
@@ -43,6 +45,16 @@ traits:
   name: 야생의 본능
   description: HP 50% 이하 시 모든 스탯 +20%
   type: trigger
+gimmick:
+  type: shapeshifting_system
+  name: 자연의 변신
+  description: 자연의 힘을 모아 동물 형태로 변신. 형태마다 고유한 능력 보유
+  max_nature_points: 100
+  forms:
+  - bear
+  - panther
+  - eagle
+
 skills:
 - bear_form
 - panther_form

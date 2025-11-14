@@ -4,16 +4,17 @@ archetype: 하이리스크 하이리턴
 base_stats:
   hp: 327
   mp: 22
-  init_brv: 1150
+  init_brv: 145
   speed: 74
   physical_attack: 64
   physical_defense: 22
   magic_attack: 13
   magic_defense: 21
+  max_brv: 505
 stat_growth:
   hp: 15
   mp: 2.5
-  init_brv: 65
+  init_brv: 5.1
   strength: 6.0
   defense: 2.0
   magic: 1.5
@@ -22,6 +23,7 @@ stat_growth:
   luck: 2.5
   accuracy: 2.0
   evasion: 1.0
+  max_brv: 3.1
 traits:
 - id: rage_mode
   name: 광기 상태
@@ -43,6 +45,12 @@ traits:
   name: 무모한 돌격
   description: 공격 시 자신도 피해 (10%)를 받지만 데미지 +80%
   type: trigger
+gimmick:
+  type: rage_system
+  name: 광전사의 분노
+  description: 전투 중 분노를 축적하여 강력한 공격 수행. HP가 낮을수록 분노 획득량 증가
+  max_rage_stacks: 10
+
 skills:
 - reckless_strike
 - blood_frenzy

@@ -4,16 +4,17 @@ archetype: 흡혈 딜러
 base_stats:
   hp: 189
   mp: 53
-  init_brv: 1050
+  init_brv: 132
   speed: 52
   physical_attack: 71
   physical_defense: 58
   magic_attack: 54
   magic_defense: 51
+  max_brv: 488
 stat_growth:
   hp: 12
   mp: 4
-  init_brv: 55
+  init_brv: 4.6
   strength: 5.0
   defense: 3.2
   magic: 2.5
@@ -22,6 +23,7 @@ stat_growth:
   luck: 2.2
   accuracy: 2.0
   evasion: 1.5
+  max_brv: 2.8
 traits:
 - id: lifesteal
   name: 생명 흡수
@@ -43,6 +45,12 @@ traits:
   name: 저주받은 검
   description: 공격 시 15% 확률로 적에게 출혈 부여 (턴당 BRV 감소)
   type: trigger
+gimmick:
+  type: darkness_system
+  name: 어둠의 힘
+  description: 자신의 HP를 소모하여 어둠의 힘을 얻고 강력한 암흑 마법 사용
+  max_darkness: 100
+
 skills:
 - dark_slash
 - blood_drain

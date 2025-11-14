@@ -4,16 +4,17 @@ archetype: 폭발 딜러
 base_stats:
   hp: 164
   mp: 39
-  init_brv: 1020
+  init_brv: 128
   speed: 71
   physical_attack: 83
   physical_defense: 51
   magic_attack: 31
   magic_defense: 47
+  max_brv: 470
 stat_growth:
   hp: 11
   mp: 3.8
-  init_brv: 54
+  init_brv: 4.5
   strength: 5.5
   defense: 2.8
   magic: 2.0
@@ -22,6 +23,7 @@ stat_growth:
   luck: 3.8
   accuracy: 2.8
   evasion: 1.8
+  max_brv: 2.7
 traits:
 - id: sword_energy
   name: 검기 충격
@@ -43,6 +45,12 @@ traits:
   name: 반격의 검
   description: 피격 시 15% 확률로 즉시 반격
   type: trigger
+gimmick:
+  type: sword_aura
+  name: 검기
+  description: 검기를 축적하여 강력한 검술 사용. 검기는 공격 시 자동 획득
+  max_sword_aura: 5
+
 skills:
 - swift_strike
 - blade_storm

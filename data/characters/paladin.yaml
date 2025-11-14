@@ -4,16 +4,17 @@ archetype: 탱커/서포터
 base_stats:
   hp: 197
   mp: 67
-  init_brv: 1100
+  init_brv: 138
   speed: 43
   physical_attack: 67
   physical_defense: 76
   magic_attack: 38
   magic_defense: 62
+  max_brv: 495
 stat_growth:
   hp: 14
   mp: 4.5
-  init_brv: 62
+  init_brv: 4.8
   strength: 3.5
   defense: 4.5
   magic: 3.0
@@ -22,6 +23,7 @@ stat_growth:
   luck: 3.0
   accuracy: 1.6
   evasion: 1.2
+  max_brv: 2.9
 traits:
 - id: divine_protection
   name: 신성한 가호
@@ -43,6 +45,12 @@ traits:
   name: 정의의 분노
   description: 아군이 전투불능 시 공격력 40% 증가
   type: trigger
+gimmick:
+  type: holy_system
+  name: 성스러운 힘
+  description: 적을 공격하고 아군을 치유하며 성력 획득. 성력으로 신성한 기술 사용
+  max_holy_power: 100
+
 skills:
 - holy_strike
 - divine_shield

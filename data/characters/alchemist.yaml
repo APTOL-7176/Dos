@@ -4,16 +4,17 @@ archetype: 포션 마스터
 base_stats:
   hp: 135
   mp: 69
-  init_brv: 900
+  init_brv: 113
   speed: 54
   physical_attack: 59
   physical_defense: 44
   magic_attack: 72
   magic_defense: 58
+  max_brv: 446
 stat_growth:
   hp: 9.5
   mp: 5.8
-  init_brv: 48
+  init_brv: 4.0
   strength: 2.8
   defense: 2.5
   magic: 4.0
@@ -22,6 +23,7 @@ stat_growth:
   luck: 4.2
   accuracy: 2.0
   evasion: 1.8
+  max_brv: 2.4
 traits:
 - id: potion_mastery
   name: 포션 제조
@@ -43,6 +45,12 @@ traits:
   name: 현자의 돌
   description: 턴 종료 시 5% 확률로 랜덤 포션 생성
   type: trigger
+gimmick:
+  type: alchemy_system
+  name: 연금술 조합
+  description: 포션을 조합하고 투척하여 다양한 효과 발동
+  max_potion_stock: 10
+
 skills:
 - throw_potion
 - acid_flask

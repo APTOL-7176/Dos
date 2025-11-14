@@ -4,21 +4,23 @@ archetype: 마법 딜러/서포터
 base_stats:
   hp: 107
   mp: 94
-  init_brv: 850
+  init_brv: 108
   physical_attack: 49
   physical_defense: 42
   magic_attack: 85
   magic_defense: 69
   speed: 59
+  max_brv: 438
 stat_growth:
   hp: 8
   mp: 8
-  init_brv: 45
+  init_brv: 3.8
   physical_attack: 2.5
   physical_defense: 2.0
   magic_attack: 5.0
   magic_defense: 4.5
   speed: 3.5
+  max_brv: 2.3
 gimmick:
   type: spirit_bond
   name: 정령 친화도

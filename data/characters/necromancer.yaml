@@ -4,16 +4,17 @@ archetype: 디버프 특화
 base_stats:
   hp: 134
   mp: 84
-  init_brv: 820
+  init_brv: 103
   speed: 48
   physical_attack: 44
   physical_defense: 39
   magic_attack: 84
   magic_defense: 74
+  max_brv: 432
 stat_growth:
   hp: 8
   mp: 7.5
-  init_brv: 42
+  init_brv: 3.6
   strength: 1.8
   defense: 1.5
   magic: 5.2
@@ -22,6 +23,7 @@ stat_growth:
   luck: 2.0
   accuracy: 2.2
   evasion: 1.8
+  max_brv: 2.2
 traits:
 - id: curse_master
   name: 저주술의 대가
@@ -43,6 +45,14 @@ traits:
   name: 역병 확산
   description: 디버프가 인접한 적에게 50% 확률로 전염
   type: trigger
+gimmick:
+  type: necro_system
+  name: 네크로 에너지
+  description: 시체를 수집하고 언데드를 소환. 네크로 에너지로 강력한 주술 사용
+  max_necro_energy: 100
+  max_corpse_count: 10
+  max_minion_count: 3
+
 skills:
 - curse_bolt
 - weakness_hex
