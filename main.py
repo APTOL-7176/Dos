@@ -106,6 +106,12 @@ def main() -> int:
         display = get_display()
         logger.info("TCOD 디스플레이 초기화 완료")
 
+        # 스킬 시스템 초기화
+        from src.character.skills.skill_initializer import initialize_all_skills
+        if not initialize_all_skills():
+            logger.error("스킬 초기화 실패 - 게임을 종료합니다")
+            return 1
+
         # 메인 게임 루프
         while True:
             # 메인 메뉴 실행

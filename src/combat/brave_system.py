@@ -192,8 +192,18 @@ class BraveSystem:
 
         # BRV 감소 (최소 0)
         old_defender_brv = defender.current_brv
-        brv_stolen = min(actual_damage, max(0, defender.current_brv))
         defender.current_brv = max(0, defender.current_brv - actual_damage)
+
+        # BREAK 상태 확인 (공격 전 BRV가 0)
+        was_broken = old_defender_brv == 0
+
+        # BRV 획득량 계산
+        if was_broken:
+            # BREAK 상태: 가한 데미지만큼 BRV 획득
+            brv_stolen = actual_damage
+        else:
+            # 일반 상태: 실제로 훔친 BRV
+            brv_stolen = min(actual_damage, max(0, old_defender_brv))
 
         # 공격자의 BRV 효율 반영
         attacker_efficiency = getattr(attacker, "brv_efficiency", 1.0)
@@ -209,9 +219,9 @@ class BraveSystem:
 
         # BREAK 판정: 이미 BRV가 0인 상태에서 추가 공격을 받으면 BREAK
         is_break = False
-        if old_defender_brv == 0 and actual_damage > 0:
+        if was_broken and actual_damage > 0:
             is_break = True
-            self.logger.info(f"BREAK! {attacker.name} → {defender.name}")
+            self.logger.info(f"⚡ BREAK! {attacker.name} → {defender.name} (BRV 획득: {brv_gain})")
 
             # BREAK 상태 플래그 설정
             defender.is_broken = True
