@@ -721,8 +721,12 @@ def run_combat(
     # 전투 시작 SFX (Battle Swirl)
     play_sfx("combat", "battle_start")
 
-    # 전투 BGM 랜덤 재생 (보스 BGM 제외)
-    battle_bgm_tracks = ["battle_normal"]  # config.yaml에 정의된 일반 전투 BGM
+    # 전투 BGM 랜덤 재생 (3개 중 랜덤)
+    battle_bgm_tracks = [
+        "21-Still More Fighting",
+        "85-Jenova Absolute",
+        "11-Fighting"
+    ]
     selected_bgm = random.choice(battle_bgm_tracks)
     play_bgm(selected_bgm, loop=True, fade_in=True)
 
