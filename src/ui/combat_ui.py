@@ -80,12 +80,12 @@ class CombatUI:
     def _create_action_menu(self) -> CursorMenu:
         """행동 메뉴 생성"""
         items = [
-            MenuItem("BRV 공격", "BRV를 축적하여 적의 BRV를 파괴", True, ActionType.BRV_ATTACK),
-            MenuItem("HP 공격", "축적한 BRV로 적의 HP에 직접 데미지", True, ActionType.HP_ATTACK),
-            MenuItem("스킬", "특수 기술 사용", True, ActionType.SKILL),
-            MenuItem("아이템", "아이템 사용", True, ActionType.ITEM),
-            MenuItem("방어", "방어 자세로 피해 감소", True, ActionType.DEFEND),
-            MenuItem("도망", "전투에서 도망", True, ActionType.FLEE),
+            MenuItem("BRV 공격", description="BRV를 축적하여 적의 BRV를 파괴", enabled=True, value=ActionType.BRV_ATTACK),
+            MenuItem("HP 공격", description="축적한 BRV로 적의 HP에 직접 데미지", enabled=True, value=ActionType.HP_ATTACK),
+            MenuItem("스킬", description="특수 기술 사용", enabled=True, value=ActionType.SKILL),
+            MenuItem("아이템", description="아이템 사용", enabled=True, value=ActionType.ITEM),
+            MenuItem("방어", description="방어 자세로 피해 감소", enabled=True, value=ActionType.DEFEND),
+            MenuItem("도망", description="전투에서 도망", enabled=True, value=ActionType.FLEE),
         ]
 
         return CursorMenu(
