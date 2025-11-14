@@ -102,6 +102,14 @@ class CombatUI:
     def _create_skill_menu(self, actor: Any) -> CursorMenu:
         """스킬 메뉴 생성"""
         skills = getattr(actor, 'skills', [])
+
+        # 디버그 로그
+        from src.core.logger import get_logger
+        logger = get_logger("combat_ui")
+        logger.warning(f"[SKILL_MENU] {actor.name}의 스킬 개수: {len(skills)}")
+        logger.warning(f"[SKILL_MENU] skill_ids: {getattr(actor, 'skill_ids', [])}")
+        logger.warning(f"[SKILL_MENU] _cached_skills: {getattr(actor, '_cached_skills', 'not set')}")
+
         items = []
 
         for skill in skills:

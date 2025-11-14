@@ -327,16 +327,16 @@ class ExplorationSystem:
         item = ItemGenerator.create_random_drop(self.floor_number, boss_drop=True)
 
         # 디버그 로그
-        logger.debug(f"[CHEST] 보물상자 처리 시작: {item.name}")
-        logger.debug(f"[CHEST] 인벤토리 존재 여부: {self.inventory is not None}")
+        logger.warning(f"[CHEST] 보물상자 처리 시작: {item.name}")
+        logger.warning(f"[CHEST] 인벤토리 존재 여부: {self.inventory is not None}")
         if self.inventory:
-            logger.debug(f"[CHEST] 인벤토리 슬롯 수: {len(self.inventory.slots)}")
-            logger.debug(f"[CHEST] 현재 무게: {self.inventory.current_weight}kg / {self.inventory.max_weight}kg")
+            logger.warning(f"[CHEST] 인벤토리 슬롯 수: {len(self.inventory.slots)}")
+            logger.warning(f"[CHEST] 현재 무게: {self.inventory.current_weight}kg / {self.inventory.max_weight}kg")
 
         # 인벤토리에 추가
         if self.inventory:
             success = self.inventory.add_item(item)
-            logger.debug(f"[CHEST] add_item 결과: {success}")
+            logger.warning(f"[CHEST] add_item 결과: {success}")
             if not success:
                 logger.warning(f"인벤토리 가득 참! {item.name} 버려짐")
                 return ExplorationResult(
@@ -368,16 +368,16 @@ class ExplorationSystem:
         item = ItemGenerator.create_random_drop(self.floor_number, boss_drop=False)
 
         # 디버그 로그
-        logger.debug(f"[ITEM] 아이템 처리 시작: {item.name}")
-        logger.debug(f"[ITEM] 인벤토리 존재 여부: {self.inventory is not None}")
+        logger.warning(f"[ITEM] 아이템 처리 시작: {item.name}")
+        logger.warning(f"[ITEM] 인벤토리 존재 여부: {self.inventory is not None}")
         if self.inventory:
-            logger.debug(f"[ITEM] 인벤토리 슬롯 수: {len(self.inventory.slots)}")
-            logger.debug(f"[ITEM] 현재 무게: {self.inventory.current_weight}kg / {self.inventory.max_weight}kg")
+            logger.warning(f"[ITEM] 인벤토리 슬롯 수: {len(self.inventory.slots)}")
+            logger.warning(f"[ITEM] 현재 무게: {self.inventory.current_weight}kg / {self.inventory.max_weight}kg")
 
         # 인벤토리에 추가
         if self.inventory:
             success = self.inventory.add_item(item)
-            logger.debug(f"[ITEM] add_item 결과: {success}")
+            logger.warning(f"[ITEM] add_item 결과: {success}")
             if not success:
                 logger.warning(f"인벤토리 가득 참! {item.name} 버려짐")
                 return ExplorationResult(
