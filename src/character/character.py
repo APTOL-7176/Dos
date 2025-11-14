@@ -82,9 +82,12 @@ class Character:
 
         # 스킬 - YAML에서 로드
         self.skill_ids = get_skills(character_class)
+        # TODO: skill_ids를 실제 Skill 객체로 변환
+        # 임시로 skill_ids를 skills로 사용 (UI 호환성)
+        self.skills = self._load_skills_from_ids(self.skill_ids)
 
         # 로그
-        self.logger.info(f"캐릭터 생성: {self.name} ({self.character_class})")
+        self.logger.info(f"캐릭터 생성: {self.name} ({self.character_class}), 스킬 {len(self.skills)}개")
 
         # 이벤트 발행
         event_bus.publish(Events.CHARACTER_CREATED, {
@@ -490,6 +493,25 @@ class Character:
         })
 
         return item
+
+    # ===== 스킬 로딩 =====
+
+    def _load_skills_from_ids(self, skill_ids: List[str]) -> List[Any]:
+        """스킬 ID로부터 스킬 객체 생성 (간단한 구현)"""
+        skills = []
+        for skill_id in skill_ids:
+            # 임시 스킬 객체 (딕셔너리 형태)
+            # TODO: 실제 Skill 클래스로 변환
+            skill = type('SimpleSkill', (), {
+                'skill_id': skill_id,
+                'name': skill_id.replace('_', ' ').title(),
+                'description': f'{skill_id} 스킬',
+                'mp_cost': 10,  # 기본 MP 비용
+                'brv_multiplier': 1.0,
+                'hp_multiplier': 1.0,
+            })()
+            skills.append(skill)
+        return skills
 
     # ===== BRV 계산 =====
 
