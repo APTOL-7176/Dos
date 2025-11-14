@@ -109,6 +109,9 @@ class ATBSystem:
         # 평균 속도 캐시
         self._average_speed: float = 0.0
 
+        # BREAK 이벤트 구독 (BREAK 시 ATB 초기화)
+        event_bus.subscribe("brave.break", self._on_break)
+
     def register_combatant(self, combatant: Any) -> None:
         """
         전투원 등록
@@ -345,6 +348,24 @@ class ATBSystem:
             effects.append("슬로우")
 
         return effects
+
+    def _on_break(self, data: Dict[str, Any]) -> None:
+        """
+        BREAK 이벤트 핸들러
+
+        BREAK 당한 캐릭터의 ATB 게이지를 0으로 초기화합니다.
+
+        Args:
+            data: 이벤트 데이터 {"attacker": ..., "defender": ..., "brv_stolen": ...}
+        """
+        defender = data.get("defender")
+        if defender:
+            gauge = self.get_gauge(defender)
+            if gauge:
+                gauge.reset()
+                self.logger.info(
+                    f"⚡ BREAK! {getattr(defender, 'name', 'Unknown')}의 ATB 게이지 초기화"
+                )
 
     def clear(self) -> None:
         """시스템 초기화"""

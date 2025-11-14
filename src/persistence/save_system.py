@@ -115,19 +115,25 @@ class SaveSystem:
 
 def serialize_party_member(member: Any) -> Dict[str, Any]:
     """파티원 직렬화"""
+    # StatManager가 있으면 직렬화
+    stats_data = None
+    if hasattr(member, 'stat_manager'):
+        stats_data = member.stat_manager.to_dict()
+
     return {
-        "character_name": getattr(member, 'character_name', member.name),
+        "name": member.name,
+        "character_class": getattr(member, 'character_class', getattr(member, 'job_id', 'unknown')),
         "job_name": getattr(member, 'job_name', 'Unknown'),
-        "job_id": getattr(member, 'job_id', 'unknown'),
         "level": getattr(member, 'level', 1),
         "current_hp": getattr(member, 'current_hp', 100),
-        "max_hp": getattr(member, 'max_hp', 100),
         "current_mp": getattr(member, 'current_mp', 50),
-        "max_mp": getattr(member, 'max_mp', 50),
         "current_brv": getattr(member, 'current_brv', 0),
-        "stats": getattr(member, 'stats', {}),
+        "experience": getattr(member, 'experience', 0),
+        "stats": stats_data,
         "equipment": serialize_equipment(member),
-        "status_effects": getattr(member, 'status_effects', {}),
+        "status_effects": getattr(member, 'status_effects', []),
+        "skill_ids": getattr(member, 'skill_ids', []),
+        "active_traits": getattr(member, 'active_traits', []),
     }
 
 
@@ -365,3 +371,59 @@ def deserialize_item(item_data: Dict[str, Any]) -> Any:
             affixes=affixes,
             unique_effect=item_data.get("unique_effect")
         )
+
+
+def deserialize_party_member(member_data: Dict[str, Any]) -> Any:
+    """파티원 역직렬화"""
+    from src.character.character import Character
+    from src.character.stats import StatManager
+
+    # Character 객체 생성
+    char = Character(
+        name=member_data["name"],
+        character_class=member_data["character_class"],
+        level=member_data["level"]
+    )
+
+    # 스탯 복원
+    if member_data.get("stats"):
+        char.stat_manager = StatManager.from_dict(member_data["stats"])
+
+    # HP/MP 복원
+    char.current_hp = member_data["current_hp"]
+    char.current_mp = member_data["current_mp"]
+    char.current_brv = member_data.get("current_brv", 0)
+
+    # 경험치 복원
+    char.experience = member_data.get("experience", 0)
+
+    # 스킬 ID 복원
+    if member_data.get("skill_ids"):
+        char.skill_ids = member_data["skill_ids"]
+        char._cached_skills = None  # 캐시 초기화
+
+    # 특성 복원
+    if member_data.get("active_traits"):
+        char.active_traits = member_data["active_traits"]
+
+    # TODO: 장비 복원
+
+    return char
+
+
+def deserialize_inventory(inventory_data: Dict[str, Any]) -> Any:
+    """인벤토리 역직렬화"""
+    from src.equipment.inventory import Inventory
+
+    # 파티 없이 기본 인벤토리 생성
+    inventory = Inventory(base_weight=50.0)
+
+    # 골드 복원
+    inventory.gold = inventory_data.get("gold", 0)
+
+    # 아이템 복원
+    for item_data in inventory_data.get("items", []):
+        item = deserialize_item(item_data)
+        inventory.add_item(item)
+
+    return inventory

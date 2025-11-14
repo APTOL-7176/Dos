@@ -76,8 +76,12 @@ class WorldUI:
             if self.inventory is not None and self.party is not None and console is not None and context is not None:
                 from src.ui.game_menu import open_game_menu, MenuOption
                 logger.warning("[DEBUG] 게임 메뉴 열기")
-                result = open_game_menu(console, context, self.inventory, self.party)
+                result = open_game_menu(console, context, self.inventory, self.party, self.exploration)
                 if result == MenuOption.QUIT:
+                    self.quit_requested = True
+                    return True
+                elif result == MenuOption.LOAD_GAME:
+                    # 게임을 불러온 경우 탐험 종료하고 main.py에서 처리하도록
                     self.quit_requested = True
                     return True
                 return False
@@ -248,7 +252,9 @@ class WorldUI:
         inv_y = y + 15
         console.print(x, inv_y, "[소지품]", fg=(200, 200, 255))
         console.print(x + 2, inv_y + 1, f"열쇠: {len(self.exploration.player.keys)}개", fg=(255, 215, 0))
-        console.print(x + 2, inv_y + 2, f"아이템: {len(self.exploration.player.inventory)}개", fg=(200, 200, 200))
+        # 실제 인벤토리 객체의 아이템 수 표시
+        item_count = len(self.inventory.items) if self.inventory and hasattr(self.inventory, 'items') else 0
+        console.print(x + 2, inv_y + 2, f"아이템: {item_count}개", fg=(200, 200, 200))
 
     def _render_messages(self, console: tcod.console.Console):
         """메시지 로그"""
@@ -264,10 +270,14 @@ def run_exploration(
     context: tcod.context.Context,
     exploration: ExplorationSystem,
     inventory=None,
-    party=None
+    party=None,
+    play_bgm_on_start: bool = True
 ) -> str:
     """
     탐험 실행
+
+    Args:
+        play_bgm_on_start: 탐험 시작 시 BGM 재생 여부 (기본 True, 전투 후 복귀 시 False)
 
     Returns:
         "quit", "combat", "floor_up", "floor_down"
@@ -277,20 +287,21 @@ def run_exploration(
 
     logger.info(f"탐험 시작: {exploration.floor_number}층")
 
-    # 층마다 다른 BGM 재생
-    floor = exploration.floor_number
-    if floor <= 5:
-        # 초반 층: 일반 던전 BGM
-        play_bgm("dungeon_normal")
-    elif floor <= 10:
-        # 중반 층: 탐색 던전 BGM
-        play_bgm("dungeon_search")
-    elif floor <= 15:
-        # 중후반 층: 어두운 던전 BGM
-        play_bgm("dungeon_dark")
-    else:
-        # 후반 층: 위험한 분위기
-        play_bgm("danger")
+    # 층마다 다른 BGM 재생 (전투 후 복귀 시에는 재생하지 않음)
+    if play_bgm_on_start:
+        floor = exploration.floor_number
+        if floor <= 5:
+            # 초반 층: 일반 던전 BGM
+            play_bgm("dungeon_normal")
+        elif floor <= 10:
+            # 중반 층: 탐색 던전 BGM
+            play_bgm("dungeon_search")
+        elif floor <= 15:
+            # 중후반 층: 어두운 던전 BGM
+            play_bgm("dungeon_dark")
+        else:
+            # 후반 층: 위험한 분위기
+            play_bgm("danger")
 
     while True:
         # 렌더링

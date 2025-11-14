@@ -98,6 +98,11 @@ class MainMenu:
             self.star_positions.append([x, y, brightness])
 
         # 메뉴 아이템 생성
+        # 저장 파일이 있는지 확인
+        from src.persistence.save_system import SaveSystem
+        save_system = SaveSystem()
+        has_saves = len(save_system.list_saves()) > 0
+
         menu_items = [
             MenuItem(
                 text="새 게임",
@@ -107,7 +112,7 @@ class MainMenu:
             MenuItem(
                 text="계속하기",
                 action=self._continue_game,
-                enabled=False,  # TODO: 세이브 파일 확인 후 활성화
+                enabled=has_saves,
                 description="저장된 게임을 불러옵니다"
             ),
             MenuItem(

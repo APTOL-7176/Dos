@@ -721,9 +721,28 @@ def run_combat(
     # 전투 시작 SFX (Battle Swirl)
     play_sfx("combat", "battle_start")
 
-    # 전투 BGM 랜덤 재생 (보스 BGM 제외)
-    battle_bgm_tracks = ["battle_normal"]  # config.yaml에 정의된 일반 전투 BGM
-    selected_bgm = random.choice(battle_bgm_tracks)
+    # 적 타입에 따라 BGM 선택
+    # 1. 세피로스 확인
+    is_sephiroth = any(hasattr(e, 'enemy_id') and e.enemy_id == "sephiroth" for e in enemies)
+    # 2. 보스 확인 (enemy_id가 "boss_"로 시작)
+    is_boss = any(hasattr(e, 'enemy_id') and e.enemy_id.startswith("boss_") for e in enemies)
+
+    if is_sephiroth:
+        # 세피로스전: One-Winged Angel 고정
+        selected_bgm = "87-One-Winged Angel"
+    elif is_boss:
+        # 보스전: 2개 중 랜덤
+        boss_bgm_tracks = ["38-J-E-N-O-V-A", "86-The Birth of God"]
+        selected_bgm = random.choice(boss_bgm_tracks)
+    else:
+        # 일반 전투: 3개 중 랜덤
+        battle_bgm_tracks = [
+            "21-Still More Fighting",
+            "85-Jenova Absolute",
+            "11-Fighting"
+        ]
+        selected_bgm = random.choice(battle_bgm_tracks)
+
     play_bgm(selected_bgm, loop=True, fade_in=True)
 
     # 전투 매니저 생성
