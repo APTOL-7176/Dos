@@ -48,6 +48,7 @@ class Enemy:
     is_chasing: bool = False  # 추적 중
     chase_turns: int = 0  # 추적 턴 수
     max_chase_turns: int = 15  # 최대 추적 턴
+    max_chase_distance: int = 15  # 최대 추적 거리 (이 거리 이상 벌어지면 포기)
     detection_range: int = 5  # 플레이어 감지 거리
 
     def __post_init__(self):
@@ -564,15 +565,24 @@ class ExplorationSystem:
         if enemy.is_chasing:
             enemy.chase_turns += 1
 
-            # 너무 오래 추적하면 포기하고 원래 위치로 복귀
+            # 포기 조건 1: 너무 오래 추적
             if enemy.chase_turns > enemy.max_chase_turns:
                 enemy.is_chasing = False
                 enemy.chase_turns = 0
+                logger.debug(f"적 {enemy.name}이(가) 추적 포기 (시간 초과)")
+
+            # 포기 조건 2: 플레이어가 너무 멀리 도망감
+            elif distance > enemy.max_chase_distance:
+                enemy.is_chasing = False
+                enemy.chase_turns = 0
+                logger.debug(f"적 {enemy.name}이(가) 추적 포기 (거리: {distance} > {enemy.max_chase_distance})")
 
             # 추적 중이면 플레이어 방향으로 이동
             if enemy.is_chasing:
                 self._move_enemy_towards(enemy, self.player.x, self.player.y)
-        else:
+
+        # 추적하지 않을 때
+        if not enemy.is_chasing:
             # 원래 위치로 복귀
             if enemy.x != enemy.spawn_x or enemy.y != enemy.spawn_y:
                 self._move_enemy_towards(enemy, enemy.spawn_x, enemy.spawn_y)
