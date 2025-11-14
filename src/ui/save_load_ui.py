@@ -102,8 +102,8 @@ class SaveLoadUI:
                 if self.cursor == -1:
                     # 새 저장
                     self._start_new_save()
-                else:
-                    # 덮어쓰기 확인
+                elif 0 <= self.cursor < len(self.save_files):
+                    # 덮어쓰기 확인 (범위 체크 추가)
                     save_name = self.save_files[self.cursor]["name"]
                     self.confirm_message = f"'{save_name}'에 덮어쓰시겠습니까?"
                     self.confirm_yes = False
@@ -165,22 +165,23 @@ class SaveLoadUI:
             if self.confirm_yes:
                 # YES 선택
                 if self.mode == SaveLoadMode.SAVE:
-                    # 덮어쓰기 또는 삭제
-                    if "삭제" in self.confirm_message:
-                        # 삭제
-                        save_name = self.save_files[self.cursor]["name"]
-                        self.save_system.delete_save(save_name)
-                        logger.info(f"저장 파일 삭제: {save_name}")
+                    # 덮어쓰기 또는 삭제 (범위 체크)
+                    if 0 <= self.cursor < len(self.save_files):
+                        if "삭제" in self.confirm_message:
+                            # 삭제
+                            save_name = self.save_files[self.cursor]["name"]
+                            self.save_system.delete_save(save_name)
+                            logger.info(f"저장 파일 삭제: {save_name}")
 
-                        # 목록 새로고침
-                        self.save_files = self.save_system.list_saves()
-                        self.cursor = max(0, min(self.cursor, len(self.save_files) - 1))
-                    else:
-                        # 덮어쓰기
-                        save_name = self.save_files[self.cursor]["name"]
-                        self.selected_save = save_name
-                        self.closed = True
-                        return True
+                            # 목록 새로고침
+                            self.save_files = self.save_system.list_saves()
+                            self.cursor = max(0, min(self.cursor, len(self.save_files) - 1))
+                        else:
+                            # 덮어쓰기
+                            save_name = self.save_files[self.cursor]["name"]
+                            self.selected_save = save_name
+                            self.closed = True
+                            return True
 
             # 확인 메시지 닫기
             self.confirm_message = None
