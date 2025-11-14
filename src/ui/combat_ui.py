@@ -729,17 +729,17 @@ def run_combat(
 
     if is_sephiroth:
         # 세피로스전: One-Winged Angel 고정
-        selected_bgm = "87-One-Winged Angel"
+        selected_bgm = "battle_final_boss"
     elif is_boss:
         # 보스전: 2개 중 랜덤
-        boss_bgm_tracks = ["38-J-E-N-O-V-A", "86-The Birth of God"]
+        boss_bgm_tracks = ["battle_jenova", "battle_birth_of_god"]
         selected_bgm = random.choice(boss_bgm_tracks)
     else:
         # 일반 전투: 3개 중 랜덤
         battle_bgm_tracks = [
-            "21-Still More Fighting",
-            "85-Jenova Absolute",
-            "11-Fighting"
+            "battle_boss",              # 21-Still More Fighting
+            "battle_jenova_absolute",   # 85-Jenova Absolute
+            "battle_normal"             # 11-Fighting
         ]
         selected_bgm = random.choice(battle_bgm_tracks)
 
