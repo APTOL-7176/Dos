@@ -180,9 +180,13 @@ class ATBSystem:
 
         Args:
             delta_time: 경과 시간 (프레임 기반)
-            is_player_turn: 플레이어 턴 중인지
+            is_player_turn: 플레이어 턴 중인지 (True면 ATB 증가 정지)
         """
         if not self.enabled:
+            return
+
+        # 플레이어 턴 중에는 시간 정지 (ATB 증가 안 함)
+        if is_player_turn:
             return
 
         for combatant, gauge in self.gauges.items():
@@ -192,10 +196,6 @@ class ATBSystem:
 
                 # ATB 업데이트 속도를 1/5로 느리게 조정 (로그라이크_2 방식)
                 increase = (effective_speed * delta_time) / 5.0
-
-                # 플레이어 턴 중 적의 ATB 감소 옵션
-                if is_player_turn and hasattr(combatant, "is_enemy") and combatant.is_enemy:
-                    increase *= self.player_turn_enemy_rate
 
                 gauge.increase(increase)
 

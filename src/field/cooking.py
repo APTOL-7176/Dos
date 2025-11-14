@@ -68,6 +68,7 @@ class CookingSystem:
         """레시피 데이터 로드"""
         # TODO: YAML에서 로드
         default_recipes = [
+            # === 초급 요리 (난이도 1-2) ===
             Recipe(
                 "herb_soup",
                 "약초 수프",
@@ -80,7 +81,72 @@ class CookingSystem:
                 "버섯 스튜",
                 {"mushroom": 3},
                 {"hp_heal": 50, "stamina_heal": 20},
+                difficulty=1
+            ),
+            Recipe(
+                "berry_juice",
+                "베리 주스",
+                {"wild_berry": 4},
+                {"mp_heal": 40, "stamina_heal": 15},
+                difficulty=1
+            ),
+            Recipe(
+                "grilled_fish",
+                "생선 구이",
+                {"fish": 1, "herb": 1},
+                {"hp_heal": 60, "buff": "defense_up"},
                 difficulty=2
+            ),
+            Recipe(
+                "roasted_meat",
+                "고기 구이",
+                {"meat": 1, "wild_berry": 1},
+                {"hp_heal": 70, "buff": "strength_up"},
+                difficulty=2
+            ),
+            Recipe(
+                "vegetable_salad",
+                "야채 샐러드",
+                {"vegetable": 3, "herb": 1},
+                {"hp_heal": 45, "mp_heal": 25},
+                difficulty=1
+            ),
+            Recipe(
+                "honey_bread",
+                "꿀빵",
+                {"flour": 2, "honey": 1},
+                {"stamina_heal": 40, "hp_heal": 30},
+                difficulty=2
+            ),
+
+            # === 중급 요리 (난이도 3-4) ===
+            Recipe(
+                "seafood_soup",
+                "해물 수프",
+                {"fish": 2, "shellfish": 1, "herb": 2},
+                {"hp_heal": 100, "mp_heal": 50, "buff": "magic_up"},
+                difficulty=3
+            ),
+            Recipe(
+                "meat_stew",
+                "고기 스튜",
+                {"meat": 2, "vegetable": 2, "mushroom": 1},
+                {"hp_heal": 120, "stamina_heal": 40, "buff": "vitality_up"},
+                difficulty=3
+            ),
+            Recipe(
+                "mushroom_risotto",
+                "버섯 리조또",
+                {"mushroom": 3, "flour": 2, "herb": 1},
+                {"hp_heal": 90, "mp_heal": 70},
+                difficulty=3
+            ),
+            Recipe(
+                "fruit_tart",
+                "과일 타르트",
+                {"wild_berry": 3, "flour": 2, "honey": 1},
+                {"mp_heal": 80, "buff": "speed_up"},
+                difficulty=3
             ),
             Recipe(
                 "special_dish",
@@ -88,6 +154,73 @@ class CookingSystem:
                 {"herb": 1, "mushroom": 2, "flower": 1},
                 {"hp_heal": 100, "mp_heal": 50, "buff": "strength_up"},
                 difficulty=4
+            ),
+            Recipe(
+                "elven_bread",
+                "엘프의 빵",
+                {"flour": 3, "honey": 2, "moonflower": 1},
+                {"hp_heal": 150, "mp_heal": 100, "stamina_heal": 50},
+                difficulty=4
+            ),
+            Recipe(
+                "dragon_curry",
+                "드래곤 카레",
+                {"meat": 3, "vegetable": 2, "spice": 2},
+                {"hp_heal": 180, "buff": "all_stats_up"},
+                difficulty=4
+            ),
+
+            # === 고급 요리 (난이도 5-6) ===
+            Recipe(
+                "phoenix_soup",
+                "불사조 수프",
+                {"phoenix_feather": 1, "herb": 3, "moonflower": 2},
+                {"hp_heal": 250, "mp_heal": 150, "buff": "regen"},
+                difficulty=5
+            ),
+            Recipe(
+                "crystal_cake",
+                "크리스탈 케이크",
+                {"crystal_sugar": 2, "flour": 3, "wild_berry": 4, "honey": 2},
+                {"mp_heal": 200, "buff": "magic_boost"},
+                difficulty=5
+            ),
+            Recipe(
+                "royal_feast",
+                "왕실 연회 요리",
+                {"meat": 3, "fish": 2, "vegetable": 3, "spice": 2, "honey": 1},
+                {"hp_heal": 300, "mp_heal": 200, "stamina_heal": 100, "buff": "royal_blessing"},
+                difficulty=6
+            ),
+            Recipe(
+                "mana_potion_deluxe",
+                "고급 마나 포션",
+                {"mana_herb": 3, "crystal_water": 2, "moonflower": 1},
+                {"mp_heal": 250, "buff": "mp_regen"},
+                difficulty=5
+            ),
+            Recipe(
+                "starlight_wine",
+                "별빛 와인",
+                {"star_fruit": 3, "moonflower": 2, "crystal_water": 1},
+                {"hp_heal": 200, "mp_heal": 200, "buff": "luck_up"},
+                difficulty=6
+            ),
+
+            # === 특수 요리 (난이도 7+) ===
+            Recipe(
+                "ambrosia",
+                "신의 음식",
+                {"phoenix_feather": 2, "star_fruit": 3, "crystal_sugar": 2, "moonflower": 3, "mana_herb": 2},
+                {"hp_heal": 500, "mp_heal": 500, "stamina_heal": 200, "buff": "divine_blessing"},
+                difficulty=8
+            ),
+            Recipe(
+                "elixir_supreme",
+                "최상급 엘릭서",
+                {"phoenix_feather": 1, "dragon_scale": 1, "mana_herb": 4, "crystal_water": 3},
+                {"hp_heal": 999, "mp_heal": 999, "buff": "full_recovery"},
+                difficulty=9
             ),
         ]
 

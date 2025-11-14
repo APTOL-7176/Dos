@@ -231,23 +231,20 @@ class CombatManager:
         # BREAK 상태 확인
         is_break = self.brave.is_broken(defender)
 
-        # 데미지 계산
-        damage_result, wound_damage = self.damage_calc.calculate_hp_damage(
-            attacker, defender, attacker.current_brv, hp_multiplier, is_break, **kwargs
-        )
-
-        # 실제 HP 감소 (HP 공격 전에 적용)
-        if hasattr(defender, "take_damage"):
-            actual_damage = defender.take_damage(damage_result.final_damage)
-        else:
-            actual_damage = damage_result.final_damage
-
-        # HP 공격 적용 (BRV 소비)
+        # HP 공격 적용 (BRV 소비 및 데미지 적용)
+        # brave.hp_attack()이 take_damage()를 내부적으로 호출함
         hp_result = self.brave.hp_attack(attacker, defender, hp_multiplier)
+
+        # wound damage 계산 (BREAK 보너스)
+        wound_damage = 0
+        if is_break and hp_result["hp_damage"] > 0:
+            wound_damage = int(hp_result["hp_damage"] * 0.2)  # 20% wound damage
+            if hasattr(defender, "wound_damage"):
+                defender.wound_damage += wound_damage
 
         return {
             "action": "hp_attack",
-            "hp_damage": actual_damage,
+            "hp_damage": hp_result["hp_damage"],
             "wound_damage": wound_damage,
             "brv_consumed": hp_result["brv_consumed"],
             "is_break_bonus": is_break

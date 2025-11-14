@@ -50,11 +50,66 @@ class GatheringSystem:
         """자원 데이터 로드"""
         # TODO: YAML에서 로드
         default_resources = [
-            Resource("herb", "약초", 0.8, 1),
-            Resource("mushroom", "버섯", 0.7, 1),
-            Resource("flower", "꽃", 0.6, 2),
-            Resource("rare_herb", "희귀 약초", 0.3, 3),
-            Resource("crystal", "크리스탈", 0.2, 4),
+            # === 기본 식재료 (평야, 초원) - 난이도 1 ===
+            Resource("herb", "약초", 0.9, 1),
+            Resource("wild_berry", "야생 베리", 0.9, 1),
+            Resource("mushroom", "버섯", 0.8, 1),
+            Resource("vegetable", "야채", 0.8, 1),
+            Resource("flower", "꽃", 0.7, 1),
+            Resource("flour", "밀가루", 0.8, 1),
+
+            # === 숲 지역 식재료 - 난이도 2 ===
+            Resource("honey", "꿀", 0.6, 2),
+            Resource("meat", "고기", 0.6, 2),
+            Resource("spice", "향신료", 0.5, 2),
+            Resource("rare_herb", "희귀 약초", 0.4, 2),
+            Resource("pine_nut", "잣", 0.6, 2),
+            Resource("wild_ginseng", "산삼", 0.3, 2),
+
+            # === 수변 지역 식재료 - 난이도 2-3 ===
+            Resource("fish", "생선", 0.7, 2),
+            Resource("shellfish", "조개", 0.6, 2),
+            Resource("seaweed", "해조류", 0.7, 2),
+            Resource("lotus_root", "연근", 0.5, 3),
+            Resource("crystal_water", "크리스탈 물", 0.4, 3),
+
+            # === 산악 지역 식재료 - 난이도 3-4 ===
+            Resource("mountain_herb", "산약초", 0.5, 3),
+            Resource("crystal", "크리스탈", 0.3, 3),
+            Resource("rare_mushroom", "희귀 버섯", 0.4, 3),
+            Resource("mineral_salt", "암염", 0.6, 3),
+            Resource("dragon_scale", "드래곤 비늘", 0.1, 4),
+
+            # === 마법 숲 지역 - 난이도 4-5 ===
+            Resource("moonflower", "달빛꽃", 0.3, 4),
+            Resource("mana_herb", "마나 허브", 0.3, 4),
+            Resource("star_fruit", "별빛 과일", 0.2, 5),
+            Resource("magic_mushroom", "마법 버섯", 0.3, 4),
+            Resource("elf_tears", "엘프의 눈물", 0.2, 5),
+
+            # === 화산 지역 - 난이도 5-6 ===
+            Resource("lava_pepper", "용암 고추", 0.3, 5),
+            Resource("fire_crystal", "화염 크리스탈", 0.2, 5),
+            Resource("phoenix_feather", "불사조 깃털", 0.1, 6),
+            Resource("volcano_salt", "화산염", 0.4, 5),
+
+            # === 극지 지역 - 난이도 5-6 ===
+            Resource("ice_flower", "얼음꽃", 0.3, 5),
+            Resource("frost_berry", "서리 베리", 0.4, 5),
+            Resource("ice_crystal", "얼음 크리스탈", 0.2, 6),
+            Resource("snow_mushroom", "설화버섯", 0.3, 5),
+
+            # === 사막 지역 - 난이도 4-5 ===
+            Resource("desert_cactus", "사막 선인장", 0.5, 4),
+            Resource("sand_truffle", "사막 송로버섯", 0.2, 5),
+            Resource("mirage_fruit", "신기루 과일", 0.2, 5),
+            Resource("crystal_sugar", "크리스탈 설탕", 0.3, 4),
+
+            # === 고대 유적 - 난이도 6+ ===
+            Resource("ancient_grain", "고대의 곡물", 0.2, 6),
+            Resource("relic_spice", "유물 향신료", 0.1, 7),
+            Resource("time_flower", "시간의 꽃", 0.1, 7),
+            Resource("celestial_nectar", "천상의 꿀", 0.05, 8),
         ]
 
         for resource in default_resources:
