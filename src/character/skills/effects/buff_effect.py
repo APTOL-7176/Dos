@@ -14,10 +14,14 @@ class BuffType:
 
 class BuffEffect(SkillEffect):
     """버프 효과"""
-    def __init__(self, buff_type: str, value: float, duration: int = 3, is_party_wide: bool = False):
+    def __init__(self, buff_type: str, value: float = None, duration: int = 3, is_party_wide: bool = False, multiplier: float = None):
         super().__init__(EffectType.BUFF)
         self.buff_type = buff_type
-        self.value = value
+        # multiplier와 value 중 하나는 반드시 제공되어야 함
+        if value is None and multiplier is None:
+            raise ValueError("Either 'value' or 'multiplier' must be provided")
+        # multiplier가 제공되면 value로 변환 (호환성)
+        self.value = value if value is not None else multiplier
         self.duration = duration
         self.is_party_wide = is_party_wide
 
