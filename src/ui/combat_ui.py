@@ -296,6 +296,12 @@ class CombatUI:
             self.battle_result = self.combat_manager.state
             self.state = CombatUIState.BATTLE_END
 
+            # 전투 종료 BGM 재생
+            if self.combat_manager.state == CombatState.VICTORY:
+                play_bgm("victory")
+            elif self.combat_manager.state == CombatState.DEFEAT:
+                play_bgm("defeat")
+
     def _show_action_result(self, result: Dict[str, Any]):
         """행동 결과 메시지 표시"""
         action = result.get("action", "unknown")

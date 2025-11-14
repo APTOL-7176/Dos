@@ -48,8 +48,15 @@ class BraveSystem:
         Returns:
             계산된 INT BRV
         """
-        # 캐릭터가 이미 init_brv를 가지고 있으면 사용
-        if hasattr(character, "init_brv"):
+        # SimpleEnemy는 이미 생성자에서 current_brv가 설정되어 있으므로 그대로 사용
+        if hasattr(character, '__class__') and character.__class__.__name__ == "SimpleEnemy":
+            return character.current_brv
+
+        # Character 객체는 StatManager를 통해 init_brv 가져오기
+        if hasattr(character, "stat_manager"):
+            from src.character.stats import Stats
+            base_int_brv = int(character.stat_manager.get_value(Stats.INIT_BRV, use_total=False))
+        elif hasattr(character, "init_brv"):
             base_int_brv = character.init_brv
         else:
             base_int_brv = self.base_brv
@@ -75,8 +82,16 @@ class BraveSystem:
         Returns:
             계산된 MAX BRV
         """
-        # 캐릭터가 이미 max_brv를 가지고 있으면 사용
-        if hasattr(character, "max_brv"):
+        # SimpleEnemy는 이미 생성자에서 max_brv가 설정되어 있으므로 그대로 사용
+        if hasattr(character, '__class__') and character.__class__.__name__ == "SimpleEnemy":
+            return character.max_brv
+
+        # Character 객체는 StatManager를 통해 max_brv 가져오기
+        if hasattr(character, "stat_manager"):
+            from src.character.stats import Stats
+            base_max_brv = int(character.stat_manager.get_value(Stats.MAX_BRV, use_total=False))
+        elif hasattr(character, "max_brv") and not callable(getattr(type(character), "max_brv", None)):
+            # max_brv가 property가 아닌 일반 속성인 경우
             base_max_brv = character.max_brv
         else:
             # INT BRV 기반으로 계산
@@ -175,6 +190,7 @@ class BraveSystem:
         actual_damage = int(damage / defender_resistance)
 
         # BRV 감소 (최소 0)
+        old_defender_brv = defender.current_brv
         brv_stolen = min(actual_damage, max(0, defender.current_brv))
         defender.current_brv = max(0, defender.current_brv - actual_damage)
 
@@ -190,10 +206,10 @@ class BraveSystem:
         )
         actual_gain = attacker.current_brv - old_attacker_brv
 
-        # BREAK 판정
-        is_break = defender.current_brv == 0
-
-        if is_break:
+        # BREAK 판정: 이미 BRV가 0인 상태에서 추가 공격을 받으면 BREAK
+        is_break = False
+        if old_defender_brv == 0 and actual_damage > 0:
+            is_break = True
             self.logger.info(f"BREAK! {attacker.name} → {defender.name}")
 
             # BREAK 상태 플래그 설정

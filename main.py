@@ -209,13 +209,13 @@ def main() -> int:
 
                             floor_number = 1
 
-                            while True:
-                                # 던전 생성
-                                dungeon_gen = DungeonGenerator(width=80, height=50)
-                                dungeon = dungeon_gen.generate(floor_number)
+                            # 던전 및 탐험 초기화 (층 변경 시에만 재생성)
+                            dungeon_gen = DungeonGenerator(width=80, height=50)
+                            dungeon = dungeon_gen.generate(floor_number)
+                            exploration = ExplorationSystem(dungeon, party, floor_number, inventory)
 
-                                # 탐험 시작
-                                exploration = ExplorationSystem(dungeon, party, floor_number, inventory)
+                            while True:
+                                # 탐험 시작 (기존 exploration 객체 재사용)
                                 result, data = run_exploration(
                                     display.console,
                                     display.context,
@@ -304,11 +304,17 @@ def main() -> int:
                                 elif result == "floor_down":
                                     floor_number += 1
                                     logger.info(f"⬇ 다음 층: {floor_number}층")
+                                    # 새 던전 생성
+                                    dungeon = dungeon_gen.generate(floor_number)
+                                    exploration = ExplorationSystem(dungeon, party, floor_number, inventory)
                                     continue
                                 elif result == "floor_up":
                                     if floor_number > 1:
                                         floor_number -= 1
                                         logger.info(f"⬆ 이전 층: {floor_number}층")
+                                        # 새 던전 생성
+                                        dungeon = dungeon_gen.generate(floor_number)
+                                        exploration = ExplorationSystem(dungeon, party, floor_number, inventory)
                                         continue
                                     else:
                                         logger.info("🎉 던전 탈출 성공!")
