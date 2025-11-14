@@ -284,7 +284,8 @@ class TextInputBox:
         max_length: int = 20,
         x: int = 20,
         y: int = 15,
-        width: int = 40
+        width: int = 40,
+        default_text: str = ""
     ):
         """
         Args:
@@ -293,6 +294,7 @@ class TextInputBox:
             max_length: 최대 입력 길이
             x, y: 위치
             width: 너비
+            default_text: 기본 텍스트
         """
         self.title = title
         self.prompt = prompt
@@ -301,7 +303,7 @@ class TextInputBox:
         self.y = y
         self.width = width
 
-        self.text = ""
+        self.text = default_text[:max_length] if default_text else ""
         self.confirmed = False
         self.cancelled = False
 
