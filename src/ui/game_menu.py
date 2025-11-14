@@ -269,10 +269,11 @@ def open_party_status_menu(
 
             # HP
             if hasattr(member, 'current_hp') and hasattr(member, 'max_hp'):
-                hp_bar, hp_color = gauge_renderer.render_bar(
-                    member.current_hp, member.max_hp, width=15, show_numbers=True
+                console.print(7, y, "HP:", fg=(200, 200, 200))
+                gauge_renderer.render_bar(
+                    console, 11, y, 15,
+                    member.current_hp, member.max_hp, show_numbers=True
                 )
-                console.print(7, y, f"HP: {hp_bar}", fg=hp_color)
                 y += 1
 
             y += 1  # 다음 파티원과 간격
@@ -346,18 +347,20 @@ def show_character_detail(
 
         # HP
         if hasattr(character, 'current_hp') and hasattr(character, 'max_hp'):
-            hp_bar, hp_color = gauge_renderer.render_bar(
-                character.current_hp, character.max_hp, width=30, show_numbers=True
+            console.print(10, y, "HP:", fg=(200, 200, 200))
+            gauge_renderer.render_bar(
+                console, 14, y, 30,
+                character.current_hp, character.max_hp, show_numbers=True
             )
-            console.print(10, y, f"HP: {hp_bar}", fg=hp_color)
             y += 1
 
         # MP
         if hasattr(character, 'current_mp') and hasattr(character, 'max_mp'):
-            mp_bar, mp_color = gauge_renderer.render_bar(
-                character.current_mp, character.max_mp, width=30, show_numbers=True, color_gradient=False
+            console.print(10, y, "MP:", fg=(200, 200, 200))
+            gauge_renderer.render_bar(
+                console, 14, y, 30,
+                character.current_mp, character.max_mp, show_numbers=True, color_gradient=False
             )
-            console.print(10, y, f"MP: {mp_bar}", fg=(100, 150, 255))
             y += 2
 
         # 스탯 상세

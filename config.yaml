@@ -21,7 +21,7 @@ display:
   screen_height: 45
 
   # 한글 폰트 설정
-  font_size: 40  # 셀 크기 = 폰트 크기 (픽셀)
+  font_size: 60  # 셀 크기 = 폰트 크기 (픽셀)
   char_spacing_adjust: 0  # 폰트 너비 조정 (0 = 정사각형, 양수 = 더 넓게, 음수 = 더 좁게)
   tileset: "assets/fonts/dejavu10x10_gs_tc.png"  # tcod 기본 타일셋 (사용 안 함)
 

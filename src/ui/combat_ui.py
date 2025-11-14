@@ -470,46 +470,49 @@ class CombatUI:
                 console.print(5 + len(ally.name) + 4, y, status_text, fg=(200, 200, 255))
 
             # HP 게이지 (정밀)
-            hp_bar, hp_color = gauge_renderer.render_bar(
-                ally.current_hp, ally.max_hp, width=15, show_numbers=True
+            console.print(8, y + 1, "HP:", fg=(200, 200, 200))
+            gauge_renderer.render_bar(
+                console, 12, y + 1, 15,
+                ally.current_hp, ally.max_hp, show_numbers=True
             )
-            console.print(8, y + 1, f"HP: {hp_bar}", fg=hp_color)
 
             # MP 게이지
-            mp_bar, mp_color = gauge_renderer.render_bar(
-                ally.current_mp, ally.max_mp, width=10, show_numbers=True, color_gradient=False
+            console.print(8, y + 2, "MP:", fg=(200, 200, 200))
+            gauge_renderer.render_bar(
+                console, 12, y + 2, 10,
+                ally.current_mp, ally.max_mp, show_numbers=True, color_gradient=False
             )
-            console.print(8, y + 2, f"MP: {mp_bar}", fg=(100, 200, 255))
 
             # BRV 게이지
             max_brv = getattr(ally, 'max_brv', 9999)
-            brv_bar, brv_color = gauge_renderer.render_bar(
-                ally.current_brv, max_brv, width=10, show_numbers=True, color_gradient=False
+            console.print(8, y + 3, "BRV:", fg=(200, 200, 200))
+            gauge_renderer.render_bar(
+                console, 13, y + 3, 10,
+                ally.current_brv, max_brv, show_numbers=True, color_gradient=False
             )
-            console.print(8, y + 3, f"BRV: {brv_bar}", fg=(255, 200, 100))
 
             # ATB 게이지 (더 정밀)
             gauge = self.combat_manager.atb.get_gauge(ally)
             atb_value = gauge.current if gauge else 0
-            atb_bar, atb_color = gauge_renderer.render_percentage_bar(
-                atb_value / 1000.0, width=15, show_percent=False, custom_color=(200, 200, 255)
+            console.print(33, y + 1, "ATB:", fg=(200, 200, 200))
+            gauge_renderer.render_percentage_bar(
+                console, 38, y + 1, 15,
+                atb_value / 1000.0, show_percent=False, custom_color=(200, 200, 255)
             )
-            console.print(33, y + 1, f"ATB: {atb_bar}", fg=atb_color)
 
             # 상처 표시
             wound_damage = getattr(ally, 'wound_damage', 0)
             if wound_damage > 0:
-                wound_text, wound_color = gauge_renderer.render_wound_indicator(wound_damage)
-                console.print(33, y + 2, f"상처: {wound_text}", fg=wound_color)
+                gauge_renderer.render_wound_indicator(console, 33, y + 2, wound_damage)
 
             # 캐스팅 표시
             cast_info = casting_system.get_cast_info(ally)
             if cast_info:
                 skill_name = getattr(cast_info.skill, 'name', 'Unknown')
-                cast_bar, cast_color = gauge_renderer.render_casting_bar(
-                    cast_info.progress, skill_name="", width=15
+                gauge_renderer.render_casting_bar(
+                    console, 8, y + 4, 20,
+                    cast_info.progress, skill_name=f"시전:{skill_name}"
                 )
-                console.print(8, y + 4, f"시전: {skill_name} {cast_bar}", fg=cast_color)
 
     def _render_enemies(self, console: tcod.console.Console):
         """적군 상태 렌더링 (상세)"""
@@ -537,17 +540,19 @@ class CombatUI:
                 console.print(x, y + 1, status_text, fg=(200, 200, 255))
 
             # HP 게이지
-            hp_bar, hp_color = gauge_renderer.render_bar(
-                enemy.current_hp, enemy.max_hp, width=12, show_numbers=True
+            console.print(x + 3, y + 2, "HP:", fg=(200, 200, 200))
+            gauge_renderer.render_bar(
+                console, x + 7, y + 2, 12,
+                enemy.current_hp, enemy.max_hp, show_numbers=True
             )
-            console.print(x + 3, y + 2, f"HP: {hp_bar}", fg=hp_color)
 
             # BRV 게이지
             max_brv = getattr(enemy, 'max_brv', 9999)
-            brv_bar, brv_color = gauge_renderer.render_bar(
-                enemy.current_brv, max_brv, width=10, show_numbers=True, color_gradient=False
+            console.print(x + 3, y + 3, "BRV:", fg=(200, 200, 200))
+            gauge_renderer.render_bar(
+                console, x + 8, y + 3, 10,
+                enemy.current_brv, max_brv, show_numbers=True, color_gradient=False
             )
-            console.print(x + 3, y + 3, f"BRV: {brv_bar}", fg=(255, 200, 100))
 
             # BREAK 상태 표시
             if self.combat_manager.brave.is_broken(enemy):
@@ -557,10 +562,10 @@ class CombatUI:
             cast_info = casting_system.get_cast_info(enemy)
             if cast_info:
                 skill_name = getattr(cast_info.skill, 'name', 'Unknown')
-                cast_bar, cast_color = gauge_renderer.render_casting_bar(
-                    cast_info.progress, skill_name="", width=12
+                gauge_renderer.render_casting_bar(
+                    console, x + 3, y + 5, 15,
+                    cast_info.progress, skill_name=f"시전:{skill_name[:8]}"
                 )
-                console.print(x + 3, y + 5, f"시전: {skill_name[:8]} {cast_bar}", fg=cast_color)
 
     def _render_messages(self, console: tcod.console.Console):
         """메시지 로그 렌더링"""
