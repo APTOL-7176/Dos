@@ -18,7 +18,7 @@ def create_alchemist_skills():
         DamageEffect(DamageType.BRV, 1.4),
         GimmickEffect(GimmickOperation.ADD, "potion_stock", 1, max_value=10)
     ]
-    throw_potion.costs = [MPCost(12)]
+    throw_potion.costs = []  # 기본 공격은 MP 소모 없음
     skills.append(throw_potion)
     
     # 2. 기본 HP: 폭발 포션
@@ -27,7 +27,7 @@ def create_alchemist_skills():
         DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "potion_stock", "multiplier": 0.2}),
         GimmickEffect(GimmickOperation.CONSUME, "potion_stock", 1)
     ]
-    explosive_potion.costs = [MPCost(20), StackCost("potion_stock", 1)]
+    explosive_potion.costs = []  # 기본 공격은 MP 소모 없음
     skills.append(explosive_potion)
     
     # 3. 회복 포션

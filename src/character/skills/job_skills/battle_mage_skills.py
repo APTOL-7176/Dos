@@ -16,7 +16,7 @@ def create_battle_mage_skills():
         DamageEffect(DamageType.BRV, 1.5),
         GimmickEffect(GimmickOperation.ADD, "rune_stacks", 1, max_value=8)
     ]
-    engrave_rune.costs = [MPCost(15)]
+    engrave_rune.costs = []  # 기본 공격은 MP 소모 없음
     skills.append(engrave_rune)
     
     # 2. 기본 HP: 룬 폭발
@@ -25,7 +25,7 @@ def create_battle_mage_skills():
         DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "rune_stacks", "multiplier": 0.25}),
         GimmickEffect(GimmickOperation.CONSUME, "rune_stacks", 1)
     ]
-    rune_burst.costs = [MPCost(20), StackCost("rune_stacks", 1)]
+    rune_burst.costs = []  # 기본 공격은 MP 소모 없음
     skills.append(rune_burst)
     
     # 3. 룬 강화

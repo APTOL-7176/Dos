@@ -16,7 +16,7 @@ def create_necromancer_skills():
         DamageEffect(DamageType.BRV, 1.4),
         GimmickEffect(GimmickOperation.ADD, "corpse_count", 1, max_value=10)
     ]
-    corpse_touch.costs = [MPCost(15)]
+    corpse_touch.costs = []  # 기본 공격은 MP 소모 없음
     
     # 2. 기본 HP: 영혼 흡수
     soul_drain = Skill("necro_soul_drain", "영혼 흡수", "시체를 소비하여 HP 공격")
@@ -24,7 +24,7 @@ def create_necromancer_skills():
         DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "corpse_count", "multiplier": 0.2}),
         GimmickEffect(GimmickOperation.CONSUME, "corpse_count", 1)
     ]
-    soul_drain.costs = [MPCost(20), StackCost("corpse_count", 1)]
+    soul_drain.costs = []  # 기본 공격은 MP 소모 없음
     
     # 3. 스켈레톤 소환
     summon_skeleton = Skill("necro_summon_skeleton", "스켈레톤 소환", "시체 3개로 소환수 생성")

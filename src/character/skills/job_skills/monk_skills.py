@@ -16,7 +16,7 @@ def create_monk_skills():
         DamageEffect(DamageType.BRV, 1.2, gimmick_bonus={"field": "combo_count", "multiplier": 0.1}),
         GimmickEffect(GimmickOperation.ADD, "combo_count", 1, max_value=10)
     ]
-    rapid_punch.costs = [MPCost(10)]
+    rapid_punch.costs = []  # 기본 공격은 MP 소모 없음
     rapid_punch.cast_time = 0.5
     
     # 2. 기본 HP: 장타
@@ -25,7 +25,7 @@ def create_monk_skills():
         DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "combo_count", "multiplier": 0.25}),
         GimmickEffect(GimmickOperation.CONSUME, "combo_count", 1)
     ]
-    palm_strike.costs = [MPCost(15), StackCost("combo_count", 1)]
+    palm_strike.costs = []  # 기본 공격은 MP 소모 없음
     
     # 3. 차크라 집중
     chakra_focus = Skill("monk_chakra_focus", "차크라 집중", "내공 집중, 차크라 획득")

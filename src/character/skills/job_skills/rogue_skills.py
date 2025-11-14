@@ -17,7 +17,7 @@ def create_rogue_skills():
         DamageEffect(DamageType.BRV, 1.3),
         GimmickEffect(GimmickOperation.ADD, "stolen_items", 1, max_value=10)
     ]
-    ambush.costs = [MPCost(10)]
+    ambush.costs = []  # 기본 공격은 MP 소모 없음
     ambush.cast_time = 0.5
     skills.append(ambush)
     
@@ -26,7 +26,7 @@ def create_rogue_skills():
     vital_strike.effects = [
         DamageEffect(DamageType.HP, 1.2, gimmick_bonus={"field": "stolen_items", "multiplier": 0.15})
     ]
-    vital_strike.costs = [MPCost(18)]
+    vital_strike.costs = []  # 기본 공격은 MP 소모 없음
     skills.append(vital_strike)
     
     # 3. 훔치기

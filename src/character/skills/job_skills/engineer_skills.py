@@ -15,7 +15,7 @@ def create_engineer_skills():
         DamageEffect(DamageType.BRV, 1.3),
         GimmickEffect(GimmickOperation.ADD, "machine_parts", 1, max_value=8)
     ]
-    assemble_parts.costs = [MPCost(14)]
+    assemble_parts.costs = []  # 기본 공격은 MP 소모 없음
 
     # 2. 기본 HP: 기계 공격
     machine_attack = Skill("engineer_machine_attack", "기계 공격", "기계 부품 소비 공격")
@@ -23,7 +23,7 @@ def create_engineer_skills():
         DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "machine_parts", "multiplier": 0.2}),
         GimmickEffect(GimmickOperation.CONSUME, "machine_parts", 1)
     ]
-    machine_attack.costs = [MPCost(18), StackCost("machine_parts", 1)]
+    machine_attack.costs = []  # 기본 공격은 MP 소모 없음
 
     # 3. 포탑 설치
     turret_deploy = Skill("engineer_turret_deploy", "포탑 설치", "부품 2개 소비, 포탑 배치")

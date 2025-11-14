@@ -14,7 +14,7 @@ def create_sword_saint_skills():
         DamageEffect(DamageType.BRV, 1.5),
         GimmickEffect(GimmickOperation.ADD, "sword_aura", 1, max_value=5)
     ]
-    kenkizan.costs = [MPCost(15)]
+    kenkizan.costs = []  # 기본 공격은 MP 소모 없음
     
     # 2. 기본 HP: 일섬
     ilseom = Skill("sword_saint_ilseom", "일섬", "검기 스택 소비하여 강력한 HP 공격")
@@ -22,7 +22,7 @@ def create_sword_saint_skills():
         DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "sword_aura", "multiplier": 0.3}),
         GimmickEffect(GimmickOperation.CONSUME, "sword_aura", 1)
     ]
-    ilseom.costs = [MPCost(20), StackCost("sword_aura", 1)]
+    ilseom.costs = []  # 기본 공격은 MP 소모 없음
     
     # 3. 검기 파동
     kenki_hadou = Skill("sword_saint_kenki_hadou", "검기 파동", "관통 공격")

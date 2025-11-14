@@ -15,7 +15,7 @@ def create_shaman_skills():
         DamageEffect(DamageType.BRV, 1.4),
         GimmickEffect(GimmickOperation.ADD, "curse_stacks", 1, max_value=8)
     ]
-    curse.costs = [MPCost(15)]
+    curse.costs = []  # 기본 공격은 MP 소모 없음
 
     # 2. 기본 HP: 저주 폭발
     curse_burst = Skill("shaman_curse_burst", "저주 폭발", "저주 소비 공격")
@@ -23,7 +23,7 @@ def create_shaman_skills():
         DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "curse_stacks", "multiplier": 0.25}),
         GimmickEffect(GimmickOperation.CONSUME, "curse_stacks", 1)
     ]
-    curse_burst.costs = [MPCost(20), StackCost("curse_stacks", 1)]
+    curse_burst.costs = []  # 기본 공격은 MP 소모 없음
 
     # 3. 역병
     plague = Skill("shaman_plague", "역병", "저주 2스택 획득, 광역 디버프")

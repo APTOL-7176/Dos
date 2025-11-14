@@ -18,7 +18,7 @@ def create_archer_skills():
         DamageEffect(DamageType.BRV, 0.6),
         GimmickEffect(GimmickOperation.ADD, "aim_points", 1, max_value=5)
     ]
-    triple_shot.costs = [MPCost(12)]
+    triple_shot.costs = []  # 기본 공격은 MP 소모 없음
     
     # 2. 기본 HP: 정밀 사격
     precision_shot = Skill("archer_precision_shot", "정밀 사격", "조준 포인트로 강화된 HP 공격")
@@ -26,7 +26,7 @@ def create_archer_skills():
         DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "aim_points", "multiplier": 0.25}),
         GimmickEffect(GimmickOperation.CONSUME, "aim_points", 1)
     ]
-    precision_shot.costs = [MPCost(18), StackCost("aim_points", 1)]
+    precision_shot.costs = []  # 기본 공격은 MP 소모 없음
     
     # 3. 지원 사격
     support_fire = Skill("archer_support_fire", "지원 사격", "아군 행동 시 조준 포인트 소비 자동 사격")

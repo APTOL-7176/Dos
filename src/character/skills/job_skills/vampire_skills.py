@@ -20,7 +20,7 @@ def create_vampire_skills():
         LifestealEffect(lifesteal_percent=0.3),
         GimmickEffect(GimmickOperation.ADD, "blood_pool", 1, max_value=10)
     ]
-    blood_drain.costs = [MPCost(12)]
+    blood_drain.costs = []  # 기본 공격은 MP 소모 없음
     skills.append(blood_drain)
     
     # 2. 기본 HP: 피의 창
@@ -30,7 +30,7 @@ def create_vampire_skills():
         LifestealEffect(lifesteal_percent=0.5),
         GimmickEffect(GimmickOperation.CONSUME, "blood_pool", 1)
     ]
-    blood_lance.costs = [MPCost(18)]
+    blood_lance.costs = []  # 기본 공격은 MP 소모 없음
     skills.append(blood_lance)
     
     # 3. 피의 갑옷

@@ -11,11 +11,11 @@ def create_dark_knight_skills():
     skills = []
     skills.append(Skill("dk_dark_slash", "어둠 베기", "어둠 스택 획득"))
     skills[-1].effects = [DamageEffect(DamageType.BRV, 1.6), GimmickEffect(GimmickOperation.ADD, "darkness", 1, max_value=10)]
-    skills[-1].costs = [MPCost(15)]
-    
+    skills[-1].costs = []  # 기본 공격은 MP 소모 없음
+
     skills.append(Skill("dk_drain", "흡혈 강타", "어둠 소비 HP공격"))
     skills[-1].effects = [DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "darkness", "multiplier": 0.25}), LifestealEffect(0.5), GimmickEffect(GimmickOperation.CONSUME, "darkness", 1)]
-    skills[-1].costs = [MPCost(20), StackCost("darkness", 1)]
+    skills[-1].costs = []  # 기본 공격은 MP 소모 없음
     
     skills.append(Skill("dk_dark_aura", "어둠의 오라", "지속 피해"))
     skills[-1].effects = [DamageEffect(DamageType.BRV, 1.0), DamageEffect(DamageType.BRV, 1.0), DamageEffect(DamageType.BRV, 1.0), GimmickEffect(GimmickOperation.ADD, "darkness", 2, max_value=10)]

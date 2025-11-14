@@ -17,7 +17,7 @@ def create_paladin_skills():
         DamageEffect(DamageType.BRV, 1.5),
         GimmickEffect(GimmickOperation.ADD, "holy_power", 1, max_value=5)
     ]
-    holy_strike.costs = [MPCost(12)]
+    holy_strike.costs = []  # 기본 공격은 MP 소모 없음
     
     # 2. 기본 HP: 신성한 심판
     divine_judgment = Skill("paladin_judgment", "신성한 심판", "성력 소비 심판의 일격")
@@ -25,7 +25,7 @@ def create_paladin_skills():
         DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "holy_power", "multiplier": 0.3}),
         GimmickEffect(GimmickOperation.CONSUME, "holy_power", 1)
     ]
-    divine_judgment.costs = [MPCost(18), StackCost("holy_power", 1)]
+    divine_judgment.costs = []  # 기본 공격은 MP 소모 없음
     
     # 3. 신성한 보호막
     divine_shield = Skill("paladin_divine_shield", "신성한 보호막", "성력으로 강력한 보호막")

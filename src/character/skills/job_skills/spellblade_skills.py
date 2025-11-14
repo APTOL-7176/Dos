@@ -15,7 +15,7 @@ def create_spellblade_skills():
         DamageEffect(DamageType.BRV, 1.5),
         GimmickEffect(GimmickOperation.ADD, "mana_blade", 1, max_value=6)
     ]
-    magic_slash.costs = [MPCost(16)]
+    magic_slash.costs = []  # 기본 공격은 MP 소모 없음
 
     # 2. 기본 HP: 원소 베기
     elemental_slash = Skill("spellblade_elemental_slash", "원소 베기", "마력 소비 공격")
@@ -23,7 +23,7 @@ def create_spellblade_skills():
         DamageEffect(DamageType.HP, 1.1, gimmick_bonus={"field": "mana_blade", "multiplier": 0.3}),
         GimmickEffect(GimmickOperation.CONSUME, "mana_blade", 1)
     ]
-    elemental_slash.costs = [MPCost(20), StackCost("mana_blade", 1)]
+    elemental_slash.costs = []  # 기본 공격은 MP 소모 없음
 
     # 3. 화염 주입
     fire_infusion = Skill("spellblade_fire_infusion", "화염 주입", "마력 2스택 획득 + 화염 버프")

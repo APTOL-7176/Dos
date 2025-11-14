@@ -16,7 +16,7 @@ def create_gladiator_skills():
         DamageEffect(DamageType.BRV, 1.4, gimmick_bonus={"field": "kill_count", "multiplier": 0.1}),
         GimmickEffect(GimmickOperation.ADD, "glory_points", 1, max_value=10)
     ]
-    arena_strike.costs = [MPCost(12)]
+    arena_strike.costs = []  # 기본 공격은 MP 소모 없음
     
     # 2. 기본 HP: 명예의 일격
     honor_strike = Skill("gladiator_honor_strike", "명예의 일격", "처치 스택으로 강력한 일격")
@@ -24,7 +24,7 @@ def create_gladiator_skills():
         DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "kill_count", "multiplier": 0.25}),
         GimmickEffect(GimmickOperation.CONSUME, "glory_points", 1)
     ]
-    honor_strike.costs = [MPCost(18), StackCost("glory_points", 1)]
+    honor_strike.costs = []  # 기본 공격은 MP 소모 없음
     
     # 3. 패링
     parry = Skill("gladiator_parry", "패링", "다음 공격을 반격으로 전환")

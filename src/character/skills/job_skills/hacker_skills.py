@@ -16,7 +16,7 @@ def create_hacker_skills():
         DamageEffect(DamageType.BRV, 1.3),
         GimmickEffect(GimmickOperation.ADD, "hack_stacks", 1, max_value=10)
     ]
-    hack_attempt.costs = [MPCost(10)]
+    hack_attempt.costs = []  # 기본 공격은 MP 소모 없음
     skills.append(hack_attempt)
     
     # 2. 기본 HP: 시스템 오버로드
@@ -25,7 +25,7 @@ def create_hacker_skills():
         DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "hack_stacks", "multiplier": 0.25}),
         GimmickEffect(GimmickOperation.CONSUME, "hack_stacks", 1)
     ]
-    overload.costs = [MPCost(18), StackCost("hack_stacks", 1)]
+    overload.costs = []  # 기본 공격은 MP 소모 없음
     skills.append(overload)
     
     # 3. 디버프 설치
