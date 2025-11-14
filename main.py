@@ -251,7 +251,10 @@ def main() -> int:
 
                                 inventory.add_gold(rewards.get("gold", 0))
 
-                                # 전투 후 복귀 시 BGM 재생 안 함
+                                # 전투 후 필드 BGM 재생
+                                from src.audio import play_bgm
+                                play_bgm("field", loop=True, fade_in=True)
+                                logger.info("필드 BGM 재생")
                                 play_dungeon_bgm = False
                                 continue
                             elif combat_result == CombatState.DEFEAT:
@@ -259,7 +262,10 @@ def main() -> int:
                                 break
                             else:
                                 logger.info("🏃 도망쳤다")
-                                # 도망 후 복귀 시 BGM 재생 안 함
+                                # 도망 후 필드 BGM 재생
+                                from src.audio import play_bgm
+                                play_bgm("field", loop=True, fade_in=True)
+                                logger.info("필드 BGM 재생")
                                 play_dungeon_bgm = False
                                 continue
 
