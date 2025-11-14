@@ -128,12 +128,13 @@ class DamageCalculator:
         brv_points: int,
         hp_multiplier: float = 1.0,
         is_break: bool = False,
+        damage_type: str = "physical",
         **kwargs
     ) -> Tuple[DamageResult, int]:
         """
         HP 데미지 계산
 
-        공식: BRV 포인트 * HP 배율 * (BREAK 보너스)
+        공식: BRV 포인트 * HP 배율 * 스탯 보정 * (BREAK 보너스)
         상처 데미지: HP 데미지의 25%
 
         Args:
@@ -142,6 +143,7 @@ class DamageCalculator:
             brv_points: 축적된 BRV
             hp_multiplier: HP 배율
             is_break: BREAK 상태 여부
+            damage_type: 데미지 타입 ("physical" 또는 "magical")
             **kwargs: 추가 옵션
 
         Returns:
@@ -150,11 +152,30 @@ class DamageCalculator:
         # 기본 HP 데미지 계산
         base_damage = int(brv_points * hp_multiplier * self.hp_damage_multiplier)
 
+        # 스탯 기반 보정 (공격자 스탯 vs 방어자 스탯)
+        if damage_type == "magical":
+            attacker_stat = self._get_magic_stat(attacker)
+            defender_stat = self._get_spirit_stat(defender)
+        else:  # physical
+            attacker_stat = self._get_attack_stat(attacker)
+            defender_stat = self._get_defense_stat(defender)
+
+        # 스탯 보정 계산: 공격자 스탯 / (방어자 스탯 + 100)
+        # +100은 기본값으로 0으로 나누는 것 방지
+        stat_modifier = attacker_stat / (defender_stat + 100.0)
+
+        damage = int(base_damage * stat_modifier)
+
+        # 크리티컬 판정
+        is_critical = self._check_critical(attacker)
+        if is_critical:
+            damage = int(damage * self.critical_multiplier)
+            self.logger.info(f"⚡ 크리티컬 HP 공격! {attacker.name}")
+
         # BREAK 보너스
-        damage = base_damage
         if is_break:
             damage = int(damage * self.break_damage_bonus)
-            self.logger.info(f"BREAK 보너스 데미지! {damage} ({self.break_damage_bonus}x)")
+            self.logger.info(f"⚡ BREAK 보너스 데미지! {damage} ({self.break_damage_bonus}x)")
 
         final_damage = max(5, damage)
 
@@ -165,6 +186,12 @@ class DamageCalculator:
             f"HP 데미지 계산: {attacker.name} → {defender.name}",
             {
                 "brv_points": brv_points,
+                "base_damage": base_damage,
+                "stat_modifier": f"{stat_modifier:.2f}",
+                "attacker_stat": attacker_stat,
+                "defender_stat": defender_stat,
+                "damage_type": damage_type,
+                "is_critical": is_critical,
                 "final_damage": final_damage,
                 "wound_damage": wound_damage,
                 "is_break": is_break
@@ -174,12 +201,18 @@ class DamageCalculator:
         result = DamageResult(
             base_damage=base_damage,
             final_damage=final_damage,
-            is_critical=False,  # HP 공격은 크리티컬 없음
+            is_critical=is_critical,
             multiplier=hp_multiplier,
-            variance=1.0,
+            variance=stat_modifier,  # 스탯 보정을 variance로 기록
             details={
                 "brv_points": brv_points,
                 "hp_multiplier": self.hp_damage_multiplier,
+                "stat_modifier": stat_modifier,
+                "attacker_stat": attacker_stat,
+                "defender_stat": defender_stat,
+                "damage_type": damage_type,
+                "is_critical": is_critical,
+                "critical_multiplier": self.critical_multiplier if is_critical else 1.0,
                 "is_break": is_break,
                 "break_bonus": self.break_damage_bonus if is_break else 1.0
             }

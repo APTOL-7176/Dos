@@ -71,9 +71,14 @@ combat:
 
   # 데미지 계산
   damage:
+    brv_multiplier: 1.5  # BRV 공격 기본 배율
+    hp_multiplier: 0.05  # HP 공격 기본 배율 (BRV → HP 변환 비율, 1/3로 감소)
     physical_defense_reduction: 0.5  # 방어력 1당 데미지 감소
     magical_defense_reduction: 0.5  # 정신력 1당 데미지 감소
-    critical_damage_multiplier: 1.5  # 크리티컬 데미지 배율
+    critical_multiplier: 1.5  # 크리티컬 데미지 배율
+    critical_chance: 0.1  # 기본 크리티컬 확률
+    break_bonus: 1.5  # BREAK 시 HP 공격 보너스
+    wound_rate: 0.25  # 상처 데미지 비율 (HP 데미지의 25%)
     elemental_weakness_bonus: 1.5  # 속성 약점 보너스
     elemental_resistance_reduction: 0.5  # 속성 저항 감소
 

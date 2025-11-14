@@ -15,6 +15,7 @@ from typing import Dict, Any, Optional
 from src.core.config import get_config
 from src.core.logger import get_logger
 from src.core.event_bus import event_bus, Events
+from src.combat.damage_calculator import get_damage_calculator
 
 
 class BraveSystem:
@@ -247,17 +248,20 @@ class BraveSystem:
         self,
         attacker: Any,
         defender: Any,
-        brv_multiplier: float = 1.0
+        brv_multiplier: float = 1.0,
+        damage_type: str = "physical"
     ) -> Dict[str, Any]:
         """
         HP 공격
 
         축적된 BRV를 소비하여 HP 데미지를 가합니다.
+        공격자의 스탯(힘/마법)과 방어자의 스탯(방어/정신)을 고려합니다.
 
         Args:
             attacker: 공격자
             defender: 방어자
             brv_multiplier: BRV 배율 (스킬에 따라 다름)
+            damage_type: 데미지 타입 ("physical" 또는 "magical")
 
         Returns:
             공격 결과 {"hp_damage": int, "brv_consumed": int}
@@ -266,23 +270,30 @@ class BraveSystem:
             self.logger.warning(f"{attacker.name}: BRV가 0이라 HP 공격 불가")
             return {"hp_damage": 0, "brv_consumed": 0}
 
-        # HP 데미지 계산
-        base_damage = int(attacker.current_brv * brv_multiplier)
+        # 데미지 계산기 사용
+        damage_calc = get_damage_calculator()
 
-        # BREAK 상태면 보너스 데미지
+        # BREAK 상태 확인
         is_defender_broken = defender.current_brv == 0
-        if is_defender_broken:
-            base_damage = int(base_damage * self.break_bonus)
-            self.logger.info(
-                f"⚡ BREAK 보너스 데미지! {base_damage} ({self.break_bonus}x)"
-            )
+
+        # HP 데미지 계산 (스탯 기반)
+        damage_result, wound_damage = damage_calc.calculate_hp_damage(
+            attacker=attacker,
+            defender=defender,
+            brv_points=attacker.current_brv,
+            hp_multiplier=brv_multiplier,
+            is_break=is_defender_broken,
+            damage_type=damage_type
+        )
 
         # HP 데미지 적용
-        hp_damage = defender.take_damage(base_damage)
+        hp_damage = defender.take_damage(damage_result.final_damage)
 
         # BRV 소비
         brv_consumed = attacker.current_brv
+        self.logger.warning(f"[HP 공격] {attacker.name} BRV 리셋 전: {attacker.current_brv}")
         attacker.current_brv = 0
+        self.logger.warning(f"[HP 공격] {attacker.name} BRV 리셋 후: {attacker.current_brv}")
 
         event_bus.publish(Events.CHARACTER_BRV_CHANGE, {
             "character": attacker,
@@ -296,14 +307,21 @@ class BraveSystem:
             {
                 "brv_consumed": brv_consumed,
                 "hp_damage": hp_damage,
-                "is_break_bonus": is_defender_broken
+                "damage_type": damage_type,
+                "stat_modifier": damage_result.variance,
+                "is_critical": damage_result.is_critical,
+                "is_break_bonus": is_defender_broken,
+                "attacker_brv_after": attacker.current_brv
             }
         )
 
         return {
             "hp_damage": hp_damage,
             "brv_consumed": brv_consumed,
-            "is_break_bonus": is_defender_broken
+            "is_break_bonus": is_defender_broken,
+            "is_critical": damage_result.is_critical,
+            "damage_type": damage_type,
+            "stat_modifier": damage_result.variance
         }
 
     def brv_hp_attack(
@@ -311,7 +329,8 @@ class BraveSystem:
         attacker: Any,
         defender: Any,
         brv_damage: int,
-        hp_multiplier: float = 1.0
+        hp_multiplier: float = 1.0,
+        damage_type: str = "physical"
     ) -> Dict[str, Any]:
         """
         BRV + HP 복합 공격
@@ -323,6 +342,7 @@ class BraveSystem:
             defender: 방어자
             brv_damage: BRV 데미지
             hp_multiplier: HP 배율
+            damage_type: 데미지 타입 ("physical" 또는 "magical")
 
         Returns:
             공격 결과
@@ -330,8 +350,8 @@ class BraveSystem:
         # 1. BRV 공격
         brv_result = self.brv_attack(attacker, defender, brv_damage)
 
-        # 2. HP 공격
-        hp_result = self.hp_attack(attacker, defender, hp_multiplier)
+        # 2. HP 공격 (데미지 타입 전달)
+        hp_result = self.hp_attack(attacker, defender, hp_multiplier, damage_type)
 
         return {
             **brv_result,

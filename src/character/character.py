@@ -85,7 +85,7 @@ class Character:
         self._cached_skills = None  # 스킬 객체 캐시
 
         # 로그
-        self.logger.info(f"캐릭터 생성: {self.name} ({self.character_class})")
+        self.logger.info(f"캐릭터 생성: {self.name} ({self.character_class}), 스킬: {len(self.skill_ids)}개")
 
         # 이벤트 발행
         event_bus.publish(Events.CHARACTER_CREATED, {

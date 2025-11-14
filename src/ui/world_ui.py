@@ -252,8 +252,8 @@ class WorldUI:
         inv_y = y + 15
         console.print(x, inv_y, "[소지품]", fg=(200, 200, 255))
         console.print(x + 2, inv_y + 1, f"열쇠: {len(self.exploration.player.keys)}개", fg=(255, 215, 0))
-        # 실제 인벤토리 객체의 아이템 수 표시
-        item_count = len(self.inventory.items) if self.inventory and hasattr(self.inventory, 'items') else 0
+        # 실제 인벤토리 객체의 아이템 수 표시 (slots 사용)
+        item_count = len(self.inventory.slots) if self.inventory and hasattr(self.inventory, 'slots') else 0
         console.print(x + 2, inv_y + 2, f"아이템: {item_count}개", fg=(200, 200, 200))
 
     def _render_messages(self, console: tcod.console.Console):

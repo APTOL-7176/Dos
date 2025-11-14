@@ -300,7 +300,7 @@ class CombatUI:
             if self.combat_manager.state == CombatState.VICTORY:
                 play_bgm("victory")
             elif self.combat_manager.state == CombatState.DEFEAT:
-                play_bgm("defeat")
+                play_bgm("game_over")
 
     def _show_action_result(self, result: Dict[str, Any]):
         """행동 결과 메시지 표시"""
@@ -729,17 +729,17 @@ def run_combat(
 
     if is_sephiroth:
         # 세피로스전: One-Winged Angel 고정
-        selected_bgm = "87-One-Winged Angel"
+        selected_bgm = "battle_final_boss"
     elif is_boss:
         # 보스전: 2개 중 랜덤
-        boss_bgm_tracks = ["38-J-E-N-O-V-A", "86-The Birth of God"]
+        boss_bgm_tracks = ["battle_jenova", "battle_birth_of_god"]
         selected_bgm = random.choice(boss_bgm_tracks)
     else:
         # 일반 전투: 3개 중 랜덤
         battle_bgm_tracks = [
-            "21-Still More Fighting",
-            "85-Jenova Absolute",
-            "11-Fighting"
+            "battle_boss",              # 21-Still More Fighting
+            "battle_jenova_absolute",   # 85-Jenova Absolute
+            "battle_normal"             # 11-Fighting
         ]
         selected_bgm = random.choice(battle_bgm_tracks)
 
@@ -777,4 +777,13 @@ def run_combat(
                 return CombatState.FLED
 
     logger.info(f"전투 종료: {ui.battle_result.value if ui.battle_result else 'unknown'}")
+
+    # 전투 종료 BGM 재생 (전투 루프에서도 재생했지만 확실하게)
+    if ui.battle_result == CombatState.VICTORY:
+        play_bgm("victory")
+        logger.info("승리 BGM 재생")
+    elif ui.battle_result == CombatState.DEFEAT:
+        play_bgm("game_over")
+        logger.info("게임 오버 BGM 재생")
+
     return ui.battle_result or CombatState.FLED
