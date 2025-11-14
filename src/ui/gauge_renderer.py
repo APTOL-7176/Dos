@@ -20,7 +20,8 @@ class GaugeRenderer:
         current: float,
         maximum: float,
         show_numbers: bool = True,
-        color_gradient: bool = True
+        color_gradient: bool = True,
+        custom_color: Tuple[int, int, int] = None
     ) -> None:
         """
         게이지 바 렌더링 (픽셀 단위 부드러운 효과)
@@ -33,6 +34,7 @@ class GaugeRenderer:
             maximum: 최대 값
             show_numbers: 숫자 표시 여부
             color_gradient: 색상 그라디언트 (빨강~노랑~초록)
+            custom_color: 커스텀 색상 (RGB 튜플)
         """
         if maximum <= 0:
             ratio = 0.0
@@ -40,7 +42,11 @@ class GaugeRenderer:
             ratio = min(1.0, current / maximum)
 
         # 색상 계산
-        if color_gradient:
+        if custom_color:
+            # 커스텀 색상 사용
+            fg_color = custom_color
+            bg_color = tuple(c // 2 for c in custom_color)
+        elif color_gradient:
             if ratio > 0.6:
                 fg_color = (0, 200, 0)  # 초록
                 bg_color = (0, 100, 0)

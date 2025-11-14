@@ -359,7 +359,8 @@ def show_character_detail(
             console.print(10, y, "MP:", fg=(200, 200, 200))
             gauge_renderer.render_bar(
                 console, 14, y, 30,
-                character.current_mp, character.max_mp, show_numbers=True, color_gradient=False
+                character.current_mp, character.max_mp, show_numbers=True,
+                color_gradient=False, custom_color=(100, 150, 255)
             )
             y += 2
 
