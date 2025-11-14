@@ -80,8 +80,8 @@ class Character:
         self.available_traits = get_traits(character_class)
         self.active_traits: List[Any] = []
 
-        # 스킬 - YAML에서 로드
-        self.skill_ids = get_skills(character_class)
+        # 스킬 - 직업별로 등록된 스킬 가져오기
+        self.skill_ids = self._get_class_skills(character_class)
         self._cached_skills = None  # 스킬 객체 캐시
 
         # 로그
@@ -372,6 +372,63 @@ class Character:
             self.max_debuff_count = self.gimmick_data.get("max_debuff_count", 10)
 
         self.logger.debug(f"{self.character_class} 기믹 초기화: {gimmick_type}")
+
+    def _get_class_skills(self, character_class: str) -> List[str]:
+        """
+        직업에 맞는 스킬 ID 목록을 가져옵니다.
+
+        SkillManager에 등록된 스킬 중 해당 직업의 스킬만 필터링합니다.
+        """
+        from src.character.skills.skill_manager import get_skill_manager
+        skill_manager = get_skill_manager()
+
+        # 한글 직업명 → 영문 job_id 매핑
+        job_prefix_map = {
+            "전사": "warrior",
+            "아크메이지": "archmage",
+            "궁수": "archer",
+            "도적": "rogue",
+            "성기사": "paladin",
+            "암흑기사": "dark_knight",
+            "몽크": "monk",
+            "바드": "bard",
+            "네크로맨서": "necromancer",
+            "용기사": "dragon_knight",
+            "검성": "sword_saint",
+            "정령술사": "elementalist",
+            "암살자": "assassin",
+            "기계공학자": "engineer",
+            "무당": "shaman",
+            "해적": "pirate",
+            "사무라이": "samurai",
+            "드루이드": "druid",
+            "철학자": "philosopher",
+            "시간술사": "time_mage",
+            "연금술사": "alchemist",
+            "검투사": "gladiator",
+            "기사": "knight",
+            "신관": "priest",
+            "마검사": "spellblade",
+            "차원술사": "dimensionist",
+            "광전사": "berserker",
+            "마법사": "mage",
+        }
+
+        # 영문 job_id 가져오기
+        job_id = job_prefix_map.get(character_class, character_class.lower())
+
+        # 해당 직업의 스킬 ID 필터링 (예: "warrior_", "alchemist_" 등으로 시작)
+        skill_ids = []
+        for skill_id in skill_manager._skills.keys():
+            if skill_id.startswith(f"{job_id}_"):
+                skill_ids.append(skill_id)
+
+        if not skill_ids:
+            self.logger.warning(f"{character_class}({job_id})의 스킬을 찾을 수 없습니다!")
+        else:
+            self.logger.debug(f"{character_class}({job_id})의 스킬: {len(skill_ids)}개")
+
+        return skill_ids
 
     # ===== 스탯 프로퍼티 =====
 

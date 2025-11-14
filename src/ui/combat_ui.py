@@ -147,6 +147,10 @@ class CombatUI:
         Returns:
             True면 전투 종료
         """
+        # ESC나 창 닫기는 무시 (전투 중에는 도주 명령으로만 종료 가능)
+        if action == GameAction.ESCAPE or action == GameAction.QUIT:
+            return False
+
         if self.state == CombatUIState.BATTLE_END:
             return True
 
@@ -274,6 +278,13 @@ class CombatUI:
 
     def _start_target_selection(self):
         """대상 선택 시작"""
+        # 살아있는 적만 필터링
+        alive_enemies = [e for e in self.combat_manager.enemies if e.is_alive]
+        if not alive_enemies:
+            # 모든 적이 죽었으면 행동 메뉴로 돌아감
+            self.state = CombatUIState.ACTION_MENU
+            return
+
         self.target_cursor = 0
         self.state = CombatUIState.TARGET_SELECT
 
@@ -784,9 +795,9 @@ def run_combat(
                 if ui.handle_input(action):
                     break
 
-            # 윈도우 닫기
-            if isinstance(event, tcod.event.Quit):
-                return CombatState.FLED
+            # 윈도우 닫기는 무시 (전투 중에는 도주 명령으로만 종료 가능)
+            # if isinstance(event, tcod.event.Quit):
+            #     return CombatState.FLED
 
     logger.info(f"전투 종료: {ui.battle_result.value if ui.battle_result else 'unknown'}")
 
