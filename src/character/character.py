@@ -394,6 +394,18 @@ class Character:
         """최대 BRV"""
         return int(self.stat_manager.get_value(Stats.MAX_BRV))
 
+    @max_brv.setter
+    def max_brv(self, value: int) -> None:
+        """최대 BRV 설정"""
+        # 기본 값 (보너스 제외)
+        base_value = int(self.stat_manager.get_value(Stats.MAX_BRV, use_total=False))
+        # 이전 direct_set 보너스 제거
+        self.stat_manager.remove_bonus(Stats.MAX_BRV, "direct_set")
+        # 새로운 보너스 추가
+        bonus = value - base_value
+        if bonus != 0:
+            self.stat_manager.add_bonus(Stats.MAX_BRV, "direct_set", bonus)
+
     @property
     def strength(self) -> int:
         """물리 공격력"""
