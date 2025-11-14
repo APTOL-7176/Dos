@@ -382,51 +382,60 @@ class Character:
         from src.character.skills.skill_manager import get_skill_manager
         skill_manager = get_skill_manager()
 
-        # 한글 직업명 → 영문 job_id 매핑
-        job_prefix_map = {
-            "전사": "warrior",
-            "아크메이지": "archmage",
-            "궁수": "archer",
-            "도적": "rogue",
-            "성기사": "paladin",
-            "암흑기사": "dark_knight",
-            "몽크": "monk",
-            "바드": "bard",
-            "네크로맨서": "necromancer",
-            "용기사": "dragon_knight",
-            "검성": "sword_saint",
-            "정령술사": "elementalist",
-            "암살자": "assassin",
-            "기계공학자": "engineer",
-            "무당": "shaman",
-            "해적": "pirate",
-            "사무라이": "samurai",
-            "드루이드": "druid",
-            "철학자": "philosopher",
-            "시간술사": "time_mage",
-            "연금술사": "alchemist",
-            "검투사": "gladiator",
-            "기사": "knight",
-            "신관": "priest",
-            "마검사": "spellblade",
-            "차원술사": "dimensionist",
-            "광전사": "berserker",
-            "마법사": "mage",
+        # 한글 직업명 → 영문 스킬 접두사 매핑
+        skill_prefix_map = {
+            "전사": "warrior_",
+            "아크메이지": "archmage_",
+            "궁수": "archer_",
+            "도적": "rogue_",
+            "성기사": "paladin_",
+            "암흑기사": "dk_",  # dark_knight 축약형
+            "몽크": "monk_",
+            "바드": "bard_",
+            "네크로맨서": "necro_",  # necromancer 축약형
+            "용기사": "dragon_knight_",
+            "검성": "sword_saint_",
+            "정령술사": "elementalist_",
+            "암살자": "assassin_",
+            "기계공학자": "engineer_",
+            "무당": "shaman_",
+            "해적": "pirate_",
+            "사무라이": "samurai_",
+            "드루이드": "druid_",
+            "철학자": "philosopher_",
+            "시간술사": "time_mage_",
+            "연금술사": "alchemist_",
+            "검투사": "gladiator_",
+            "기사": "knight_",
+            "신관": "priest_",
+            "마검사": "spellblade_",
+            "차원술사": "dimensionist_",
+            "광전사": "berserker_",
+            "마법사": "mage_",
+            "전투마법사": "bmage_",  # battle_mage 축약형
+            "클레릭": "cleric_",
+            "브레이커": "breaker_",
+            "해커": "hacker_",
+            "저격수": "sniper_",
+            "흡혈귀": "vampire_",
         }
 
-        # 영문 job_id 가져오기
-        job_id = job_prefix_map.get(character_class, character_class.lower())
+        # 스킬 접두사 가져오기
+        skill_prefix = skill_prefix_map.get(character_class)
+        if not skill_prefix:
+            self.logger.warning(f"{character_class}의 스킬 접두사를 찾을 수 없습니다!")
+            return []
 
-        # 해당 직업의 스킬 ID 필터링 (예: "warrior_", "alchemist_" 등으로 시작)
+        # 해당 접두사로 시작하는 스킬 ID 필터링
         skill_ids = []
         for skill_id in skill_manager._skills.keys():
-            if skill_id.startswith(f"{job_id}_"):
+            if skill_id.startswith(skill_prefix):
                 skill_ids.append(skill_id)
 
         if not skill_ids:
-            self.logger.warning(f"{character_class}({job_id})의 스킬을 찾을 수 없습니다!")
+            self.logger.warning(f"{character_class}({skill_prefix})의 스킬을 찾을 수 없습니다!")
         else:
-            self.logger.debug(f"{character_class}({job_id})의 스킬: {len(skill_ids)}개")
+            self.logger.debug(f"{character_class}({skill_prefix})의 스킬: {len(skill_ids)}개")
 
         return skill_ids
 

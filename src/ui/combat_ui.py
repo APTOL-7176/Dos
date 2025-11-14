@@ -79,16 +79,41 @@ class CombatUI:
 
         logger.info("전투 UI 초기화")
 
-    def _create_action_menu(self) -> CursorMenu:
+    def _create_action_menu(self, actor: Any = None) -> CursorMenu:
         """행동 메뉴 생성"""
-        items = [
-            MenuItem("BRV 공격", description="BRV를 축적하여 적의 BRV를 파괴", enabled=True, value=ActionType.BRV_ATTACK),
-            MenuItem("HP 공격", description="축적한 BRV로 적의 HP에 직접 데미지", enabled=True, value=ActionType.HP_ATTACK),
-            MenuItem("스킬", description="특수 기술 사용", enabled=True, value=ActionType.SKILL),
-            MenuItem("아이템", description="아이템 사용", enabled=True, value=ActionType.ITEM),
-            MenuItem("방어", description="방어 자세로 피해 감소", enabled=True, value=ActionType.DEFEND),
-            MenuItem("도망", description="전투에서 도망", enabled=True, value=ActionType.FLEE),
-        ]
+        items = []
+
+        # 현재 행동자의 기본 공격 스킬 가져오기
+        if actor:
+            skills = getattr(actor, 'skills', [])
+
+            # 첫 번째 스킬 = 기본 BRV 공격
+            if len(skills) >= 1:
+                brv_skill = skills[0]
+                brv_name = getattr(brv_skill, 'name', 'BRV 공격')
+                brv_desc = getattr(brv_skill, 'description', 'BRV를 축적')
+                items.append(MenuItem(brv_name, description=brv_desc, enabled=True, value=("brv_skill", brv_skill)))
+            else:
+                items.append(MenuItem("BRV 공격", description="BRV를 축적", enabled=True, value=ActionType.BRV_ATTACK))
+
+            # 두 번째 스킬 = 기본 HP 공격
+            if len(skills) >= 2:
+                hp_skill = skills[1]
+                hp_name = getattr(hp_skill, 'name', 'HP 공격')
+                hp_desc = getattr(hp_skill, 'description', 'HP 데미지')
+                items.append(MenuItem(hp_name, description=hp_desc, enabled=True, value=("hp_skill", hp_skill)))
+            else:
+                items.append(MenuItem("HP 공격", description="HP 데미지", enabled=True, value=ActionType.HP_ATTACK))
+        else:
+            # actor가 없으면 기본 행동
+            items.append(MenuItem("BRV 공격", description="BRV를 축적", enabled=True, value=ActionType.BRV_ATTACK))
+            items.append(MenuItem("HP 공격", description="HP 데미지", enabled=True, value=ActionType.HP_ATTACK))
+
+        # 나머지 행동들
+        items.append(MenuItem("스킬", description="특수 기술 사용", enabled=True, value=ActionType.SKILL))
+        items.append(MenuItem("아이템", description="아이템 사용", enabled=True, value=ActionType.ITEM))
+        items.append(MenuItem("방어", description="방어 자세로 피해 감소", enabled=True, value=ActionType.DEFEND))
+        items.append(MenuItem("도망", description="전투에서 도망", enabled=True, value=ActionType.FLEE))
 
         return CursorMenu(
             title="행동 선택",
@@ -101,14 +126,17 @@ class CombatUI:
 
     def _create_skill_menu(self, actor: Any) -> CursorMenu:
         """스킬 메뉴 생성"""
-        skills = getattr(actor, 'skills', [])
+        all_skills = getattr(actor, 'skills', [])
 
         # 디버그 로그
         from src.core.logger import get_logger
         logger = get_logger("combat_ui")
-        logger.warning(f"[SKILL_MENU] {actor.name}의 스킬 개수: {len(skills)}")
+        logger.warning(f"[SKILL_MENU] {actor.name}의 전체 스킬 개수: {len(all_skills)}")
         logger.warning(f"[SKILL_MENU] skill_ids: {getattr(actor, 'skill_ids', [])}")
-        logger.warning(f"[SKILL_MENU] _cached_skills: {getattr(actor, '_cached_skills', 'not set')}")
+
+        # 첫 두 스킬은 기본 공격이므로 제외 (행동 메뉴에 있음)
+        skills = all_skills[2:] if len(all_skills) >= 2 else []
+        logger.warning(f"[SKILL_MENU] 기본 공격 제외 후 스킬 개수: {len(skills)}")
 
         items = []
 
@@ -216,19 +244,22 @@ class CombatUI:
 
     def _handle_target_select(self, action: GameAction) -> bool:
         """대상 선택 입력 처리"""
-        enemies = [e for e in self.combat_manager.enemies if e.is_alive]
+        enemies = self.combat_manager.enemies
+        alive_indices = [i for i, e in enumerate(enemies) if e.is_alive]
 
-        if not enemies:
+        if not alive_indices:
             return False
 
-        if action == GameAction.MOVE_UP:
-            self.target_cursor = (self.target_cursor - 1) % len(enemies)
-        elif action == GameAction.MOVE_DOWN:
-            self.target_cursor = (self.target_cursor + 1) % len(enemies)
-        elif action == GameAction.MOVE_LEFT:
-            self.target_cursor = (self.target_cursor - 1) % len(enemies)
-        elif action == GameAction.MOVE_RIGHT:
-            self.target_cursor = (self.target_cursor + 1) % len(enemies)
+        if action == GameAction.MOVE_UP or action == GameAction.MOVE_LEFT:
+            # 이전 살아있는 적으로 이동
+            current_pos = alive_indices.index(self.target_cursor) if self.target_cursor in alive_indices else 0
+            new_pos = (current_pos - 1) % len(alive_indices)
+            self.target_cursor = alive_indices[new_pos]
+        elif action == GameAction.MOVE_DOWN or action == GameAction.MOVE_RIGHT:
+            # 다음 살아있는 적으로 이동
+            current_pos = alive_indices.index(self.target_cursor) if self.target_cursor in alive_indices else 0
+            new_pos = (current_pos + 1) % len(alive_indices)
+            self.target_cursor = alive_indices[new_pos]
         elif action == GameAction.CONFIRM:
             self.selected_target = enemies[self.target_cursor]
             self._execute_current_action()
@@ -255,6 +286,16 @@ class CombatUI:
 
     def _on_action_selected(self):
         """행동 선택 후 처리"""
+        # 튜플 형식 체크 (기본 공격 스킬)
+        if isinstance(self.selected_action, tuple):
+            action_type, skill = self.selected_action
+            if action_type in ("brv_skill", "hp_skill"):
+                # 기본 공격 스킬 선택됨
+                self.selected_skill = skill
+                self._start_target_selection()
+                return
+
+        # ActionType 체크
         if self.selected_action == ActionType.SKILL:
             # 스킬 메뉴 열기
             self.skill_menu = self._create_skill_menu(self.current_actor)
@@ -285,16 +326,26 @@ class CombatUI:
             self.state = CombatUIState.ACTION_MENU
             return
 
-        self.target_cursor = 0
+        # 첫 번째 살아있는 적의 인덱스로 커서 설정
+        for i, enemy in enumerate(self.combat_manager.enemies):
+            if enemy.is_alive:
+                self.target_cursor = i
+                break
+
         self.state = CombatUIState.TARGET_SELECT
 
     def _execute_current_action(self):
         """현재 선택된 행동 실행"""
         self.state = CombatUIState.EXECUTING
 
+        # 튜플 형식이면 ActionType.SKILL로 변환
+        action_type = self.selected_action
+        if isinstance(self.selected_action, tuple):
+            action_type = ActionType.SKILL  # 기본 공격 스킬도 스킬로 실행
+
         result = self.combat_manager.execute_action(
             actor=self.current_actor,
-            action_type=self.selected_action,
+            action_type=action_type,
             target=self.selected_target,
             skill=self.selected_skill
         )
@@ -416,7 +467,7 @@ class CombatUI:
                 play_sfx("combat", "turn_start")
 
                 self.current_actor = combatant
-                self.action_menu = self._create_action_menu()
+                self.action_menu = self._create_action_menu(self.current_actor)  # actor 전달
                 self.state = CombatUIState.ACTION_MENU
                 self.add_message(f"{combatant.name}의 턴!", (100, 255, 255))
                 return
@@ -517,6 +568,11 @@ class CombatUI:
 
             # 이름 + 상태
             name_color = (255, 255, 255) if ally.is_alive else (100, 100, 100)
+
+            # 현재 행동 중인 캐릭터 표시
+            turn_indicator = "▶ " if ally == self.current_actor else "  "
+            console.print(3, y, turn_indicator, fg=(255, 255, 100))
+
             console.print(5, y, f"{i+1}. {ally.name}", fg=name_color)
 
             # 상태이상 아이콘
@@ -614,13 +670,21 @@ class CombatUI:
             # 이름
             name_color = (255, 255, 255) if enemy.is_alive else (100, 100, 100)
 
-            # 대상 선택 커서
-            cursor = "▶ " if (
-                self.state == CombatUIState.TARGET_SELECT and
-                i == self.target_cursor
-            ) else "  "
+            # 대상 선택 커서 또는 턴 표시
+            if enemy == self.current_actor:
+                # 현재 행동 중인 적
+                cursor = "⚔ "
+                cursor_color = (255, 100, 100)
+            elif self.state == CombatUIState.TARGET_SELECT and i == self.target_cursor:
+                # 타겟팅 중
+                cursor = "▶ "
+                cursor_color = (255, 255, 100)
+            else:
+                cursor = "  "
+                cursor_color = name_color
 
-            console.print(x, y, f"{cursor}{chr(65+i)}. {enemy.name}", fg=name_color)
+            console.print(x, y, cursor, fg=cursor_color)
+            console.print(x + 2, y, f"{chr(65+i)}. {enemy.name}", fg=name_color)
 
             # 상태이상
             status_effects = getattr(enemy, 'status_effects', {})
