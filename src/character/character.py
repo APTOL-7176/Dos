@@ -82,6 +82,7 @@ class Character:
 
         # 스킬 - YAML에서 로드
         self.skill_ids = get_skills(character_class)
+        self._cached_skills = None  # 스킬 객체 캐시
 
         # 로그
         self.logger.info(f"캐릭터 생성: {self.name} ({self.character_class})")
@@ -445,6 +446,21 @@ class Character:
     def evasion(self) -> int:
         """회피율"""
         return int(self.stat_manager.get_value(Stats.EVASION))
+
+    # ===== 스킬 관리 =====
+
+    @property
+    def skills(self) -> List[Any]:
+        """스킬 객체 리스트 (skill_ids로부터 생성)"""
+        if self._cached_skills is None:
+            from src.character.skills.skill_manager import get_skill_manager
+            skill_manager = get_skill_manager()
+            self._cached_skills = [
+                skill_manager.get_skill(skill_id)
+                for skill_id in self.skill_ids
+                if skill_manager.get_skill(skill_id)
+            ]
+        return self._cached_skills
 
     # ===== HP/MP 관리 =====
 
