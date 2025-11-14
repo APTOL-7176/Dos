@@ -135,12 +135,18 @@ class TCODDisplay:
                     # char_spacing_adjust만큼 폰트를 넓게 만들어 문자가 겹치게 함
                     char_width = char_height + char_spacing_adjust
 
+                    # 유니코드 전체 범위 포함하여 로드
+                    # TCOD는 기본적으로 전체 유니코드를 지원
                     self.tileset = tcod.tileset.load_truetype_font(
                         font_path,
                         char_width,
-                        char_height
+                        char_height,
                     )
-                    self.logger.info(f"폰트 로드 성공: {font_path} (셀: {char_width}x{char_height}, 오버랩: {char_spacing_adjust}px)")
+
+                    # 타일셋을 전역 기본값으로 설정 (특수문자 렌더링 보장)
+                    tcod.tileset.set_default(self.tileset)
+
+                    self.logger.info(f"폰트 로드 성공: {font_path} (셀: {char_width}x{char_height}, 유니코드 전체 지원)")
                     break
             except Exception as e:
                 self.logger.debug(f"폰트 로드 시도 실패 ({font_path}): {e}")
