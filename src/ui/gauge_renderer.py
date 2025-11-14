@@ -57,8 +57,8 @@ class GaugeRenderer:
         # 배경 (빈 부분)
         console.draw_rect(x, y, width, 1, ord(" "), bg=bg_color)
 
-        # 전경 (채워진 부분)
-        filled_width = int(ratio * width)
+        # 전경 (채워진 부분) - 반올림으로 정확도 향상
+        filled_width = round(ratio * width)
         if filled_width > 0:
             console.draw_rect(x, y, filled_width, 1, ord(" "), bg=fg_color)
 
@@ -110,8 +110,8 @@ class GaugeRenderer:
         # 배경
         console.draw_rect(x, y, width, 1, ord(" "), bg=bg_color)
 
-        # 전경
-        filled_width = int(ratio * width)
+        # 전경 - 반올림으로 정확도 향상
+        filled_width = round(ratio * width)
         if filled_width > 0:
             console.draw_rect(x, y, filled_width, 1, ord(" "), bg=fg_color)
 
@@ -158,8 +158,8 @@ class GaugeRenderer:
         # 배경
         console.draw_rect(bar_x, y, bar_width, 1, ord(" "), bg=bg_color)
 
-        # 전경
-        filled_width = int(ratio * bar_width)
+        # 전경 - 반올림으로 정확도 향상
+        filled_width = round(ratio * bar_width)
         if filled_width > 0:
             console.draw_rect(bar_x, y, filled_width, 1, ord(" "), bg=fg_color)
 
@@ -201,8 +201,8 @@ class GaugeRenderer:
         # 배경
         console.draw_rect(x, y, width, 1, ord(" "), bg=bg_color)
 
-        # 전경
-        filled_width = int(ratio * width)
+        # 전경 - 반올림으로 정확도 향상
+        filled_width = round(ratio * width)
         if filled_width > 0:
             console.draw_rect(x, y, filled_width, 1, ord(" "), bg=fg_color)
 
