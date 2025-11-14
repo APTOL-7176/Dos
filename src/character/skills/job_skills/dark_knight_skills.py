@@ -19,29 +19,44 @@ def create_dark_knight_skills():
     
     skills.append(Skill("dk_dark_aura", "어둠의 오라", "지속 피해"))
     skills[-1].effects = [DamageEffect(DamageType.BRV, 1.0), DamageEffect(DamageType.BRV, 1.0), DamageEffect(DamageType.BRV, 1.0), GimmickEffect(GimmickOperation.ADD, "darkness", 2, max_value=10)]
-    skills[-1].costs = [MPCost(30)]
+    skills[-1].costs = [MPCost(8)]
     skills[-1].cooldown = 3
     
     skills.append(Skill("dk_dark_shield", "어둠의 보호막", "어둠으로 보호"))
     skills[-1].effects = [BuffEffect(BuffType.DEFENSE_UP, 0.4, duration=4), GimmickEffect(GimmickOperation.CONSUME, "darkness", 2)]
-    skills[-1].costs = [MPCost(28), StackCost("darkness", 2)]
+    skills[-1].costs = [MPCost(7), StackCost("darkness", 2)]
     skills[-1].target_type = "self"
     skills[-1].cooldown = 4
     
     skills.append(Skill("dk_dark_wave", "어둠의 파동", "광역 공격"))
     skills[-1].effects = [DamageEffect(DamageType.BRV_HP, 1.8, gimmick_bonus={"field": "darkness", "multiplier": 0.3}), LifestealEffect(0.4), GimmickEffect(GimmickOperation.CONSUME, "darkness", 3)]
-    skills[-1].costs = [MPCost(40), StackCost("darkness", 3)]
+    skills[-1].costs = [MPCost(10), StackCost("darkness", 3)]
     skills[-1].cooldown = 4
     
-    for i in range(4):  # 나머지 스킬
-        skill = Skill(f"dk_skill_{i+6}", f"암흑 스킬 {i+6}", "")
-        skill.effects = [DamageEffect(DamageType.BRV, 1.5 + i*0.3)]
-        skill.costs = [MPCost(30 + i*10)]
-        skills.append(skill)
+    skills.append(Skill("dk_dark_blade", "어둠의 검", "강력한 BRV 공격"))
+    skills[-1].effects = [DamageEffect(DamageType.BRV, 2.0, gimmick_bonus={"field": "darkness", "multiplier": 0.2}), GimmickEffect(GimmickOperation.ADD, "darkness", 1, max_value=10)]
+    skills[-1].costs = [MPCost(9)]
+    skills[-1].cooldown = 2
+
+    skills.append(Skill("dk_soul_eater", "영혼 포식", "HP 흡수 공격"))
+    skills[-1].effects = [DamageEffect(DamageType.HP, 1.5, gimmick_bonus={"field": "darkness", "multiplier": 0.3}), LifestealEffect(0.6), GimmickEffect(GimmickOperation.CONSUME, "darkness", 2)]
+    skills[-1].costs = [MPCost(10), StackCost("darkness", 2)]
+    skills[-1].cooldown = 3
+
+    skills.append(Skill("dk_dark_buster", "어둠 파쇄", "방어 무시 공격"))
+    skills[-1].effects = [DamageEffect(DamageType.BRV_HP, 2.2, ignore_defense=0.3, gimmick_bonus={"field": "darkness", "multiplier": 0.4}), GimmickEffect(GimmickOperation.CONSUME, "darkness", 4)]
+    skills[-1].costs = [MPCost(12), StackCost("darkness", 4)]
+    skills[-1].cooldown = 5
+
+    skills.append(Skill("dk_dark_explosion", "어둠 폭발", "광역 어둠 폭발"))
+    skills[-1].effects = [DamageEffect(DamageType.BRV_HP, 2.5, gimmick_bonus={"field": "darkness", "multiplier": 0.5}), LifestealEffect(0.3), GimmickEffect(GimmickOperation.CONSUME, "darkness", 5)]
+    skills[-1].costs = [MPCost(15), StackCost("darkness", 5)]
+    skills[-1].target_type = "all_enemies"
+    skills[-1].cooldown = 6
     
     ultimate = Skill("dk_ultimate", "어둠의 지배자", "궁극 어둠")
     ultimate.effects = [DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "darkness", "multiplier": 0.5}), DamageEffect(DamageType.HP, 3.5), LifestealEffect(1.0), GimmickEffect(GimmickOperation.SET, "darkness", 0)]
-    ultimate.costs = [MPCost(100)]
+    ultimate.costs = [MPCost(25)]
     ultimate.is_ultimate = True
     ultimate.cooldown = 10
     skills.append(ultimate)

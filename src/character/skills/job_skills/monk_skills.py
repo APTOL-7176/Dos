@@ -33,7 +33,7 @@ def create_monk_skills():
         GimmickEffect(GimmickOperation.ADD, "chakra_points", 2, max_value=5),
         GimmickEffect(GimmickOperation.ADD, "combo_count", 1, max_value=10)
     ]
-    chakra_focus.costs = [MPCost(20)]
+    chakra_focus.costs = [MPCost(5)]
     chakra_focus.target_type = "self"
     chakra_focus.cooldown = 3
     
@@ -43,7 +43,7 @@ def create_monk_skills():
         DamageEffect(DamageType.BRV, 1.8, gimmick_bonus={"field": "combo_count", "multiplier": 0.15}),
         GimmickEffect(GimmickOperation.ADD, "combo_count", 2, max_value=10)
     ]
-    flying_kick.costs = [MPCost(25)]
+    flying_kick.costs = [MPCost(6)]
     flying_kick.cooldown = 2
     
     # 5. 내공 방출
@@ -54,7 +54,7 @@ def create_monk_skills():
         BuffEffect(BuffType.CRITICAL_UP, 0.2, duration=4),
         GimmickEffect(GimmickOperation.CONSUME, "chakra_points", 1)
     ]
-    inner_fire.costs = [MPCost(30), StackCost("chakra_points", 1)]
+    inner_fire.costs = [MPCost(8), StackCost("chakra_points", 1)]
     inner_fire.target_type = "self"
     inner_fire.cooldown = 4
     
@@ -64,7 +64,7 @@ def create_monk_skills():
         DamageEffect(DamageType.BRV_HP, 2.0, gimmick_bonus={"field": "combo_count", "multiplier": 0.4}),
         GimmickEffect(GimmickOperation.SET, "combo_count", 0)
     ]
-    combo_finisher.costs = [MPCost(40), StackCost("combo_count", 3)]
+    combo_finisher.costs = [MPCost(10), StackCost("combo_count", 3)]
     combo_finisher.cooldown = 4
     
     # 7. 명상
@@ -73,7 +73,7 @@ def create_monk_skills():
         HealEffect(HealType.HP, percentage=0.3),
         GimmickEffect(GimmickOperation.ADD, "chakra_points", 3, max_value=5)
     ]
-    meditation.costs = [MPCost(25)]
+    meditation.costs = [MPCost(6)]
     meditation.target_type = "self"
     meditation.cooldown = 5
     
@@ -83,7 +83,7 @@ def create_monk_skills():
         DamageEffect(DamageType.BRV_HP, 2.5, gimmick_bonus={"field": "combo_count", "multiplier": 0.3}),
         GimmickEffect(GimmickOperation.CONSUME, "combo_count", 3)
     ]
-    dragon_strike.costs = [MPCost(50), StackCost("combo_count", 5)]
+    dragon_strike.costs = [MPCost(12), StackCost("combo_count", 5)]
     dragon_strike.cooldown = 5
     
     # 9. 궁극기: 칠성권
@@ -99,7 +99,7 @@ def create_monk_skills():
         GimmickEffect(GimmickOperation.SET, "combo_count", 0),
         GimmickEffect(GimmickOperation.SET, "chakra_points", 0)
     ]
-    ultimate.costs = [MPCost(100)]
+    ultimate.costs = [MPCost(25)]
     ultimate.is_ultimate = True
     ultimate.cooldown = 10
     

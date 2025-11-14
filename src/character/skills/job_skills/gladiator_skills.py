@@ -32,7 +32,7 @@ def create_gladiator_skills():
         GimmickEffect(GimmickOperation.SET, "parry_active", 1),
         BuffEffect(BuffType.DEFENSE_UP, 0.4, duration=2)
     ]
-    parry.costs = [MPCost(25)]
+    parry.costs = [MPCost(6)]
     parry.target_type = "self"
     parry.cooldown = 4
     
@@ -43,7 +43,7 @@ def create_gladiator_skills():
         GimmickEffect(GimmickOperation.ADD, "kill_count", 1),  # 처치 가정
         GimmickEffect(GimmickOperation.CONSUME, "glory_points", 2)
     ]
-    execute.costs = [MPCost(35), StackCost("glory_points", 2)]
+    execute.costs = [MPCost(9), StackCost("glory_points", 2)]
     execute.cooldown = 3
     
     # 5. 투사의 기백
@@ -53,7 +53,7 @@ def create_gladiator_skills():
         BuffEffect(BuffType.CRITICAL_UP, 0.2, duration=4),
         GimmickEffect(GimmickOperation.ADD, "glory_points", 2, max_value=10)
     ]
-    warrior_spirit.costs = [MPCost(30)]
+    warrior_spirit.costs = [MPCost(8)]
     warrior_spirit.target_type = "self"
     warrior_spirit.cooldown = 4
     
@@ -64,7 +64,7 @@ def create_gladiator_skills():
         HealEffect(HealType.HP, percentage=0.2),
         GimmickEffect(GimmickOperation.ADD, "glory_points", 1, max_value=10)
     ]
-    blood_thirst.costs = [MPCost(28)]
+    blood_thirst.costs = [MPCost(7)]
     blood_thirst.cooldown = 2
     
     # 7. 결투자의 영광
@@ -74,7 +74,7 @@ def create_gladiator_skills():
         BuffEffect(BuffType.ATTACK_UP, 0.25, duration=3),
         GimmickEffect(GimmickOperation.CONSUME, "glory_points", 3)
     ]
-    duel_glory.costs = [MPCost(45), StackCost("glory_points", 3)]
+    duel_glory.costs = [MPCost(11), StackCost("glory_points", 3)]
     duel_glory.cooldown = 5
     
     # 8. 챔피언의 함성
@@ -84,7 +84,7 @@ def create_gladiator_skills():
         BuffEffect(BuffType.CRITICAL_UP, 0.15, duration=4, is_party_wide=True),
         GimmickEffect(GimmickOperation.ADD, "glory_points", 2, max_value=10)
     ]
-    champion_roar.costs = [MPCost(40)]
+    champion_roar.costs = [MPCost(10)]
     champion_roar.target_type = "party"
     champion_roar.cooldown = 6
     
@@ -98,7 +98,7 @@ def create_gladiator_skills():
         BuffEffect(BuffType.CRITICAL_UP, 0.4, duration=5),
         GimmickEffect(GimmickOperation.SET, "glory_points", 0)
     ]
-    ultimate.costs = [MPCost(100)]
+    ultimate.costs = [MPCost(25)]
     ultimate.is_ultimate = True
     ultimate.cooldown = 10
     

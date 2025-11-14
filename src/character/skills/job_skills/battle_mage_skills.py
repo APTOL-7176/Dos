@@ -34,7 +34,7 @@ def create_battle_mage_skills():
         BuffEffect(BuffType.MAGIC_UP, 0.4, duration=4),
         GimmickEffect(GimmickOperation.ADD, "rune_stacks", 2, max_value=8)
     ]
-    empower_rune.costs = [MPCost(25)]
+    empower_rune.costs = [MPCost(6)]
     empower_rune.target_type = "self"
     empower_rune.cooldown = 3
     skills.append(empower_rune)
@@ -45,7 +45,7 @@ def create_battle_mage_skills():
         DamageEffect(DamageType.BRV_HP, 1.8, gimmick_bonus={"field": "rune_stacks", "multiplier": 0.3}),
         GimmickEffect(GimmickOperation.CONSUME, "rune_stacks", 2)
     ]
-    chain_burst.costs = [MPCost(35), StackCost("rune_stacks", 2)]
+    chain_burst.costs = [MPCost(9), StackCost("rune_stacks", 2)]
     chain_burst.cooldown = 2
     skills.append(chain_burst)
     
@@ -56,7 +56,7 @@ def create_battle_mage_skills():
         DamageEffect(DamageType.HP, 1.0),
         GimmickEffect(GimmickOperation.ADD, "rune_stacks", 1, max_value=8)
     ]
-    magic_blade.costs = [MPCost(30)]
+    magic_blade.costs = [MPCost(8)]
     magic_blade.cooldown = 2
     skills.append(magic_blade)
     
@@ -67,7 +67,7 @@ def create_battle_mage_skills():
         BuffEffect(BuffType.SPIRIT_UP, 0.3, duration=3),
         GimmickEffect(GimmickOperation.CONSUME, "rune_stacks", 2)
     ]
-    rune_shield.costs = [MPCost(28), StackCost("rune_stacks", 2)]
+    rune_shield.costs = [MPCost(7), StackCost("rune_stacks", 2)]
     rune_shield.target_type = "self"
     rune_shield.cooldown = 4
     skills.append(rune_shield)
@@ -78,7 +78,7 @@ def create_battle_mage_skills():
         DamageEffect(DamageType.BRV_HP, 2.0, gimmick_bonus={"field": "rune_stacks", "multiplier": 0.35}),
         GimmickEffect(GimmickOperation.CONSUME, "rune_stacks", 3)
     ]
-    rune_storm.costs = [MPCost(45), StackCost("rune_stacks", 3)]
+    rune_storm.costs = [MPCost(11), StackCost("rune_stacks", 3)]
     rune_storm.cooldown = 4
     skills.append(rune_storm)
     
@@ -88,7 +88,7 @@ def create_battle_mage_skills():
         GimmickEffect(GimmickOperation.SET, "rune_stacks", 8),
         BuffEffect(BuffType.MAGIC_UP, 0.5, duration=4)
     ]
-    ancient_rune.costs = [MPCost(50)]
+    ancient_rune.costs = [MPCost(12)]
     ancient_rune.target_type = "self"
     ancient_rune.cooldown = 6
     skills.append(ancient_rune)
@@ -102,7 +102,7 @@ def create_battle_mage_skills():
         BuffEffect(BuffType.MAGIC_UP, 0.6, duration=5),
         GimmickEffect(GimmickOperation.SET, "rune_stacks", 0)
     ]
-    ultimate.costs = [MPCost(100)]
+    ultimate.costs = [MPCost(25)]
     ultimate.is_ultimate = True
     ultimate.cooldown = 10
     skills.append(ultimate)

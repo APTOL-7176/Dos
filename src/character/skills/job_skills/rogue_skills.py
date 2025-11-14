@@ -35,7 +35,7 @@ def create_rogue_skills():
         GimmickEffect(GimmickOperation.ADD, "stolen_items", 3, max_value=10),
         BuffEffect(BuffType.SPEED_UP, 0.2, duration=3)
     ]
-    steal.costs = [MPCost(25)]
+    steal.costs = [MPCost(6)]
     steal.cooldown = 3
     skills.append(steal)
     
@@ -45,7 +45,7 @@ def create_rogue_skills():
         GimmickEffect(GimmickOperation.SET, "evasion_active", 1),
         BuffEffect(BuffType.EVASION_UP, 0.4, duration=2)
     ]
-    smoke_bomb.costs = [MPCost(20)]
+    smoke_bomb.costs = [MPCost(5)]
     smoke_bomb.target_type = "self"
     smoke_bomb.cooldown = 4
     skills.append(smoke_bomb)
@@ -56,7 +56,7 @@ def create_rogue_skills():
         DamageEffect(DamageType.BRV_HP, 1.8, gimmick_bonus={"field": "stolen_items", "multiplier": 0.25}),
         GimmickEffect(GimmickOperation.CONSUME, "stolen_items", 2)
     ]
-    use_item.costs = [MPCost(30)]
+    use_item.costs = [MPCost(8)]
     use_item.cooldown = 2
     skills.append(use_item)
     
@@ -68,7 +68,7 @@ def create_rogue_skills():
         DamageEffect(DamageType.BRV, 0.8),
         GimmickEffect(GimmickOperation.ADD, "stolen_items", 1, max_value=10)
     ]
-    poison_blade.costs = [MPCost(28)]
+    poison_blade.costs = [MPCost(7)]
     poison_blade.cooldown = 3
     skills.append(poison_blade)
     
@@ -78,7 +78,7 @@ def create_rogue_skills():
         GimmickEffect(GimmickOperation.ADD, "stolen_items", 5, max_value=10),
         BuffEffect(BuffType.LUCK, 0.3, duration=4)
     ]
-    treasure_hunt.costs = [MPCost(35)]
+    treasure_hunt.costs = [MPCost(9)]
     treasure_hunt.target_type = "self"
     treasure_hunt.cooldown = 5
     skills.append(treasure_hunt)
@@ -89,7 +89,7 @@ def create_rogue_skills():
         DamageEffect(DamageType.BRV_HP, 2.5, gimmick_bonus={"field": "stolen_items", "multiplier": 0.4}),
         GimmickEffect(GimmickOperation.CONSUME, "stolen_items", 4)
     ]
-    backstab.costs = [MPCost(50)]
+    backstab.costs = [MPCost(12)]
     backstab.cooldown = 5
     skills.append(backstab)
     
@@ -102,7 +102,7 @@ def create_rogue_skills():
         BuffEffect(BuffType.SPEED_UP, 0.5, duration=5),
         BuffEffect(BuffType.CRITICAL_UP, 0.4, duration=5)
     ]
-    ultimate.costs = [MPCost(100)]
+    ultimate.costs = [MPCost(25)]
     ultimate.is_ultimate = True
     ultimate.cooldown = 10
     skills.append(ultimate)

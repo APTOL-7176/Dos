@@ -141,17 +141,28 @@ class CombatUI:
         items = []
 
         for skill in skills:
-            # MP 체크
-            mp_cost = getattr(skill, 'mp_cost', 0)
-            can_use = actor.current_mp >= mp_cost
+            # 모든 비용 체크 (MP, Stack, HP 등)
+            can_use, reason = skill.can_use(actor)
+
+            # 비용 정보 표시
+            cost_parts = []
+            for cost in skill.costs:
+                if hasattr(cost, 'get_description'):
+                    cost_desc = cost.get_description(actor)
+                    if cost_desc:
+                        cost_parts.append(cost_desc)
+
+            cost_text = f" ({', '.join(cost_parts)})" if cost_parts else ""
 
             name = getattr(skill, 'name', str(skill))
             desc = getattr(skill, 'description', '')
-            mp_text = f" (MP: {mp_cost})" if mp_cost > 0 else ""
+
+            # 사용 불가 시 이유 추가
+            full_desc = f"{desc}\n{reason}" if not can_use and reason else desc
 
             items.append(MenuItem(
-                text=f"{name}{mp_text}",
-                description=desc,
+                text=f"{name}{cost_text}",
+                description=full_desc,
                 enabled=can_use,
                 value=skill
             ))
@@ -365,12 +376,7 @@ class CombatUI:
             self.battle_ended = True
             self.battle_result = self.combat_manager.state
             self.state = CombatUIState.BATTLE_END
-
-            # 전투 종료 BGM 재생
-            if self.combat_manager.state == CombatState.VICTORY:
-                play_bgm("victory")
-            elif self.combat_manager.state == CombatState.DEFEAT:
-                play_bgm("game_over")
+            # BGM은 main.py에서 처리 (필드 BGM으로 전환하기 위해)
 
     def _show_action_result(self, result: Dict[str, Any]):
         """행동 결과 메시지 표시"""
@@ -1051,12 +1057,5 @@ def run_combat(
 
     logger.info(f"전투 종료: {ui.battle_result.value if ui.battle_result else 'unknown'}")
 
-    # 전투 종료 BGM 재생 (전투 루프에서도 재생했지만 확실하게)
-    if ui.battle_result == CombatState.VICTORY:
-        play_bgm("victory")
-        logger.info("승리 BGM 재생")
-    elif ui.battle_result == CombatState.DEFEAT:
-        play_bgm("game_over")
-        logger.info("게임 오버 BGM 재생")
-
+    # BGM은 main.py에서 처리 (필드 BGM으로 전환하기 위해)
     return ui.battle_result or CombatState.FLED

@@ -39,7 +39,7 @@ def create_vampire_skills():
         ShieldEffect(base_amount=0, multiplier=1.5, stat_name="blood_pool"),
         GimmickEffect(GimmickOperation.CONSUME, "blood_pool", 3)
     ]
-    blood_armor.costs = [MPCost(30)]
+    blood_armor.costs = [MPCost(8)]
     blood_armor.target_type = "self"
     blood_armor.cooldown = 4
     skills.append(blood_armor)
@@ -50,7 +50,7 @@ def create_vampire_skills():
         HealEffect(HealType.HP, percentage=0.25),
         GimmickEffect(GimmickOperation.ADD, "blood_pool", 2, max_value=10)
     ]
-    regeneration.costs = [MPCost(25)]
+    regeneration.costs = [MPCost(6)]
     regeneration.target_type = "self"
     regeneration.cooldown = 3
     skills.append(regeneration)
@@ -62,7 +62,7 @@ def create_vampire_skills():
         LifestealEffect(lifesteal_percent=0.4),
         GimmickEffect(GimmickOperation.CONSUME, "blood_pool", 2)
     ]
-    blood_explosion.costs = [MPCost(35)]
+    blood_explosion.costs = [MPCost(9)]
     blood_explosion.cooldown = 3
     skills.append(blood_explosion)
     
@@ -72,7 +72,7 @@ def create_vampire_skills():
         BuffEffect(BuffType.ATTACK_UP, 0.3, duration=4),
         GimmickEffect(GimmickOperation.SET, "lifesteal_boost", 2)
     ]
-    blood_frenzy.costs = [MPCost(30)]
+    blood_frenzy.costs = [MPCost(8)]
     blood_frenzy.target_type = "self"
     blood_frenzy.cooldown = 5
     skills.append(blood_frenzy)
@@ -84,7 +84,7 @@ def create_vampire_skills():
         HealEffect(HealType.HP, percentage=0.3),
         GimmickEffect(GimmickOperation.CONSUME, "blood_pool", 5)
     ]
-    immortal.costs = [MPCost(50)]
+    immortal.costs = [MPCost(12)]
     immortal.target_type = "self"
     immortal.cooldown = 7
     skills.append(immortal)
@@ -96,7 +96,7 @@ def create_vampire_skills():
         LifestealEffect(lifesteal_percent=0.8),
         GimmickEffect(GimmickOperation.CONSUME, "blood_pool", 4)
     ]
-    blood_control.costs = [MPCost(55)]
+    blood_control.costs = [MPCost(14)]
     blood_control.cooldown = 6
     skills.append(blood_control)
     
@@ -110,7 +110,7 @@ def create_vampire_skills():
         BuffEffect(BuffType.ATTACK_UP, 0.6, duration=5),
         GimmickEffect(GimmickOperation.SET, "blood_pool", 10)
     ]
-    ultimate.costs = [MPCost(100)]
+    ultimate.costs = [MPCost(25)]
     ultimate.is_ultimate = True
     ultimate.cooldown = 10
     skills.append(ultimate)

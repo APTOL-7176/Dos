@@ -32,7 +32,7 @@ def create_spellblade_skills():
         BuffEffect(BuffType.ATTACK_UP, 0.4, duration=4),
         GimmickEffect(GimmickOperation.ADD, "mana_blade", 2, max_value=6)
     ]
-    fire_infusion.costs = [MPCost(28)]
+    fire_infusion.costs = [MPCost(7)]
     fire_infusion.target_type = "self"
     fire_infusion.cooldown = 2
 
@@ -43,7 +43,7 @@ def create_spellblade_skills():
         BuffEffect(BuffType.DEFENSE_UP, 0.4, duration=4),
         GimmickEffect(GimmickOperation.ADD, "mana_blade", 2, max_value=6)
     ]
-    ice_infusion.costs = [MPCost(28)]
+    ice_infusion.costs = [MPCost(7)]
     ice_infusion.target_type = "self"
     ice_infusion.cooldown = 2
 
@@ -54,7 +54,7 @@ def create_spellblade_skills():
         BuffEffect(BuffType.SPEED_UP, 0.5, duration=4),
         GimmickEffect(GimmickOperation.ADD, "mana_blade", 2, max_value=6)
     ]
-    lightning_infusion.costs = [MPCost(28)]
+    lightning_infusion.costs = [MPCost(7)]
     lightning_infusion.target_type = "self"
     lightning_infusion.cooldown = 2
 
@@ -66,7 +66,7 @@ def create_spellblade_skills():
         DamageEffect(DamageType.HP, 1.3),
         GimmickEffect(GimmickOperation.CONSUME, "mana_blade", 3)
     ]
-    magic_blade_dance.costs = [MPCost(45), StackCost("mana_blade", 3)]
+    magic_blade_dance.costs = [MPCost(11), StackCost("mana_blade", 3)]
     magic_blade_dance.cooldown = 4
 
     # 7. 마력 폭발
@@ -75,7 +75,7 @@ def create_spellblade_skills():
         GimmickEffect(GimmickOperation.SET, "mana_blade", 6),
         BuffEffect(BuffType.MAGIC_UP, 0.5, duration=4)
     ]
-    mana_burst.costs = [MPCost(40)]
+    mana_burst.costs = [MPCost(10)]
     mana_burst.target_type = "self"
     mana_burst.cooldown = 5
 
@@ -86,7 +86,7 @@ def create_spellblade_skills():
         DamageEffect(DamageType.HP, 1.8),
         GimmickEffect(GimmickOperation.CONSUME, "mana_blade", 5)
     ]
-    elemental_storm.costs = [MPCost(60), StackCost("mana_blade", 5)]
+    elemental_storm.costs = [MPCost(15), StackCost("mana_blade", 5)]
     elemental_storm.cooldown = 6
     elemental_storm.is_aoe = True
 
@@ -100,7 +100,7 @@ def create_spellblade_skills():
         BuffEffect(BuffType.MAGIC_UP, 0.7, duration=5),
         GimmickEffect(GimmickOperation.SET, "mana_blade", 0)
     ]
-    ultimate.costs = [MPCost(100), StackCost("mana_blade", 1)]
+    ultimate.costs = [MPCost(25), StackCost("mana_blade", 1)]
     ultimate.is_ultimate = True
     ultimate.cooldown = 10
 

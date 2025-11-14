@@ -34,7 +34,7 @@ def create_berserker_skills():
         ShieldEffect(base_amount=0, hp_consumed_multiplier=1.5),  # 소비 HP의 150%
         GimmickEffect(GimmickOperation.ADD, "rage_stacks", 2, max_value=10)
     ]
-    blood_armor.costs = [MPCost(20), HPCost(percentage=0.2)]  # HP 20% 소비
+    blood_armor.costs = [MPCost(5), HPCost(percentage=0.2)]  # HP 20% 소비
     blood_armor.target_type = "self"
     blood_armor.cooldown = 3
     
@@ -45,7 +45,7 @@ def create_berserker_skills():
         LifestealEffect(lifesteal_percent=0.8, low_hp_bonus=True),  # 80% 흡혈
         GimmickEffect(GimmickOperation.SET, "shield_amount", 0)  # 보호막 전부 소비
     ]
-    vampiric_strike.costs = [MPCost(25)]
+    vampiric_strike.costs = [MPCost(6)]
     vampiric_strike.cooldown = 2
     
     # 5. 광폭화
@@ -54,7 +54,7 @@ def create_berserker_skills():
         DamageEffect(DamageType.BRV, 1.0),
         GimmickEffect(GimmickOperation.ADD, "rage_stacks", 5, max_value=10)
     ]
-    rampage.costs = [MPCost(20), HPCost(amount=30)]
+    rampage.costs = [MPCost(5), HPCost(amount=30)]
     rampage.cooldown = 4
     
     # 6. 전쟁의 함성
@@ -63,7 +63,7 @@ def create_berserker_skills():
         DamageEffect(DamageType.BRV, 2.0, hp_scaling=True),  # HP 낮을수록 강력
         GimmickEffect(GimmickOperation.CONSUME, "rage_stacks", 3)
     ]
-    war_cry.costs = [MPCost(30), StackCost("rage_stacks", 3)]
+    war_cry.costs = [MPCost(8), StackCost("rage_stacks", 3)]
     war_cry.target_type = "all_enemies"
     war_cry.cooldown = 3
     
@@ -73,7 +73,7 @@ def create_berserker_skills():
         HealEffect(HealType.HP, percentage=0.2),  # 최대 HP의 20% 회복
         GimmickEffect(GimmickOperation.ADD, "rage_stacks", 2, max_value=10)
     ]
-    life_drain.costs = [MPCost(25)]
+    life_drain.costs = [MPCost(6)]
     life_drain.target_type = "self"
     life_drain.cooldown = 5
     
@@ -83,7 +83,7 @@ def create_berserker_skills():
         DamageEffect(DamageType.BRV_HP, 1.8, gimmick_bonus={"field": "shield_amount", "multiplier": 0.002}),
         GimmickEffect(GimmickOperation.SET, "shield_amount", 0)
     ]
-    blood_explosion.costs = [MPCost(35)]
+    blood_explosion.costs = [MPCost(9)]
     blood_explosion.target_type = "all_enemies"
     blood_explosion.cooldown = 4
     
@@ -96,7 +96,7 @@ def create_berserker_skills():
         LifestealEffect(lifesteal_percent=1.0, low_hp_bonus=False),  # 100% 흡혈
         GimmickEffect(GimmickOperation.SET, "rage_stacks", 0)
     ]
-    blood_frenzy.costs = [MPCost(100), HPCost(percentage=0.99)]  # HP 99% 소비
+    blood_frenzy.costs = [MPCost(25), HPCost(percentage=0.99)]  # HP 99% 소비
     blood_frenzy.is_ultimate = True
     blood_frenzy.cooldown = 10
     

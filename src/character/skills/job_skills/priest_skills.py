@@ -33,7 +33,7 @@ def create_priest_skills():
         BuffEffect(BuffType.SPEED_DOWN, 0.4, duration=3),
         GimmickEffect(GimmickOperation.ADD, "judgment_points", 1, max_value=6)
     ]
-    light_bind.costs = [MPCost(25)]
+    light_bind.costs = [MPCost(6)]
     light_bind.cooldown = 2
 
     # 4. 성스러운 치유
@@ -42,7 +42,7 @@ def create_priest_skills():
         HealEffect(HealType.HP, percentage=0.35),
         GimmickEffect(GimmickOperation.CONSUME, "judgment_points", 2)
     ]
-    holy_heal.costs = [MPCost(30), StackCost("judgment_points", 2)]
+    holy_heal.costs = [MPCost(8), StackCost("judgment_points", 2)]
     holy_heal.target_type = "ally"
     holy_heal.cooldown = 3
 
@@ -53,7 +53,7 @@ def create_priest_skills():
         BuffEffect(BuffType.REGEN, 0.2, duration=4),
         GimmickEffect(GimmickOperation.CONSUME, "judgment_points", 2)
     ]
-    divine_protection.costs = [MPCost(32), StackCost("judgment_points", 2)]
+    divine_protection.costs = [MPCost(8), StackCost("judgment_points", 2)]
     divine_protection.target_type = "ally"
     divine_protection.cooldown = 4
 
@@ -63,7 +63,7 @@ def create_priest_skills():
         GimmickEffect(GimmickOperation.SET, "judgment_points", 6),
         BuffEffect(BuffType.MAGIC_UP, 0.4, duration=3)
     ]
-    judgment_light.costs = [MPCost(35)]
+    judgment_light.costs = [MPCost(9)]
     judgment_light.target_type = "self"
     judgment_light.cooldown = 5
 
@@ -73,7 +73,7 @@ def create_priest_skills():
         DamageEffect(DamageType.BRV_HP, 2.0, gimmick_bonus={"field": "judgment_points", "multiplier": 0.35}),
         GimmickEffect(GimmickOperation.CONSUME, "judgment_points", 3)
     ]
-    holy_beam.costs = [MPCost(45), StackCost("judgment_points", 3)]
+    holy_beam.costs = [MPCost(11), StackCost("judgment_points", 3)]
     holy_beam.cooldown = 4
     holy_beam.is_aoe = True
 
@@ -85,7 +85,7 @@ def create_priest_skills():
         BuffEffect(BuffType.ATTACK_DOWN, 0.5, duration=4),
         GimmickEffect(GimmickOperation.CONSUME, "judgment_points", 5)
     ]
-    divine_wrath.costs = [MPCost(60), StackCost("judgment_points", 5)]
+    divine_wrath.costs = [MPCost(15), StackCost("judgment_points", 5)]
     divine_wrath.cooldown = 6
 
     # 9. 궁극기: 최후의 심판
@@ -97,7 +97,7 @@ def create_priest_skills():
         HealEffect(HealType.HP, percentage=0.3, is_party_wide=True),
         GimmickEffect(GimmickOperation.SET, "judgment_points", 0)
     ]
-    ultimate.costs = [MPCost(100), StackCost("judgment_points", 1)]
+    ultimate.costs = [MPCost(25), StackCost("judgment_points", 1)]
     ultimate.is_ultimate = True
     ultimate.is_aoe = True
     ultimate.cooldown = 10

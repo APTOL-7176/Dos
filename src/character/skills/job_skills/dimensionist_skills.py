@@ -31,7 +31,7 @@ def create_dimensionist_skills():
         BuffEffect(BuffType.EVASION_UP, 0.6, duration=3),
         GimmickEffect(GimmickOperation.ADD, "dimension_points", 2, max_value=5)
     ]
-    dimension_shift.costs = [MPCost(28)]
+    dimension_shift.costs = [MPCost(7)]
     dimension_shift.target_type = "self"
     dimension_shift.cooldown = 3
 
@@ -41,7 +41,7 @@ def create_dimensionist_skills():
         DamageEffect(DamageType.BRV, 2.0, gimmick_bonus={"field": "dimension_points", "multiplier": 0.25}),
         GimmickEffect(GimmickOperation.CONSUME, "dimension_points", 2)
     ]
-    dimension_gate.costs = [MPCost(35), StackCost("dimension_points", 2)]
+    dimension_gate.costs = [MPCost(9), StackCost("dimension_points", 2)]
     dimension_gate.cooldown = 3
     dimension_gate.is_aoe = True
 
@@ -51,7 +51,7 @@ def create_dimensionist_skills():
         DamageEffect(DamageType.BRV_HP, 1.8, gimmick_bonus={"field": "dimension_points", "multiplier": 0.4}),
         GimmickEffect(GimmickOperation.CONSUME, "dimension_points", 3)
     ]
-    dimension_warp.costs = [MPCost(45), StackCost("dimension_points", 3)]
+    dimension_warp.costs = [MPCost(11), StackCost("dimension_points", 3)]
     dimension_warp.cooldown = 4
 
     # 6. 평행 세계
@@ -60,7 +60,7 @@ def create_dimensionist_skills():
         GimmickEffect(GimmickOperation.SET, "dimension_points", 5),
         BuffEffect(BuffType.DEFENSE_UP, 0.4, duration=3)
     ]
-    parallel_world.costs = [MPCost(40)]
+    parallel_world.costs = [MPCost(10)]
     parallel_world.target_type = "self"
     parallel_world.cooldown = 5
 
@@ -71,7 +71,7 @@ def create_dimensionist_skills():
         DamageEffect(DamageType.HP, 1.5),
         GimmickEffect(GimmickOperation.CONSUME, "dimension_points", 4)
     ]
-    dimension_collapse.costs = [MPCost(55), StackCost("dimension_points", 4)]
+    dimension_collapse.costs = [MPCost(14), StackCost("dimension_points", 4)]
     dimension_collapse.cooldown = 5
     dimension_collapse.is_aoe = True
 
@@ -81,7 +81,7 @@ def create_dimensionist_skills():
         DamageEffect(DamageType.BRV_HP, 2.8, gimmick_bonus={"field": "dimension_points", "multiplier": 0.6}),
         GimmickEffect(GimmickOperation.CONSUME, "dimension_points", 5)
     ]
-    dimension_master.costs = [MPCost(65), StackCost("dimension_points", 5)]
+    dimension_master.costs = [MPCost(16), StackCost("dimension_points", 5)]
     dimension_master.cooldown = 6
 
     # 9. 궁극기: 차원 파괴
@@ -93,7 +93,7 @@ def create_dimensionist_skills():
         BuffEffect(BuffType.EVASION_UP, 0.8, duration=4),
         GimmickEffect(GimmickOperation.SET, "dimension_points", 0)
     ]
-    ultimate.costs = [MPCost(100), StackCost("dimension_points", 1)]
+    ultimate.costs = [MPCost(25), StackCost("dimension_points", 1)]
     ultimate.is_ultimate = True
     ultimate.is_aoe = True
     ultimate.cooldown = 10

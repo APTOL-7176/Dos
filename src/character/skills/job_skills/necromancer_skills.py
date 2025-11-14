@@ -33,7 +33,7 @@ def create_necromancer_skills():
         GimmickEffect(GimmickOperation.CONSUME, "corpse_count", 3),
         BuffEffect(BuffType.ATTACK_UP, 0.15, duration=5)
     ]
-    summon_skeleton.costs = [MPCost(30), StackCost("corpse_count", 3)]
+    summon_skeleton.costs = [MPCost(8), StackCost("corpse_count", 3)]
     summon_skeleton.target_type = "self"
     summon_skeleton.cooldown = 3
     
@@ -43,7 +43,7 @@ def create_necromancer_skills():
         DamageEffect(DamageType.BRV, 1.8, gimmick_bonus={"field": "corpse_count", "multiplier": 0.15}),
         GimmickEffect(GimmickOperation.ADD, "corpse_count", 1, max_value=10)
     ]
-    death_bolt.costs = [MPCost(25)]
+    death_bolt.costs = [MPCost(6)]
     death_bolt.cooldown = 2
     
     # 5. 시체 폭발
@@ -52,7 +52,7 @@ def create_necromancer_skills():
         DamageEffect(DamageType.BRV_HP, 1.5, gimmick_bonus={"field": "corpse_count", "multiplier": 0.3}),
         GimmickEffect(GimmickOperation.SET, "corpse_count", 0)
     ]
-    corpse_explosion.costs = [MPCost(40), StackCost("corpse_count", 1)]
+    corpse_explosion.costs = [MPCost(10), StackCost("corpse_count", 1)]
     corpse_explosion.cooldown = 4
     
     # 6. 생명 흡수
@@ -62,7 +62,7 @@ def create_necromancer_skills():
         HealEffect(HealType.HP, percentage=0.2),
         GimmickEffect(GimmickOperation.ADD, "corpse_count", 2, max_value=10)
     ]
-    life_tap.costs = [MPCost(30)]
+    life_tap.costs = [MPCost(8)]
     life_tap.cooldown = 3
     
     # 7. 암흑 의식
@@ -72,7 +72,7 @@ def create_necromancer_skills():
         BuffEffect(BuffType.SPEED_UP, 0.2, duration=4),
         GimmickEffect(GimmickOperation.CONSUME, "corpse_count", 2)
     ]
-    dark_ritual.costs = [MPCost(35), StackCost("corpse_count", 2)]
+    dark_ritual.costs = [MPCost(9), StackCost("corpse_count", 2)]
     dark_ritual.target_type = "self"
     dark_ritual.cooldown = 4
     
@@ -83,7 +83,7 @@ def create_necromancer_skills():
         GimmickEffect(GimmickOperation.ADD, "minion_count", 2, max_value=5),
         GimmickEffect(GimmickOperation.CONSUME, "corpse_count", 5)
     ]
-    reanimate.costs = [MPCost(50), StackCost("corpse_count", 5)]
+    reanimate.costs = [MPCost(12), StackCost("corpse_count", 5)]
     reanimate.target_type = "self"
     reanimate.cooldown = 6
     
@@ -98,7 +98,7 @@ def create_necromancer_skills():
         BuffEffect(BuffType.MAGIC_UP, 0.5, duration=5),
         BuffEffect(BuffType.ATTACK_UP, 0.4, duration=5)
     ]
-    ultimate.costs = [MPCost(100)]
+    ultimate.costs = [MPCost(25)]
     ultimate.is_ultimate = True
     ultimate.cooldown = 10
     

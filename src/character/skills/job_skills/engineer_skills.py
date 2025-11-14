@@ -31,7 +31,7 @@ def create_engineer_skills():
         DamageEffect(DamageType.BRV, 1.8, gimmick_bonus={"field": "machine_parts", "multiplier": 0.15}),
         GimmickEffect(GimmickOperation.CONSUME, "machine_parts", 2)
     ]
-    turret_deploy.costs = [MPCost(28), StackCost("machine_parts", 2)]
+    turret_deploy.costs = [MPCost(7), StackCost("machine_parts", 2)]
     turret_deploy.cooldown = 2
 
     # 4. 수리 드론
@@ -40,7 +40,7 @@ def create_engineer_skills():
         GimmickEffect(GimmickOperation.CONSUME, "machine_parts", 2),
         BuffEffect(BuffType.REGEN, 0.25, duration=4)
     ]
-    repair_drone.costs = [MPCost(30), StackCost("machine_parts", 2)]
+    repair_drone.costs = [MPCost(8), StackCost("machine_parts", 2)]
     repair_drone.target_type = "ally"
     repair_drone.cooldown = 3
 
@@ -50,7 +50,7 @@ def create_engineer_skills():
         BuffEffect(BuffType.DEFENSE_UP, 0.5, duration=4),
         GimmickEffect(GimmickOperation.CONSUME, "machine_parts", 3)
     ]
-    shield_generator.costs = [MPCost(35), StackCost("machine_parts", 3)]
+    shield_generator.costs = [MPCost(9), StackCost("machine_parts", 3)]
     shield_generator.target_type = "ally"
     shield_generator.cooldown = 4
 
@@ -60,7 +60,7 @@ def create_engineer_skills():
         GimmickEffect(GimmickOperation.SET, "machine_parts", 8),
         BuffEffect(BuffType.ACCURACY_UP, 0.3, duration=3)
     ]
-    machine_deploy.costs = [MPCost(40)]
+    machine_deploy.costs = [MPCost(10)]
     machine_deploy.target_type = "self"
     machine_deploy.cooldown = 5
 
@@ -70,7 +70,7 @@ def create_engineer_skills():
         DamageEffect(DamageType.BRV_HP, 2.2, gimmick_bonus={"field": "machine_parts", "multiplier": 0.3}),
         GimmickEffect(GimmickOperation.CONSUME, "machine_parts", 4)
     ]
-    explosive_drone.costs = [MPCost(50), StackCost("machine_parts", 4)]
+    explosive_drone.costs = [MPCost(12), StackCost("machine_parts", 4)]
     explosive_drone.cooldown = 4
     explosive_drone.is_aoe = True
 
@@ -81,7 +81,7 @@ def create_engineer_skills():
         DamageEffect(DamageType.HP, 1.8),
         GimmickEffect(GimmickOperation.CONSUME, "machine_parts", 6)
     ]
-    giant_robot.costs = [MPCost(60), StackCost("machine_parts", 6)]
+    giant_robot.costs = [MPCost(15), StackCost("machine_parts", 6)]
     giant_robot.cooldown = 6
 
     # 9. 궁극기: 기계군단
@@ -94,7 +94,7 @@ def create_engineer_skills():
         BuffEffect(BuffType.ATTACK_UP, 0.5, duration=4),
         GimmickEffect(GimmickOperation.SET, "machine_parts", 0)
     ]
-    ultimate.costs = [MPCost(90), StackCost("machine_parts", 1)]
+    ultimate.costs = [MPCost(22), StackCost("machine_parts", 1)]
     ultimate.is_ultimate = True
     ultimate.is_aoe = True
     ultimate.cooldown = 10

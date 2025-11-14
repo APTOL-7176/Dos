@@ -79,7 +79,7 @@ def create_warrior_skills():
         BuffEffect(BuffType.ATTACK_DOWN, 0.3, duration=3),
         BuffEffect(BuffType.ATTACK_UP, 0.3, duration=3)
     ]
-    war_cry.costs = [MPCost(35)]
+    war_cry.costs = [MPCost(9)]
     war_cry.cooldown = 4
     war_cry.is_aoe = True
 
@@ -94,7 +94,7 @@ def create_warrior_skills():
         BuffEffect(BuffType.SPEED_UP, 0.6, duration=5),
         GimmickEffect(GimmickOperation.SET, "current_stance", 0)  # 0=balanced
     ]
-    ultimate.costs = [MPCost(90)]
+    ultimate.costs = [MPCost(22)]
     ultimate.is_ultimate = True
     ultimate.cooldown = 10
 
