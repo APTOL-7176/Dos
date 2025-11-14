@@ -326,9 +326,17 @@ class ExplorationSystem:
         # 랜덤 아이템 생성 (보물상자는 보스 드롭 취급)
         item = ItemGenerator.create_random_drop(self.floor_number, boss_drop=True)
 
+        # 디버그 로그
+        logger.debug(f"[CHEST] 보물상자 처리 시작: {item.name}")
+        logger.debug(f"[CHEST] 인벤토리 존재 여부: {self.inventory is not None}")
+        if self.inventory:
+            logger.debug(f"[CHEST] 인벤토리 슬롯 수: {len(self.inventory.slots)}")
+            logger.debug(f"[CHEST] 현재 무게: {self.inventory.current_weight}kg / {self.inventory.max_weight}kg")
+
         # 인벤토리에 추가
         if self.inventory:
             success = self.inventory.add_item(item)
+            logger.debug(f"[CHEST] add_item 결과: {success}")
             if not success:
                 logger.warning(f"인벤토리 가득 참! {item.name} 버려짐")
                 return ExplorationResult(
@@ -336,6 +344,8 @@ class ExplorationSystem:
                     event=ExplorationEvent.NONE,
                     message=f"📦 보물상자 발견! 하지만 인벤토리가 가득 차서 {item.name}을(를) 버렸다..."
                 )
+        else:
+            logger.error(f"[CHEST] 인벤토리가 None입니다!")
 
         logger.info(f"보물상자 획득: {item.name}")
 
@@ -357,9 +367,17 @@ class ExplorationSystem:
         # 랜덤 아이템 생성 (일반 드롭)
         item = ItemGenerator.create_random_drop(self.floor_number, boss_drop=False)
 
+        # 디버그 로그
+        logger.debug(f"[ITEM] 아이템 처리 시작: {item.name}")
+        logger.debug(f"[ITEM] 인벤토리 존재 여부: {self.inventory is not None}")
+        if self.inventory:
+            logger.debug(f"[ITEM] 인벤토리 슬롯 수: {len(self.inventory.slots)}")
+            logger.debug(f"[ITEM] 현재 무게: {self.inventory.current_weight}kg / {self.inventory.max_weight}kg")
+
         # 인벤토리에 추가
         if self.inventory:
             success = self.inventory.add_item(item)
+            logger.debug(f"[ITEM] add_item 결과: {success}")
             if not success:
                 logger.warning(f"인벤토리 가득 참! {item.name} 버려짐")
                 return ExplorationResult(
@@ -367,6 +385,8 @@ class ExplorationSystem:
                     event=ExplorationEvent.NONE,
                     message=f"✨ 아이템 발견! 하지만 인벤토리가 가득 차서 {item.name}을(를) 버렸다..."
                 )
+        else:
+            logger.error(f"[ITEM] 인벤토리가 None입니다!")
 
         logger.info(f"아이템 획득: {item.name}")
 
