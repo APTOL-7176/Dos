@@ -96,6 +96,7 @@ class TCODDisplay:
 
         # 프로젝트 루트 경로
         project_root = Path(__file__).parent.parent.parent
+        self.logger.info(f"프로젝트 루트: {project_root.absolute()}")
 
         if platform.system() == "Windows":
             # Windows 시스템 폰트 (고정폭 우선 - 공백 제거)
@@ -126,50 +127,61 @@ class TCODDisplay:
             ]
 
         self.tileset = None
-        for font_path in font_paths:
+        self.logger.info(f"폰트 검색 시작 (총 {len(font_paths)}개 경로)")
+
+        for i, font_path in enumerate(font_paths):
+            self.logger.info(f"[{i+1}/{len(font_paths)}] 시도: {font_path}")
+
             try:
-                if Path(font_path).exists():
-                    # 타일 크기 설정
-                    # 폰트를 의도적으로 넓게 렌더링해서 문자들이 겹치도록 함
-                    char_height = font_size // 2
-                    # char_spacing_adjust만큼 폰트를 넓게 만들어 문자가 겹치게 함
-                    char_width = char_height + char_spacing_adjust
+                if not Path(font_path).exists():
+                    self.logger.warning(f"  → 파일 없음")
+                    continue
 
-                    # 유니코드 전체 범위 포함하여 로드
-                    # TCOD는 폰트의 모든 글리프를 자동으로 로드
-                    self.tileset = tcod.tileset.load_truetype_font(
-                        font_path,
-                        char_width,
-                        char_height,
+                self.logger.info(f"  → 파일 발견! 로딩 시도...")
+
+                # 타일 크기 설정
+                # 폰트를 의도적으로 넓게 렌더링해서 문자들이 겹치도록 함
+                char_height = font_size // 2
+                # char_spacing_adjust만큼 폰트를 넓게 만들어 문자가 겹치게 함
+                char_width = char_height + char_spacing_adjust
+
+                # 유니코드 전체 범위 포함하여 로드
+                # TCOD는 폰트의 모든 글리프를 자동으로 로드
+                self.tileset = tcod.tileset.load_truetype_font(
+                    font_path,
+                    char_width,
+                    char_height,
+                )
+
+                # 타일셋을 전역 기본값으로 설정 (특수문자 렌더링 보장)
+                tcod.tileset.set_default(self.tileset)
+
+                # 특수문자 포함 여부 확인
+                box_chars = "╔═╗║╚╝"  # Box Drawing: U+2554, U+2550, U+2557, U+2551, U+255A, U+255D
+                block_chars = "█"      # Block Element: U+2588
+                special_chars_found = []
+
+                for char in box_chars + block_chars:
+                    code_point = ord(char)
+                    # charmap에 해당 문자가 있는지 확인
+                    if code_point in self.tileset.charmap:
+                        special_chars_found.append(f"{char}(U+{code_point:04X})")
+
+                if special_chars_found:
+                    self.logger.info(
+                        f"  ✓ 폰트 로드 성공: {font_path}\n"
+                        f"    셀 크기: {char_width}x{char_height}\n"
+                        f"    특수문자: {', '.join(special_chars_found)}"
                     )
+                else:
+                    self.logger.warning(
+                        f"  ✓ 폰트 로드됨: {font_path} (셀: {char_width}x{char_height})\n"
+                        f"    ⚠ 경고: 박스/블록 문자가 폰트에 없을 수 있음"
+                    )
+                break
 
-                    # 타일셋을 전역 기본값으로 설정 (특수문자 렌더링 보장)
-                    tcod.tileset.set_default(self.tileset)
-
-                    # 특수문자 포함 여부 확인
-                    box_chars = "╔═╗║╚╝"  # Box Drawing: U+2554, U+2550, U+2557, U+2551, U+255A, U+255D
-                    block_chars = "█"      # Block Element: U+2588
-                    special_chars_found = []
-
-                    for char in box_chars + block_chars:
-                        code_point = ord(char)
-                        # charmap에 해당 문자가 있는지 확인
-                        if code_point in self.tileset.charmap:
-                            special_chars_found.append(f"{char}(U+{code_point:04X})")
-
-                    if special_chars_found:
-                        self.logger.info(
-                            f"폰트 로드 성공: {font_path} (셀: {char_width}x{char_height})\n"
-                            f"  특수문자 지원 확인: {', '.join(special_chars_found)}"
-                        )
-                    else:
-                        self.logger.warning(
-                            f"폰트 로드: {font_path} (셀: {char_width}x{char_height})\n"
-                            f"  경고: 박스/블록 문자가 폰트에 없을 수 있음"
-                        )
-                    break
             except Exception as e:
-                self.logger.debug(f"폰트 로드 시도 실패 ({font_path}): {e}")
+                self.logger.warning(f"  ✗ 로드 실패: {e}")
                 continue
 
         # 폴백: 기본 폰트
