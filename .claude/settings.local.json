@@ -22,7 +22,12 @@
       "WebFetch(domain:www.sounds-resource.com)",
       "WebFetch(domain:sounds.spriters-resource.com)",
       "WebFetch(domain:forums.qhimm.com)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(git pull:*)",
+      "Bash(git checkout:*)",
+      "Bash(git commit:*)",
+      "Bash(git push)",
+      "Bash(git stash:*)"
     ],
     "deny": [],
     "ask": []

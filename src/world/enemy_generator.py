@@ -223,8 +223,8 @@ class SimpleEnemy:
 
     def _calculate_max_brv(self, template: EnemyTemplate, level_modifier: float) -> int:
         """적의 최대 BRV 계산 (레벨과 타입에 따라 다름)"""
-        # 기본 최대 BRV: 레벨 * 30 (이전의 1/10 수준)
-        base_max_brv = int(template.level * 30 * level_modifier)
+        # 기본 최대 BRV: 레벨 * 150 (플레이어와 비슷한 수준)
+        base_max_brv = int(template.level * 150 * level_modifier)
 
         # 적 타입별 보정
         enemy_type = template.enemy_id
@@ -327,7 +327,7 @@ class EnemyGenerator:
 
             # 레벨 보정 (층수에 맞게)
             level_modifier = floor_number / max(1, template.level)
-            level_modifier = max(0.5, min(2.0, level_modifier))  # 0.5배 ~ 2배
+            level_modifier = max(0.8, min(2.5, level_modifier))  # 0.8배 ~ 2.5배
 
             enemy = SimpleEnemy(template, level_modifier)
 

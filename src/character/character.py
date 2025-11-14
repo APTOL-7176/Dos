@@ -102,6 +102,7 @@ class Character:
             "hp": Stats.HP,
             "mp": Stats.MP,
             "init_brv": Stats.INIT_BRV,
+            "max_brv": Stats.MAX_BRV,
             "physical_attack": Stats.STRENGTH,
             "physical_defense": Stats.DEFENSE,
             "magic_attack": Stats.MAGIC,
@@ -123,6 +124,9 @@ class Character:
                 growth_type = "linear"
             elif yaml_key == "init_brv":
                 growth_rate = 50
+                growth_type = "linear"
+            elif yaml_key == "max_brv":
+                growth_rate = 75
                 growth_type = "linear"
             elif yaml_key in ["physical_attack", "magic_attack"]:
                 growth_rate = 1.1
@@ -384,6 +388,11 @@ class Character:
     def init_brv(self) -> int:
         """초기 BRV (전투 시작 시)"""
         return int(self.stat_manager.get_value(Stats.INIT_BRV))
+
+    @property
+    def max_brv(self) -> int:
+        """최대 BRV"""
+        return int(self.stat_manager.get_value(Stats.MAX_BRV))
 
     @property
     def strength(self) -> int:
@@ -681,7 +690,7 @@ class Character:
 
         # 각 스탯에 대해 trait 보너스 계산
         stat_names = [
-            "hp", "mp", "init_brv", "physical_attack", "physical_defense",
+            "hp", "mp", "init_brv", "max_brv", "physical_attack", "physical_defense",
             "magic_attack", "magic_defense", "speed", "accuracy", "evasion"
         ]
 
@@ -693,6 +702,8 @@ class Character:
                 base_value = self.stat_manager.get_value(Stats.MP)
             elif stat_name == "init_brv":
                 base_value = self.stat_manager.get_value(Stats.INIT_BRV)
+            elif stat_name == "max_brv":
+                base_value = self.stat_manager.get_value(Stats.MAX_BRV)
             elif stat_name == "physical_attack":
                 base_value = self.stat_manager.get_value(Stats.STRENGTH)
             elif stat_name == "physical_defense":
@@ -726,6 +737,7 @@ class Character:
             "hp": Stats.HP,
             "mp": Stats.MP,
             "init_brv": Stats.INIT_BRV,
+            "max_brv": Stats.MAX_BRV,
             "physical_attack": Stats.STRENGTH,
             "physical_defense": Stats.DEFENSE,
             "magic_attack": Stats.MAGIC,

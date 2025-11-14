@@ -270,6 +270,7 @@ class Stats:
     HP = "hp"
     MP = "mp"
     INIT_BRV = "init_brv"  # 초기 브레이브 (전투 시작 시 BRV)
+    MAX_BRV = "max_brv"    # 최대 브레이브
     STRENGTH = "strength"
     DEFENSE = "defense"
     MAGIC = "magic"

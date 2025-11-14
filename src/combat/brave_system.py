@@ -48,9 +48,9 @@ class BraveSystem:
         Returns:
             계산된 INT BRV
         """
-        # 캐릭터가 이미 int_brv를 가지고 있으면 사용
-        if hasattr(character, "int_brv"):
-            base_int_brv = character.int_brv
+        # 캐릭터가 이미 init_brv를 가지고 있으면 사용
+        if hasattr(character, "init_brv"):
+            base_int_brv = character.init_brv
         else:
             base_int_brv = self.base_brv
 

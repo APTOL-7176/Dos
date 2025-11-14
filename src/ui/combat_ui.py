@@ -346,7 +346,7 @@ class CombatUI:
                 self.battle_ended = True
                 self.battle_result = self.combat_manager.state
                 self.state = CombatUIState.BATTLE_END
-                self.logger.info(f"전투 종료 감지: {self.battle_result.value}")
+                logger.info(f"전투 종료 감지: {self.battle_result.value}")
 
         # 메시지 타이머 감소
         for msg in self.messages:
@@ -694,11 +694,11 @@ def run_combat(
     Returns:
         전투 결과 (승리/패배/도주)
     """
-    # 전투 시작 SFX (swirl)
-    play_sfx("combat", "swirl")
+    # 전투 시작 SFX (Battle Swirl)
+    play_sfx("combat", "battle_start")
 
     # 전투 BGM 랜덤 재생 (보스 BGM 제외)
-    battle_bgm_tracks = ["battle_normal", "battle_1", "battle_2", "battle_3"]
+    battle_bgm_tracks = ["battle_normal"]  # config.yaml에 정의된 일반 전투 BGM
     selected_bgm = random.choice(battle_bgm_tracks)
     play_bgm(selected_bgm, loop=True, fade_in=True)
 
