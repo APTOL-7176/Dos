@@ -241,6 +241,7 @@ class SimpleEnemy:
     """간단한 적 클래스 (전투용)"""
 
     def __init__(self, template: EnemyTemplate, level_modifier: float = 1.0):
+        self.enemy_id = template.enemy_id  # 적 ID 저장 (BGM 선택용)
         self.name = template.name
         self.level = max(1, int(template.level * level_modifier))
 
