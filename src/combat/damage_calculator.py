@@ -36,7 +36,7 @@ class DamageCalculator:
         self.config = get_config()
 
         # 밸런스 설정
-        self.brv_damage_multiplier = self.config.get("combat.damage.brv_multiplier", 0.1)
+        self.brv_damage_multiplier = self.config.get("combat.damage.brv_multiplier", 1.5)
         self.hp_damage_multiplier = self.config.get("combat.damage.hp_multiplier", 0.15)
         self.break_damage_bonus = self.config.get("combat.damage.break_bonus", 1.5)
         self.wound_damage_rate = self.config.get("combat.damage.wound_rate", 0.25)
