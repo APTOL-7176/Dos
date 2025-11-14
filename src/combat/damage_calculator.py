@@ -161,9 +161,8 @@ class DamageCalculator:
             defender_stat = self._get_defense_stat(defender)
 
         # 스탯 보정 계산: 공격자 스탯 / (방어자 스탯 + 100)
-        # +100은 기본값으로 너무 극단적인 보정 방지
+        # +100은 기본값으로 0으로 나누는 것 방지
         stat_modifier = attacker_stat / (defender_stat + 100.0)
-        stat_modifier = max(0.3, min(3.0, stat_modifier))  # 최소 30%, 최대 300%로 제한
 
         damage = int(base_damage * stat_modifier)
 
