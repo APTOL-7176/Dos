@@ -135,7 +135,8 @@ def open_game_menu(
     console: tcod.console.Console,
     context: tcod.context.Context,
     inventory=None,
-    party=None
+    party=None,
+    exploration=None
 ) -> MenuOption:
     """
     게임 메뉴 열기
@@ -145,6 +146,7 @@ def open_game_menu(
         context: TCOD 컨텍스트
         inventory: 인벤토리 (인벤토리 메뉴용)
         party: 파티 (파티 상태 메뉴용)
+        exploration: 탐험 상태 (저장용)
 
     Returns:
         선택된 메뉴 옵션
@@ -185,14 +187,31 @@ def open_game_menu(
                         continue
 
                     elif result == MenuOption.SAVE_GAME:
+                        if exploration is None:
+                            show_message(console, context, "저장할 수 없습니다.")
+                            continue
+
                         from src.ui.save_load_ui import show_save_screen
-                        from src.persistence.save_system import serialize_party_member
+                        from src.persistence.save_system import (
+                            serialize_party_member, serialize_dungeon, serialize_item
+                        )
+
                         # 게임 상태 직렬화
                         game_state = {
                             "party": [serialize_party_member(m) for m in party] if party else [],
-                            "floor_number": 1,  # TODO: 현재 층수 전달 필요
-                            "gold": inventory.gold if inventory and hasattr(inventory, 'gold') else 0,
+                            "floor_number": exploration.floor_number,
+                            "dungeon": serialize_dungeon(exploration.dungeon),
+                            "player_position": {
+                                "x": exploration.player.x,
+                                "y": exploration.player.y
+                            },
+                            "inventory": {
+                                "gold": inventory.gold if inventory and hasattr(inventory, 'gold') else 0,
+                                "items": [serialize_item(item) for item in inventory.items] if inventory and hasattr(inventory, 'items') else []
+                            },
+                            "keys": exploration.player_keys if hasattr(exploration, 'player_keys') else [],
                         }
+
                         success = show_save_screen(console, context, game_state)
                         if success:
                             show_message(console, context, "저장 완료!")
@@ -202,8 +221,8 @@ def open_game_menu(
                         from src.ui.save_load_ui import show_load_screen
                         game_state = show_load_screen(console, context)
                         if game_state:
-                            # 로드 성공 - 메뉴 닫고 게임 재시작 필요
-                            show_message(console, context, "게임 불러오기 성공!\n(아직 게임 복원 기능은 개발 중입니다)")
+                            # 로드 성공 - 메뉴 닫고 게임 재시작
+                            return MenuOption.LOAD_GAME
                         continue
 
                     elif result == MenuOption.OPTIONS:

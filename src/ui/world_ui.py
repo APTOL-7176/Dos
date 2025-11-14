@@ -76,8 +76,12 @@ class WorldUI:
             if self.inventory is not None and self.party is not None and console is not None and context is not None:
                 from src.ui.game_menu import open_game_menu, MenuOption
                 logger.warning("[DEBUG] 게임 메뉴 열기")
-                result = open_game_menu(console, context, self.inventory, self.party)
+                result = open_game_menu(console, context, self.inventory, self.party, self.exploration)
                 if result == MenuOption.QUIT:
+                    self.quit_requested = True
+                    return True
+                elif result == MenuOption.LOAD_GAME:
+                    # 게임을 불러온 경우 탐험 종료하고 main.py에서 처리하도록
                     self.quit_requested = True
                     return True
                 return False

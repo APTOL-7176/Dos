@@ -114,6 +114,160 @@ def main() -> int:
 
             if menu_result == MenuResult.QUIT:
                 break
+            elif menu_result == MenuResult.CONTINUE:
+                # 게임 불러오기
+                logger.info("계속하기 - 저장된 게임 불러오기")
+                from src.ui.save_load_ui import show_load_screen
+                from src.persistence.save_system import deserialize_dungeon, deserialize_item
+                from src.character.character import Character
+                from src.equipment.inventory import Inventory
+
+                loaded_state = show_load_screen(display.console, display.context)
+
+                if loaded_state:
+                    logger.info("게임 불러오기 성공")
+                    # 불러온 데이터로 게임 재개
+                    from src.persistence.save_system import (
+                        deserialize_party_member,
+                        deserialize_dungeon,
+                        deserialize_inventory
+                    )
+                    from src.world.exploration import ExplorationSystem
+                    from src.ui.world_ui import run_exploration
+                    from src.ui.combat_ui import run_combat, CombatState
+                    from src.combat.experience_system import (
+                        RewardCalculator,
+                        distribute_party_experience
+                    )
+                    from src.ui.reward_ui import show_reward_screen
+                    from src.world.enemy_generator import EnemyGenerator
+
+                    # 파티 복원
+                    party = [deserialize_party_member(member_data) for member_data in loaded_state.get("party", [])]
+                    logger.info(f"파티 복원 완료: {len(party)}명")
+
+                    # 던전 복원
+                    dungeon = deserialize_dungeon(loaded_state["dungeon"])
+                    floor_number = loaded_state.get("floor_number", 1)
+                    logger.info(f"던전 복원 완료: {floor_number}층")
+
+                    # 인벤토리 복원
+                    inventory_data = loaded_state.get("inventory", {})
+                    inventory = deserialize_inventory(inventory_data)
+                    logger.info(f"인벤토리 복원 완료: 골드 {inventory.gold}")
+
+                    # 플레이어 위치 복원
+                    player_pos = loaded_state.get("player_position", {"x": 0, "y": 0})
+
+                    # 탐험 시스템 초기화
+                    exploration = ExplorationSystem(dungeon, party, floor_number, inventory)
+                    exploration.player.x = player_pos["x"]
+                    exploration.player.y = player_pos["y"]
+
+                    # 키 복원
+                    exploration.player_keys = loaded_state.get("keys", [])
+
+                    # 탐험 계속 (새 게임과 동일한 루프)
+                    while True:
+                        result, data = run_exploration(
+                            display.console,
+                            display.context,
+                            exploration,
+                            inventory,
+                            party
+                        )
+
+                        logger.info(f"탐험 결과: {result}")
+
+                        if result == "quit":
+                            logger.info("게임 종료")
+                            break
+                        elif result == "combat":
+                            # 전투 처리 (새 게임과 동일)
+                            logger.info("⚔ 전투 시작!")
+
+                            if data and len(data) > 0:
+                                num_enemies = len(data)
+                                enemies = EnemyGenerator.generate_enemies(floor_number, num_enemies)
+                                logger.info(f"적 {len(enemies)}명 조우: {[e.name for e in enemies]}")
+                            else:
+                                enemies = EnemyGenerator.generate_enemies(floor_number)
+                                logger.info(f"적 {len(enemies)}명: {[e.name for e in enemies]}")
+
+                            combat_result = run_combat(
+                                display.console,
+                                display.context,
+                                party,
+                                enemies
+                            )
+
+                            logger.info(f"전투 결과: {combat_result}")
+
+                            if combat_result == CombatState.VICTORY:
+                                logger.info("✅ 승리!")
+
+                                if data:
+                                    for enemy_entity in data:
+                                        if enemy_entity in exploration.enemies:
+                                            exploration.enemies.remove(enemy_entity)
+                                    logger.info(f"적 {len(data)}명 제거됨")
+
+                                rewards = RewardCalculator.calculate_combat_rewards(
+                                    enemies,
+                                    floor_number,
+                                    is_boss_fight=False
+                                )
+
+                                level_up_info = distribute_party_experience(
+                                    party,
+                                    rewards["experience"]
+                                )
+
+                                show_reward_screen(
+                                    display.console,
+                                    display.context,
+                                    rewards,
+                                    level_up_info
+                                )
+
+                                for item in rewards.get("items", []):
+                                    if not inventory.add_item(item):
+                                        logger.warning(f"인벤토리 가득 참! {item.name} 버려짐")
+
+                                inventory.add_gold(rewards.get("gold", 0))
+
+                                continue
+                            elif combat_result == CombatState.DEFEAT:
+                                logger.info("❌ 패배... 게임 오버")
+                                break
+                            else:
+                                logger.info("🏃 도망쳤다")
+                                continue
+
+                        elif result == "floor_down":
+                            floor_number += 1
+                            logger.info(f"⬇ 다음 층: {floor_number}층")
+                            from src.world.dungeon_generator import DungeonGenerator
+                            dungeon_gen = DungeonGenerator(width=80, height=50)
+                            dungeon = dungeon_gen.generate(floor_number)
+                            exploration = ExplorationSystem(dungeon, party, floor_number, inventory)
+                            continue
+                        elif result == "floor_up":
+                            if floor_number > 1:
+                                floor_number -= 1
+                                logger.info(f"⬆ 이전 층: {floor_number}층")
+                                from src.world.dungeon_generator import DungeonGenerator
+                                dungeon_gen = DungeonGenerator(width=80, height=50)
+                                dungeon = dungeon_gen.generate(floor_number)
+                                exploration = ExplorationSystem(dungeon, party, floor_number, inventory)
+                                continue
+                            else:
+                                logger.info("🎉 던전 탈출 성공!")
+                                break
+                else:
+                    logger.info("게임 불러오기 취소")
+                    continue
+
             elif menu_result == MenuResult.NEW_GAME:
                 logger.info("새 게임 시작 - 파티 구성")
 
