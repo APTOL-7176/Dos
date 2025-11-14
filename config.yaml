@@ -350,6 +350,8 @@ audio:
       battle_normal: "11-Fighting"                             # Fighting (Let the Battles Begin!)
       battle_boss: "21-Still More Fighting"                    # Still More Fighting (Fight On!)
       battle_jenova: "38-J-E-N-O-V-A"                          # J-E-N-O-V-A
+      battle_jenova_absolute: "85-Jenova Absolute"             # Jenova Absolute
+      battle_birth_of_god: "86-The Birth of God"               # The Birth of God
       battle_sephiroth: "50-Those Chosen By the Planet"        # Those Chosen By the Planet
       battle_weapon: "71-Weapon Raid"                          # Weapon Raid
       battle_final_boss: "87-One-Winged Angel"                 # One-Winged Angel
