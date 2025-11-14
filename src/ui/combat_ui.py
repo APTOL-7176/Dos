@@ -338,6 +338,14 @@ class CombatUI:
         # 전투 매니저 업데이트
         self.combat_manager.update(delta_time)
 
+        # 전투 종료 확인
+        if self.combat_manager.state in [CombatState.VICTORY, CombatState.DEFEAT, CombatState.FLED]:
+            if not self.battle_ended:
+                self.battle_ended = True
+                self.battle_result = self.combat_manager.state
+                self.state = CombatUIState.BATTLE_END
+                self.logger.info(f"전투 종료 감지: {self.battle_result.value}")
+
         # 메시지 타이머 감소
         for msg in self.messages:
             msg.frames_remaining -= 1

@@ -209,9 +209,9 @@ class SimpleEnemy:
         self.accuracy = template.accuracy
         self.evasion = template.evasion
 
-        # BRV
-        self.current_brv = 0
-        self.max_brv = 9999
+        # BRV (적 타입과 레벨에 따라 차별화)
+        self.max_brv = self._calculate_max_brv(template, level_modifier)
+        self.current_brv = self._calculate_init_brv(template, level_modifier)
 
         # 상태
         self.is_alive = True
@@ -220,6 +220,51 @@ class SimpleEnemy:
 
         # 스킬 (간단하게)
         self.skills = []
+
+    def _calculate_max_brv(self, template: EnemyTemplate, level_modifier: float) -> int:
+        """적의 최대 BRV 계산 (레벨과 타입에 따라 다름)"""
+        # 기본 최대 BRV: 레벨 * 30 (이전의 1/10 수준)
+        base_max_brv = int(template.level * 30 * level_modifier)
+
+        # 적 타입별 보정
+        enemy_type = template.enemy_id
+        if "boss" in enemy_type or enemy_type == "sephiroth":
+            # 보스: 3배
+            return int(base_max_brv * 3)
+        elif enemy_type in ["dragon", "demon", "vampire"]:
+            # 강력한 적: 2배
+            return int(base_max_brv * 2)
+        elif enemy_type in ["wraith", "dark_mage"]:
+            # 마법사 계열: 1.5배
+            return int(base_max_brv * 1.5)
+        elif enemy_type in ["slime", "goblin"]:
+            # 약한 적: 0.7배
+            return int(base_max_brv * 0.7)
+        else:
+            # 기본
+            return base_max_brv
+
+    def _calculate_init_brv(self, template: EnemyTemplate, level_modifier: float) -> int:
+        """적의 초기 BRV 계산 (최대 BRV의 일부)"""
+        max_brv = self.max_brv if hasattr(self, 'max_brv') else self._calculate_max_brv(template, level_modifier)
+
+        # 적 타입별 초기 BRV 비율
+        enemy_type = template.enemy_id
+        if "boss" in enemy_type or enemy_type == "sephiroth":
+            # 보스: 50% 시작
+            return int(max_brv * 0.5)
+        elif enemy_type in ["wraith", "dark_mage", "vampire"]:
+            # 마법사/언데드: 30% 시작
+            return int(max_brv * 0.3)
+        elif enemy_type in ["dragon", "demon", "troll"]:
+            # 강력한 물리 적: 40% 시작
+            return int(max_brv * 0.4)
+        elif enemy_type in ["slime", "goblin", "wolf"]:
+            # 약한 적: 10% 시작
+            return int(max_brv * 0.1)
+        else:
+            # 기본: 20% 시작
+            return int(max_brv * 0.2)
 
     def take_damage(self, damage: int) -> int:
         """데미지 받기"""
