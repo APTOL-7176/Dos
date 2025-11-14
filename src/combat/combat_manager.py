@@ -327,8 +327,18 @@ class CombatManager:
             pass
 
         # 일반 스킬 실행 (플레이어 스킬)
-        # TODO: 플레이어 스킬 시스템 연동
-        result["error"] = "player_skill_not_implemented"
+        from src.character.skills.skill_manager import get_skill_manager
+        skill_manager = get_skill_manager()
+
+        # SkillManager를 통해 스킬 실행
+        skill_result = skill_manager.execute_skill(skill.skill_id, actor, target, context={"combat_manager": self})
+
+        if skill_result.success:
+            result["success"] = True
+            result["message"] = skill_result.message
+        else:
+            result["error"] = skill_result.message
+
         return result
 
     def _execute_enemy_skill(
