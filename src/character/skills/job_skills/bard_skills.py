@@ -15,7 +15,7 @@ def create_bard_skills():
         DamageEffect(DamageType.BRV, 1.3),
         GimmickEffect(GimmickOperation.ADD, "melody_notes", 1, max_value=7)
     ]
-    note_attack.costs = [MPCost(12)]
+    note_attack.costs = []  # 기본 공격은 MP 소모 없음
     
     # 2. 기본 HP: 화음 타격
     chord_strike = Skill("bard_chord_strike", "화음 타격", "멜로디를 소비하여 HP 공격")
@@ -23,7 +23,7 @@ def create_bard_skills():
         DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "melody_notes", "multiplier": 0.15}),
         GimmickEffect(GimmickOperation.CONSUME, "melody_notes", 1)
     ]
-    chord_strike.costs = [MPCost(18)]
+    chord_strike.costs = []  # 기본 공격은 MP 소모 없음
     
     # 3. 음계 상승
     scale_up = Skill("bard_scale_up", "음계 상승", "멜로디 3음 획득")

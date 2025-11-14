@@ -16,7 +16,7 @@ def create_druid_skills():
         DamageEffect(DamageType.BRV, 1.4),
         GimmickEffect(GimmickOperation.ADD, "nature_points", 1, max_value=5)
     ]
-    nature_power.costs = [MPCost(15)]
+    nature_power.costs = []  # 기본 공격은 MP 소모 없음
 
     # 2. 기본 HP: 가시 덩굴
     thorn_vine = Skill("druid_thorn_vine", "가시 덩굴", "자연 포인트 소비 공격")
@@ -24,7 +24,7 @@ def create_druid_skills():
         DamageEffect(DamageType.HP, 1.1, gimmick_bonus={"field": "nature_points", "multiplier": 0.3}),
         GimmickEffect(GimmickOperation.CONSUME, "nature_points", 1)
     ]
-    thorn_vine.costs = [MPCost(20), StackCost("nature_points", 1)]
+    thorn_vine.costs = []  # 기본 공격은 MP 소모 없음
 
     # 3. 곰 변신
     bear_form = Skill("druid_bear_form", "곰 변신", "방어 태세 변신")

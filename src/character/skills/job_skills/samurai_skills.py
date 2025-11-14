@@ -15,7 +15,7 @@ def create_samurai_skills():
         DamageEffect(DamageType.BRV, 1.6),
         GimmickEffect(GimmickOperation.ADD, "will_gauge", 1, max_value=5)
     ]
-    iaido.costs = [MPCost(16)]
+    iaido.costs = []  # 기본 공격은 MP 소모 없음
 
     # 2. 기본 HP: 참월
     moonlight_slash = Skill("samurai_moonlight_slash", "참월", "의지 소비 공격")
@@ -23,7 +23,7 @@ def create_samurai_skills():
         DamageEffect(DamageType.HP, 1.2, gimmick_bonus={"field": "will_gauge", "multiplier": 0.35}),
         GimmickEffect(GimmickOperation.CONSUME, "will_gauge", 1)
     ]
-    moonlight_slash.costs = [MPCost(22), StackCost("will_gauge", 1)]
+    moonlight_slash.costs = []  # 기본 공격은 MP 소모 없음
 
     # 3. 명경지수
     clear_mind = Skill("samurai_clear_mind", "명경지수", "의지 2게이지 획득")

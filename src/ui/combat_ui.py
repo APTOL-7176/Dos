@@ -575,6 +575,11 @@ class CombatUI:
 
             console.print(5, y, f"{i+1}. {ally.name}", fg=name_color)
 
+            # 직업 및 기믹 상태 표시
+            gimmick_text = self._get_gimmick_display(ally)
+            if gimmick_text:
+                console.print(5 + len(f"{i+1}. {ally.name}") + 2, y, gimmick_text, fg=(150, 255, 200))
+
             # 상태이상 아이콘
             status_effects = getattr(ally, 'status_effects', {})
             if status_effects:
@@ -743,6 +748,187 @@ class CombatUI:
             "Z: 확정  X: 취소",
             fg=(180, 180, 180)
         )
+
+    def _get_gimmick_display(self, character: Any) -> str:
+        """캐릭터의 기믹 상태를 문자열로 반환"""
+        gimmick_type = getattr(character, 'gimmick_type', None)
+        if not gimmick_type:
+            return ""
+
+        # 기믹 타입별 상태 표시
+        if gimmick_type == "stance_system":
+            # 전사 - 스탠스
+            stance = getattr(character, 'current_stance', 0)
+            stance_names = ["기본", "공격", "방어", "신속", "균형", "최종"]
+            if 0 <= stance < len(stance_names):
+                return f"[{stance_names[stance]}]"
+
+        elif gimmick_type == "elemental_counter":
+            # 아크메이지 - 원소 카운터
+            fire = getattr(character, 'fire_element', 0)
+            ice = getattr(character, 'ice_element', 0)
+            lightning = getattr(character, 'lightning_element', 0)
+            return f"[🔥{fire} ❄{ice} ⚡{lightning}]"
+
+        elif gimmick_type == "aim_system":
+            # 궁수/저격수 - 조준
+            aim = getattr(character, 'aim_points', 0)
+            max_aim = getattr(character, 'max_aim_points', 5)
+            return f"[조준:{aim}/{max_aim}]"
+
+        elif gimmick_type == "venom_system":
+            # 도적 - 베놈
+            venom = getattr(character, 'venom_power', 0)
+            return f"[독:{venom}]"
+
+        elif gimmick_type == "shadow_system":
+            # 암살자 - 그림자
+            shadows = getattr(character, 'shadow_count', 0)
+            max_shadows = getattr(character, 'max_shadow_count', 5)
+            return f"[그림자:{shadows}/{max_shadows}]"
+
+        elif gimmick_type == "sword_aura":
+            # 검성 - 검기
+            aura = getattr(character, 'sword_aura', 0)
+            max_aura = getattr(character, 'max_sword_aura', 5)
+            return f"[검기:{aura}/{max_aura}]"
+
+        elif gimmick_type == "rage_system":
+            # 광전사 - 분노
+            rage = getattr(character, 'rage_stacks', 0)
+            max_rage = getattr(character, 'max_rage_stacks', 10)
+            return f"[분노:{rage}/{max_rage}]"
+
+        elif gimmick_type == "ki_system":
+            # 몽크 - 기
+            ki = getattr(character, 'ki_energy', 0)
+            max_ki = getattr(character, 'max_ki_energy', 100)
+            return f"[기:{ki}/{max_ki}]"
+
+        elif gimmick_type == "melody_system":
+            # 바드 - 멜로디
+            melody = getattr(character, 'melody_stacks', 0)
+            max_melody = getattr(character, 'max_melody_stacks', 7)
+            return f"[♪:{melody}/{max_melody}]"
+
+        elif gimmick_type == "necro_system":
+            # 네크로맨서 - 네크로 에너지
+            necro = getattr(character, 'necro_energy', 0)
+            max_necro = getattr(character, 'max_necro_energy', 50)
+            return f"[사령:{necro}/{max_necro}]"
+
+        elif gimmick_type == "dragon_power":
+            # 용기사 - 드래곤 파워
+            power = getattr(character, 'dragon_power', 0)
+            max_power = getattr(character, 'max_dragon_power', 100)
+            return f"[용력:{power}/{max_power}]"
+
+        elif gimmick_type == "spirit_system":
+            # 정령술사 - 정령
+            count = getattr(character, 'spirit_count', 0)
+            max_count = getattr(character, 'max_spirits', 4)
+            return f"[정령:{count}/{max_count}]"
+
+        elif gimmick_type == "construct_system":
+            # 기계공학자 - 부품
+            parts = getattr(character, 'construct_parts', 0)
+            max_parts = getattr(character, 'max_parts', 5)
+            return f"[부품:{parts}/{max_parts}]"
+
+        elif gimmick_type == "totem_system":
+            # 무당 - 토템
+            totems = getattr(character, 'totem_count', 0)
+            max_totems = getattr(character, 'max_totems', 3)
+            return f"[토템:{totems}/{max_totems}]"
+
+        elif gimmick_type == "treasure_system":
+            # 해적 - 보물
+            treasure = getattr(character, 'treasure_points', 0)
+            return f"[보물:{treasure}]"
+
+        elif gimmick_type == "bushido_system":
+            # 사무라이 - 명상
+            meditation = getattr(character, 'meditation_stacks', 0)
+            max_meditation = getattr(character, 'max_meditation_stacks', 3)
+            return f"[명상:{meditation}/{max_meditation}]"
+
+        elif gimmick_type == "nature_system":
+            # 드루이드 - 자연력
+            nature = getattr(character, 'nature_energy', 0)
+            max_nature = getattr(character, 'max_nature_energy', 100)
+            return f"[자연:{nature}/{max_nature}]"
+
+        elif gimmick_type == "wisdom_system":
+            # 철학자 - 지혜
+            knowledge = getattr(character, 'knowledge_stacks', 0)
+            max_knowledge = getattr(character, 'max_knowledge_stacks', 10)
+            return f"[지혜:{knowledge}/{max_knowledge}]"
+
+        elif gimmick_type == "time_system":
+            # 시간술사 - 시간 게이지
+            time = getattr(character, 'time_gauge', 0)
+            max_time = getattr(character, 'max_time_gauge', 100)
+            return f"[시간:{time}/{max_time}]"
+
+        elif gimmick_type == "alchemy_system":
+            # 연금술사 - 물약
+            potions = getattr(character, 'potion_stock', 0)
+            max_potions = getattr(character, 'max_potion_stock', 10)
+            return f"[물약:{potions}/{max_potions}]"
+
+        elif gimmick_type == "blood_system":
+            # 흡혈귀 - 혈액
+            blood = getattr(character, 'blood_pool', 0)
+            max_blood = getattr(character, 'max_blood_pool', 100)
+            return f"[혈액:{blood}/{max_blood}]"
+
+        elif gimmick_type == "hack_system":
+            # 해커 - 해킹
+            hacks = getattr(character, 'hack_stacks', 0)
+            max_hacks = getattr(character, 'max_hack_stacks', 5)
+            return f"[해킹:{hacks}/{max_hacks}]"
+
+        elif gimmick_type == "darkness_system":
+            # 암흑기사 - 어둠
+            darkness = getattr(character, 'darkness', 0)
+            return f"[어둠:{darkness}]"
+
+        elif gimmick_type == "holy_system":
+            # 성기사/신관 - 신성력
+            holy = getattr(character, 'holy_power', 0)
+            max_holy = getattr(character, 'max_holy_power', 100)
+            return f"[신성:{holy}/{max_holy}]"
+
+        elif gimmick_type == "rune_system":
+            # 전투마법사 - 룬
+            runes = getattr(character, 'rune_count', 0)
+            max_runes = getattr(character, 'max_runes', 3)
+            return f"[룬:{runes}/{max_runes}]"
+
+        elif gimmick_type == "dimension_system":
+            # 차원술사 - 차원력
+            dimension = getattr(character, 'dimension_energy', 0)
+            max_dimension = getattr(character, 'max_dimension_energy', 50)
+            return f"[차원:{dimension}/{max_dimension}]"
+
+        elif gimmick_type == "honor_system":
+            # 검투사/기사 - 명예
+            honor = getattr(character, 'honor_points', 0)
+            return f"[명예:{honor}]"
+
+        elif gimmick_type == "faith_system":
+            # 클레릭 - 신앙
+            faith = getattr(character, 'faith_stacks', 0)
+            max_faith = getattr(character, 'max_faith_stacks', 5)
+            return f"[신앙:{faith}/{max_faith}]"
+
+        elif gimmick_type == "spell_layer":
+            # 마검사 - 마법 레이어
+            layers = getattr(character, 'spell_layers', 0)
+            max_layers = getattr(character, 'max_spell_layers', 3)
+            return f"[레이어:{layers}/{max_layers}]"
+
+        return ""
 
     def _render_item_menu(self, console: tcod.console.Console):
         """아이템 메뉴 렌더링 (TODO)"""

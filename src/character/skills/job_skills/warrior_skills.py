@@ -13,14 +13,14 @@ def create_warrior_skills():
     power_strike.effects = [
         DamageEffect(DamageType.BRV, 1.6)
     ]
-    power_strike.costs = [MPCost(14)]
+    power_strike.costs = []  # 기본 공격은 MP 소모 없음
 
     # 2. 기본 HP: 방패 강타
     shield_bash = Skill("warrior_shield_bash", "방패 강타", "HP 공격")
     shield_bash.effects = [
         DamageEffect(DamageType.HP, 1.1)
     ]
-    shield_bash.costs = [MPCost(18)]
+    shield_bash.costs = []  # 기본 공격은 MP 소모 없음
 
     # 3. 공격 자세
     attack_stance = Skill("warrior_attack_stance", "공격 자세", "공격력 상승 자세")

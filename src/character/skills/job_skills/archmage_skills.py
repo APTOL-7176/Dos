@@ -13,7 +13,7 @@ def create_archmage_skills():
         DamageEffect(DamageType.BRV, 1.6),
         GimmickEffect(GimmickOperation.ADD, "fire_element", 1, max_value=5)
     ]
-    fireball.costs = [MPCost(18)]
+    fireball.costs = []  # 기본 공격은 MP 소모 없음
 
     # 2. 기본 HP: 번개 화살
     lightning_bolt = Skill("archmage_lightning_bolt", "번개 화살", "번개 원소 획득")
@@ -21,7 +21,7 @@ def create_archmage_skills():
         DamageEffect(DamageType.HP, 1.0),
         GimmickEffect(GimmickOperation.ADD, "lightning_element", 1, max_value=5)
     ]
-    lightning_bolt.costs = [MPCost(20)]
+    lightning_bolt.costs = []  # 기본 공격은 MP 소모 없음
 
     # 3. 빙결 폭풍
     ice_storm = Skill("archmage_ice_storm", "빙결 폭풍", "빙결 원소 획득 광역 공격")

@@ -15,7 +15,7 @@ def create_time_mage_skills():
         DamageEffect(DamageType.BRV, 1.4),
         GimmickEffect(GimmickOperation.ADD, "time_points", 1, max_value=6)
     ]
-    time_accel.costs = [MPCost(16)]
+    time_accel.costs = []  # 기본 공격은 MP 소모 없음
 
     # 2. 기본 HP: 시간 충격
     time_shock = Skill("time_mage_time_shock", "시간 충격", "시간 포인트 소비 공격")
@@ -23,7 +23,7 @@ def create_time_mage_skills():
         DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "time_points", "multiplier": 0.25}),
         GimmickEffect(GimmickOperation.CONSUME, "time_points", 1)
     ]
-    time_shock.costs = [MPCost(20), StackCost("time_points", 1)]
+    time_shock.costs = []  # 기본 공격은 MP 소모 없음
 
     # 3. 헤이스트
     haste = Skill("time_mage_haste", "헤이스트", "아군 속도 대폭 상승")

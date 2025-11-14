@@ -16,7 +16,7 @@ def create_priest_skills():
         DamageEffect(DamageType.BRV, 1.5),
         GimmickEffect(GimmickOperation.ADD, "judgment_points", 1, max_value=6)
     ]
-    holy_smite.costs = [MPCost(16)]
+    holy_smite.costs = []  # 기본 공격은 MP 소모 없음
 
     # 2. 기본 HP: 신성한 심판
     divine_judgment = Skill("priest_divine_judgment", "신성한 심판", "심판 포인트 소비 공격")
@@ -24,7 +24,7 @@ def create_priest_skills():
         DamageEffect(DamageType.HP, 1.1, gimmick_bonus={"field": "judgment_points", "multiplier": 0.3}),
         GimmickEffect(GimmickOperation.CONSUME, "judgment_points", 1)
     ]
-    divine_judgment.costs = [MPCost(20), StackCost("judgment_points", 1)]
+    divine_judgment.costs = []  # 기본 공격은 MP 소모 없음
 
     # 3. 빛의 속박
     light_bind = Skill("priest_light_bind", "빛의 속박", "심판 포인트 획득, 디버프")

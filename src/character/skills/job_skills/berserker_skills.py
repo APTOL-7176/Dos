@@ -18,7 +18,7 @@ def create_berserker_skills():
         DamageEffect(DamageType.BRV, 1.8),  # 강력한 배율
         GimmickEffect(GimmickOperation.ADD, "rage_stacks", 1, max_value=10)
     ]
-    frenzy_strike.costs = [MPCost(10), HPCost(amount=10)]
+    frenzy_strike.costs = []  # 기본 공격은 MP 소모 없음
     
     # 2. 기본 HP: 피의 섬광
     blood_flash = Skill("berserker_blood_flash", "피의 섬광", "HP 소비 HP 공격, 흡혈 회복")
@@ -26,7 +26,7 @@ def create_berserker_skills():
         DamageEffect(DamageType.HP, 1.2),
         LifestealEffect(lifesteal_percent=0.5, low_hp_bonus=True)  # 50% 흡혈
     ]
-    blood_flash.costs = [MPCost(15), HPCost(amount=15)]
+    blood_flash.costs = []  # 기본 공격은 MP 소모 없음
     
     # 3. 피의 갑옷
     blood_armor = Skill("berserker_blood_armor", "피의 갑옷", "HP 소비하여 강력한 보호막 생성 (150%)")

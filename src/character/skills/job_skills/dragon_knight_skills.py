@@ -15,7 +15,7 @@ def create_dragon_knight_skills():
         DamageEffect(DamageType.BRV, 1.5),
         GimmickEffect(GimmickOperation.ADD, "dragon_power", 1, max_value=5)
     ]
-    flame_slash.costs = [MPCost(15)]
+    flame_slash.costs = []  # 기본 공격은 MP 소모 없음
 
     # 2. 기본 HP: 용의 돌진
     dragon_dive = Skill("dragon_knight_dragon_dive", "용의 돌진", "용의 힘 소비 공격")
@@ -23,7 +23,7 @@ def create_dragon_knight_skills():
         DamageEffect(DamageType.HP, 1.1, gimmick_bonus={"field": "dragon_power", "multiplier": 0.3}),
         GimmickEffect(GimmickOperation.CONSUME, "dragon_power", 1)
     ]
-    dragon_dive.costs = [MPCost(20), StackCost("dragon_power", 1)]
+    dragon_dive.costs = []  # 기본 공격은 MP 소모 없음
 
     # 3. 화염 숨결
     fire_breath = Skill("dragon_knight_fire_breath", "화염 숨결", "광역 화염 피해")

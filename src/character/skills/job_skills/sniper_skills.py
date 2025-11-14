@@ -16,7 +16,7 @@ def create_sniper_skills():
         DamageEffect(DamageType.BRV, 1.8),
         GimmickEffect(GimmickOperation.ADD, "focus_stacks", 1, max_value=10)
     ]
-    precise_aim.costs = [MPCost(15)]
+    precise_aim.costs = []  # 기본 공격은 MP 소모 없음
     precise_aim.cast_time = 1.5
     skills.append(precise_aim)
     
@@ -26,7 +26,7 @@ def create_sniper_skills():
         DamageEffect(DamageType.HP, 2.0, gimmick_bonus={"field": "focus_stacks", "multiplier": 0.4}),
         GimmickEffect(GimmickOperation.CONSUME, "focus_stacks", 2)
     ]
-    headshot.costs = [MPCost(25), StackCost("focus_stacks", 2)]
+    headshot.costs = []  # 기본 공격은 MP 소모 없음
     headshot.cast_time = 2.0
     skills.append(headshot)
     

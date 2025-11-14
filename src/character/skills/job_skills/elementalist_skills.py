@@ -15,7 +15,7 @@ def create_elementalist_skills():
         DamageEffect(DamageType.BRV, 1.3),
         GimmickEffect(GimmickOperation.ADD, "spirit_count", 1, max_value=4)
     ]
-    spirit_call.costs = [MPCost(15)]
+    spirit_call.costs = []  # 기본 공격은 MP 소모 없음
 
     # 2. 기본 HP: 정령 공격
     spirit_attack = Skill("elementalist_spirit_attack", "정령 공격", "정령 소비 공격")
@@ -23,7 +23,7 @@ def create_elementalist_skills():
         DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "spirit_count", "multiplier": 0.4}),
         GimmickEffect(GimmickOperation.CONSUME, "spirit_count", 1)
     ]
-    spirit_attack.costs = [MPCost(20), StackCost("spirit_count", 1)]
+    spirit_attack.costs = []  # 기본 공격은 MP 소모 없음
 
     # 3. 화염 정령
     fire_spirit = Skill("elementalist_fire_spirit", "화염 정령", "화염 정령 특수 소환")

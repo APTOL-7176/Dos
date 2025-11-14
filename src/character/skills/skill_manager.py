@@ -25,18 +25,68 @@ class SkillManager:
         skill = self.get_skill(skill_id)
         if not skill:
             return SkillResult(success=False, message=f"스킬 없음: {skill_id}")
-        
+
         if self.is_on_cooldown(user, skill_id):
             return SkillResult(success=False, message="쿨다운 중")
-        
+
+        # 스킬 타입에 따른 SFX 재생
+        self._play_skill_sfx(skill)
+
         event_bus.publish(Events.SKILL_CAST_START, {"skill": skill, "user": user, "target": target})
         result = skill.execute(user, target, context)
-        
+
         if result.success and skill.cooldown > 0:
             self.set_cooldown(user, skill_id, skill.cooldown)
-        
+
         event_bus.publish(Events.SKILL_EXECUTE, {"skill": skill, "user": user, "target": target, "result": result})
         return result
+
+    def _play_skill_sfx(self, skill: Skill):
+        """스킬 타입에 따라 SFX 재생"""
+        from src.audio import play_sfx
+        from src.character.skills.effects.damage_effect import DamageEffect, DamageType
+        from src.character.skills.effects.buff_effect import BuffEffect
+        from src.character.skills.effects.heal_effect import HealEffect
+
+        # 스킬 effects 분석
+        has_brv_damage = False
+        has_hp_damage = False
+        has_buff = False
+        has_heal = False
+        is_magical = False
+
+        for effect in skill.effects:
+            if isinstance(effect, DamageEffect):
+                if effect.damage_type == DamageType.BRV:
+                    has_brv_damage = True
+                elif effect.damage_type == DamageType.HP:
+                    has_hp_damage = True
+                # 마법 속성 체크
+                if hasattr(effect, 'element') and effect.element in ['fire', 'ice', 'lightning', 'holy', 'dark']:
+                    is_magical = True
+            elif isinstance(effect, BuffEffect):
+                has_buff = True
+            elif isinstance(effect, HealEffect):
+                has_heal = True
+
+        # 우선순위에 따라 SFX 재생
+        if has_heal:
+            play_sfx("combat", "heal")
+        elif has_buff:
+            play_sfx("combat", "buff")
+        elif has_hp_damage:
+            if is_magical:
+                play_sfx("combat", "attack_magic")
+            else:
+                play_sfx("combat", "attack_heavy")
+        elif has_brv_damage:
+            if is_magical:
+                play_sfx("combat", "attack_magic")
+            else:
+                play_sfx("combat", "attack_physical")
+        else:
+            # 기본 SFX
+            play_sfx("combat", "skill_use")
 
     def is_on_cooldown(self, character: Any, skill_id: str) -> bool:
         """쿨다운 확인"""

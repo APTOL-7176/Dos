@@ -15,7 +15,7 @@ def create_dimensionist_skills():
         DamageEffect(DamageType.BRV, 1.5),
         GimmickEffect(GimmickOperation.ADD, "dimension_points", 1, max_value=5)
     ]
-    dimension_rift.costs = [MPCost(17)]
+    dimension_rift.costs = []  # 기본 공격은 MP 소모 없음
 
     # 2. 기본 HP: 차원 절단
     dimension_cut = Skill("dimensionist_dimension_cut", "차원 절단", "차원 포인트 소비 공격")
@@ -23,7 +23,7 @@ def create_dimensionist_skills():
         DamageEffect(DamageType.HP, 1.1, gimmick_bonus={"field": "dimension_points", "multiplier": 0.3}),
         GimmickEffect(GimmickOperation.CONSUME, "dimension_points", 1)
     ]
-    dimension_cut.costs = [MPCost(22), StackCost("dimension_points", 1)]
+    dimension_cut.costs = []  # 기본 공격은 MP 소모 없음
 
     # 3. 차원 이동
     dimension_shift = Skill("dimensionist_dimension_shift", "차원 이동", "회피 상승 + 차원 포인트")

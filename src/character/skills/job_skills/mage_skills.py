@@ -14,7 +14,7 @@ def create_mage_skills():
         DamageEffect(DamageType.BRV, 1.5),
         GimmickEffect(GimmickOperation.ADD, "fire_element", 1, max_value=5)
     ]
-    fire_blast.costs = [MPCost(15)]
+    fire_blast.costs = []  # 기본 공격은 MP 소모 없음
 
     # 2. 기본 HP: 얼음 파편
     ice_shard = Skill("mage_ice_shard", "얼음 파편", "빙결 원소 획득")
@@ -22,7 +22,7 @@ def create_mage_skills():
         DamageEffect(DamageType.HP, 0.9),
         GimmickEffect(GimmickOperation.ADD, "ice_element", 1, max_value=5)
     ]
-    ice_shard.costs = [MPCost(18)]
+    ice_shard.costs = []  # 기본 공격은 MP 소모 없음
 
     # 3. 천둥 화살
     thunder_bolt = Skill("mage_thunder_bolt", "천둥 화살", "번개 원소 획득")

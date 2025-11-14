@@ -15,7 +15,7 @@ def create_assassin_skills():
         DamageEffect(DamageType.BRV, 1.4),
         GimmickEffect(GimmickOperation.ADD, "stealth_points", 1, max_value=5)
     ]
-    shadow_slash.costs = [MPCost(12)]
+    shadow_slash.costs = []  # 기본 공격은 MP 소모 없음
 
     # 2. 기본 HP: 암살
     assassinate = Skill("assassin_assassinate", "암살", "은신 포인트로 치명타 증가")
@@ -23,7 +23,7 @@ def create_assassin_skills():
         DamageEffect(DamageType.HP, 1.2, gimmick_bonus={"field": "stealth_points", "multiplier": 0.35}),
         GimmickEffect(GimmickOperation.CONSUME, "stealth_points", 1)
     ]
-    assassinate.costs = [MPCost(20), StackCost("stealth_points", 1)]
+    assassinate.costs = []  # 기본 공격은 MP 소모 없음
 
     # 3. 배후 습격
     backstab = Skill("assassin_backstab", "배후 습격", "강력한 배후 공격")

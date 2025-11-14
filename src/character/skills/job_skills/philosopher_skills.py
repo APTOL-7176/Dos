@@ -15,7 +15,7 @@ def create_philosopher_skills():
         DamageEffect(DamageType.BRV, 1.4),
         GimmickEffect(GimmickOperation.ADD, "knowledge_stacks", 1, max_value=10)
     ]
-    analyze.costs = [MPCost(15)]
+    analyze.costs = []  # 기본 공격은 MP 소모 없음
 
     # 2. 기본 HP: 논리적 공격
     logic_strike = Skill("philosopher_logic_strike", "논리적 공격", "지식 소비 공격")
@@ -23,7 +23,7 @@ def create_philosopher_skills():
         DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "knowledge_stacks", "multiplier": 0.15}),
         GimmickEffect(GimmickOperation.CONSUME, "knowledge_stacks", 1)
     ]
-    logic_strike.costs = [MPCost(18), StackCost("knowledge_stacks", 1)]
+    logic_strike.costs = []  # 기본 공격은 MP 소모 없음
 
     # 3. 통찰력
     insight = Skill("philosopher_insight", "통찰력", "지식 2스택 획득 + 정확도 상승")

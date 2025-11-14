@@ -17,7 +17,7 @@ def create_knight_skills():
         DamageEffect(DamageType.BRV, 1.4),
         GimmickEffect(GimmickOperation.ADD, "duty_stacks", 1, max_value=5)
     ]
-    lance_charge.costs = [MPCost(12)]
+    lance_charge.costs = []  # 기본 공격은 MP 소모 없음
     skills.append(lance_charge)
     
     # 2. 기본 HP: 의무의 일격
@@ -26,7 +26,7 @@ def create_knight_skills():
         DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "duty_stacks", "multiplier": 0.3}),
         GimmickEffect(GimmickOperation.CONSUME, "duty_stacks", 1)
     ]
-    duty_strike.costs = [MPCost(18), StackCost("duty_stacks", 1)]
+    duty_strike.costs = []  # 기본 공격은 MP 소모 없음
     skills.append(duty_strike)
     
     # 3. 수호의 맹세

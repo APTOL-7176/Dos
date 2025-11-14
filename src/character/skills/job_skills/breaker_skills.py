@@ -16,7 +16,7 @@ def create_breaker_skills():
         DamageEffect(DamageType.BRV, 2.0),
         GimmickEffect(GimmickOperation.ADD, "break_power", 1, max_value=10)
     ]
-    crush_strike.costs = [MPCost(12)]
+    crush_strike.costs = []  # 기본 공격은 MP 소모 없음
     skills.append(crush_strike)
     
     # 2. 기본 HP: 파괴의 일격
@@ -25,7 +25,7 @@ def create_breaker_skills():
         DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "break_power", "multiplier": 0.2}),
         GimmickEffect(GimmickOperation.CONSUME, "break_power", 1)
     ]
-    break_hit.costs = [MPCost(18), StackCost("break_power", 1)]
+    break_hit.costs = []  # 기본 공격은 MP 소모 없음
     skills.append(break_hit)
     
     # 3. BRV 집중

@@ -15,7 +15,7 @@ def create_pirate_skills():
         DamageEffect(DamageType.BRV, 1.5),
         GimmickEffect(GimmickOperation.ADD, "gold", 1, max_value=10)
     ]
-    plunder.costs = [MPCost(14)]
+    plunder.costs = []  # 기본 공격은 MP 소모 없음
 
     # 2. 기본 HP: 금화 발사
     coin_shot = Skill("pirate_coin_shot", "금화 발사", "골드 소비 공격")
@@ -23,7 +23,7 @@ def create_pirate_skills():
         DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "gold", "multiplier": 0.2}),
         GimmickEffect(GimmickOperation.CONSUME, "gold", 1)
     ]
-    coin_shot.costs = [MPCost(18), StackCost("gold", 1)]
+    coin_shot.costs = []  # 기본 공격은 MP 소모 없음
 
     # 3. 보물 사냥
     treasure_hunt = Skill("pirate_treasure_hunt", "보물 사냥", "골드 2개 획득")
