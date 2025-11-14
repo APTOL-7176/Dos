@@ -580,6 +580,10 @@ class CombatUI:
                     cast_info.progress, skill_name=f"시전:{skill_name}"
                 )
 
+            # BREAK 상태 표시
+            if self.combat_manager.brave.is_broken(ally):
+                console.print(8, y + 4, "💔 BREAK!", fg=(255, 50, 50))
+
     def _render_enemies(self, console: tcod.console.Console):
         """적군 상태 렌더링 (상세)"""
         console.print(self.screen_width - 30, 4, "[적군]", fg=(255, 100, 100))
