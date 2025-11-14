@@ -3,6 +3,7 @@ from src.character.skills.effects.base import SkillEffect, EffectResult, EffectT
 
 class BuffType:
     """버프 타입"""
+    # 버프 (증가)
     ATTACK_UP = "attack_up"
     DEFENSE_UP = "defense_up"
     MAGIC_UP = "magic_up"
@@ -11,6 +12,16 @@ class BuffType:
     CRITICAL_UP = "critical_up"
     ACCURACY_UP = "accuracy_up"
     EVASION_UP = "evasion_up"
+
+    # 디버프 (감소)
+    ATTACK_DOWN = "attack_down"
+    DEFENSE_DOWN = "defense_down"
+    MAGIC_DOWN = "magic_down"
+    SPIRIT_DOWN = "spirit_down"
+    SPEED_DOWN = "speed_down"
+    CRITICAL_DOWN = "critical_down"
+    ACCURACY_DOWN = "accuracy_down"
+    EVASION_DOWN = "evasion_down"
 
 class BuffEffect(SkillEffect):
     """버프 효과"""
