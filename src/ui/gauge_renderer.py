@@ -1,170 +1,216 @@
 """
 게이지 렌더러
 
-정밀한 유니코드 박스 문자 게이지
+그래픽 기반 게이지 (특수문자 불필요)
 """
 
 from typing import Tuple
-
-
-# 유니코드 블록 문자 (7단계) - 왼쪽에서 오른쪽으로 채워지는 블록 (U+258F ~ U+2588)
-# 부분 블록만 (공백 제외)
-BLOCK_CHARS = ["▏", "▎", "▍", "▌", "▋", "▊", "▉"]
-FULL_BLOCK = "█"
+import tcod.console
 
 
 class GaugeRenderer:
-    """게이지 렌더러"""
+    """게이지 렌더러 - draw_rect() 기반"""
 
     @staticmethod
     def render_bar(
+        console: tcod.console.Console,
+        x: int,
+        y: int,
+        width: int,
         current: float,
         maximum: float,
-        width: int = 10,
         show_numbers: bool = True,
         color_gradient: bool = True
-    ) -> Tuple[str, Tuple[int, int, int]]:
+    ) -> None:
         """
-        게이지 바 렌더링
+        게이지 바 렌더링 (그래픽 방식)
 
         Args:
+            console: TCOD 콘솔
+            x, y: 게이지 위치
+            width: 게이지 너비 (셀 수)
             current: 현재 값
             maximum: 최대 값
-            width: 게이지 너비 (문자 수)
             show_numbers: 숫자 표시 여부
             color_gradient: 색상 그라디언트 (빨강~노랑~초록)
-
-        Returns:
-            (게이지 문자열, 색상)
         """
         if maximum <= 0:
             ratio = 0.0
         else:
             ratio = min(1.0, current / maximum)
 
-        # 채워진 블록 수 계산
-        filled_blocks = ratio * width
-        full_count = int(filled_blocks)
-        partial = filled_blocks - full_count
-
-        # 부분 블록 선택 (7단계)
-        partial_index = int(partial * 7)
-        partial_char = BLOCK_CHARS[partial_index] if partial > 0 and partial_index < len(BLOCK_CHARS) else ""
-
-        # 게이지 문자열 생성 (공백 없이)
-        gauge = FULL_BLOCK * full_count
-        gauge += partial_char
-        # 빈 공간은 표시하지 않음 (trailing spaces 제거)
-
         # 색상 계산
         if color_gradient:
             if ratio > 0.6:
-                # 초록
-                color = (100, 255, 100)
+                fg_color = (0, 200, 0)  # 초록
+                bg_color = (0, 100, 0)
             elif ratio > 0.3:
-                # 노랑
-                color = (255, 255, 100)
+                fg_color = (200, 200, 0)  # 노랑
+                bg_color = (100, 100, 0)
             else:
-                # 빨강
-                color = (255, 100, 100)
+                fg_color = (200, 0, 0)  # 빨강
+                bg_color = (100, 0, 0)
         else:
-            color = (200, 200, 200)
+            fg_color = (150, 150, 150)
+            bg_color = (50, 50, 50)
 
-        # 숫자 추가
+        # 배경 (빈 부분)
+        console.draw_rect(x, y, width, 1, ord(" "), bg=bg_color)
+
+        # 전경 (채워진 부분)
+        filled_width = int(ratio * width)
+        if filled_width > 0:
+            console.draw_rect(x, y, filled_width, 1, ord(" "), bg=fg_color)
+
+        # 숫자 표시
         if show_numbers:
-            gauge += f" {int(current)}/{int(maximum)}"
-
-        return gauge, color
+            text = f"{int(current)}/{int(maximum)}"
+            text_x = x + (width - len(text)) // 2
+            console.print(text_x, y, text, fg=(255, 255, 255))
 
     @staticmethod
     def render_percentage_bar(
+        console: tcod.console.Console,
+        x: int,
+        y: int,
+        width: int,
         percentage: float,
-        width: int = 10,
         show_percent: bool = True,
         custom_color: Tuple[int, int, int] = None
-    ) -> Tuple[str, Tuple[int, int, int]]:
+    ) -> None:
         """
         퍼센트 게이지 렌더링
 
         Args:
-            percentage: 0.0 ~ 1.0
+            console: TCOD 콘솔
+            x, y: 게이지 위치
             width: 게이지 너비
+            percentage: 0.0 ~ 1.0
             show_percent: 퍼센트 표시 여부
             custom_color: 커스텀 색상
-
-        Returns:
-            (게이지 문자열, 색상)
         """
         ratio = min(1.0, max(0.0, percentage))
 
-        # 채워진 블록 수 계산
-        filled_blocks = ratio * width
-        full_count = int(filled_blocks)
-        partial = filled_blocks - full_count
-
-        # 부분 블록
-        partial_index = int(partial * 7)
-        partial_char = BLOCK_CHARS[partial_index] if partial > 0 and partial_index < len(BLOCK_CHARS) else ""
-
-        # 게이지 문자열 (공백 없이)
-        gauge = FULL_BLOCK * full_count
-        gauge += partial_char
-        # 빈 공간은 표시하지 않음 (trailing spaces 제거)
-
         # 색상
         if custom_color:
-            color = custom_color
+            fg_color = custom_color
+            bg_color = tuple(c // 2 for c in custom_color)
         else:
             # 기본 그라디언트
             if ratio > 0.6:
-                color = (100, 255, 100)
+                fg_color = (0, 200, 0)
+                bg_color = (0, 100, 0)
             elif ratio > 0.3:
-                color = (255, 255, 100)
+                fg_color = (200, 200, 0)
+                bg_color = (100, 100, 0)
             else:
-                color = (255, 100, 100)
+                fg_color = (200, 0, 0)
+                bg_color = (100, 0, 0)
 
-        # 퍼센트 추가
+        # 배경
+        console.draw_rect(x, y, width, 1, ord(" "), bg=bg_color)
+
+        # 전경
+        filled_width = int(ratio * width)
+        if filled_width > 0:
+            console.draw_rect(x, y, filled_width, 1, ord(" "), bg=fg_color)
+
+        # 퍼센트 표시
         if show_percent:
-            gauge += f" {int(ratio * 100)}%"
-
-        return gauge, color
+            text = f"{int(ratio * 100)}%"
+            text_x = x + (width - len(text)) // 2
+            console.print(text_x, y, text, fg=(255, 255, 255))
 
     @staticmethod
     def render_casting_bar(
+        console: tcod.console.Console,
+        x: int,
+        y: int,
+        width: int,
         progress: float,
-        skill_name: str = "",
-        width: int = 20
-    ) -> Tuple[str, Tuple[int, int, int]]:
+        skill_name: str = ""
+    ) -> None:
         """
         캐스팅 게이지 렌더링
 
         Args:
+            console: TCOD 콘솔
+            x, y: 게이지 위치
+            width: 게이지 너비
             progress: 진행도 (0.0 ~ 1.0)
             skill_name: 스킬 이름
-            width: 게이지 너비
-
-        Returns:
-            (게이지 문자열, 색상)
         """
         ratio = min(1.0, max(0.0, progress))
 
-        # 채워진 블록
-        filled_blocks = ratio * width
-        full_count = int(filled_blocks)
-        partial = filled_blocks - full_count
+        # 캐스팅은 보라색
+        fg_color = (150, 100, 255)
+        bg_color = (75, 50, 125)
 
-        partial_index = int(partial * 7)
-        partial_char = BLOCK_CHARS[partial_index] if partial > 0 and partial_index < len(BLOCK_CHARS) else ""
-
-        # 게이지 (캐스팅은 항상 보라색)
-        gauge = f"[{'▓' * full_count}{partial_char}{'░' * (width - full_count - (1 if partial_char else 0))}]"
-
+        # 스킬 이름 표시
         if skill_name:
-            gauge = f"{skill_name}: {gauge}"
+            console.print(x, y, f"{skill_name}:", fg=(200, 200, 200))
+            bar_x = x + len(skill_name) + 2
+            bar_width = width - len(skill_name) - 2
+        else:
+            bar_x = x
+            bar_width = width
 
-        color = (200, 150, 255)  # 보라색
+        # 배경
+        console.draw_rect(bar_x, y, bar_width, 1, ord(" "), bg=bg_color)
 
-        return gauge, color
+        # 전경
+        filled_width = int(ratio * bar_width)
+        if filled_width > 0:
+            console.draw_rect(bar_x, y, filled_width, 1, ord(" "), bg=fg_color)
+
+        # 진행도 표시
+        percent_text = f"{int(ratio * 100)}%"
+        text_x = bar_x + (bar_width - len(percent_text)) // 2
+        console.print(text_x, y, percent_text, fg=(255, 255, 255))
+
+    @staticmethod
+    def render_atb_gauge(
+        console: tcod.console.Console,
+        x: int,
+        y: int,
+        width: int,
+        current: float,
+        threshold: float,
+        maximum: float
+    ) -> None:
+        """
+        ATB 게이지 렌더링
+
+        Args:
+            console: TCOD 콘솔
+            x, y: 게이지 위치
+            width: 게이지 너비
+            current: 현재 ATB 값
+            threshold: 행동 가능 임계값
+            maximum: 최대 ATB 값
+        """
+        if maximum <= 0:
+            ratio = 0.0
+        else:
+            ratio = min(1.0, current / maximum)
+
+        # ATB 색상 (파란색)
+        fg_color = (100, 150, 255)
+        bg_color = (50, 75, 125)
+
+        # 배경
+        console.draw_rect(x, y, width, 1, ord(" "), bg=bg_color)
+
+        # 전경
+        filled_width = int(ratio * width)
+        if filled_width > 0:
+            console.draw_rect(x, y, filled_width, 1, ord(" "), bg=fg_color)
+
+        # 행동 가능 임계값 표시 (세로선)
+        threshold_ratio = threshold / maximum
+        threshold_x = x + int(threshold_ratio * width)
+        if 0 <= threshold_x < x + width:
+            console.print(threshold_x, y, "|", fg=(255, 255, 100))
 
     @staticmethod
     def render_status_icons(status_effects: dict) -> str:
@@ -178,53 +224,57 @@ class GaugeRenderer:
             아이콘 문자열
         """
         icon_map = {
-            "poison": "🧪",
-            "burn": "🔥",
-            "freeze": "❄",
-            "stun": "💫",
-            "sleep": "💤",
-            "silence": "🔇",
-            "blind": "👁",
-            "berserk": "😡",
-            "haste": "⚡",
-            "slow": "🐌",
-            "regen": "💚",
-            "reflect": "🛡",
-            "barrier": "🔰",
-            "break": "💔",
-            "doom": "💀"
+            "poison": "[독]",
+            "burn": "[화상]",
+            "freeze": "[빙결]",
+            "stun": "[기절]",
+            "sleep": "[수면]",
+            "silence": "[침묵]",
+            "blind": "[암흑]",
+            "berserk": "[광폭]",
+            "haste": "[헤이스트]",
+            "slow": "[슬로우]",
+            "regen": "[재생]",
+            "reflect": "[반사]",
+            "barrier": "[방벽]",
+            "break": "[브레이크]",
+            "doom": "[죽음]"
         }
 
         icons = []
         for status, turns in status_effects.items():
-            icon = icon_map.get(status.lower(), "●")
+            icon = icon_map.get(status.lower(), f"[{status}]")
             icons.append(f"{icon}{turns}")
 
         return " ".join(icons) if icons else ""
 
     @staticmethod
-    def render_wound_indicator(wound_damage: int) -> Tuple[str, Tuple[int, int, int]]:
+    def render_wound_indicator(
+        console: tcod.console.Console,
+        x: int,
+        y: int,
+        wound_damage: int
+    ) -> None:
         """
         상처 데미지 표시
 
         Args:
+            console: TCOD 콘솔
+            x, y: 표시 위치
             wound_damage: 상처 누적 데미지
-
-        Returns:
-            (표시 문자열, 색상)
         """
         if wound_damage <= 0:
-            return "", (100, 100, 100)
+            return
 
-        # 상처 레벨
+        # 상처 레벨에 따른 색상
         if wound_damage < 50:
-            symbol = "🩹"  # 작은 상처
+            text = f"[상처:{wound_damage}]"
             color = (255, 200, 150)
         elif wound_damage < 150:
-            symbol = "🤕"  # 중간 상처
+            text = f"[중상:{wound_damage}]"
             color = (255, 150, 100)
         else:
-            symbol = "💀"  # 심각한 상처
+            text = f"[치명상:{wound_damage}]"
             color = (255, 50, 50)
 
-        return f"{symbol}{wound_damage}", color
+        console.print(x, y, text, fg=color)
