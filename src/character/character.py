@@ -56,8 +56,9 @@ class Character:
         self.current_hp = self.max_hp
         self.current_mp = self.max_mp
 
-        # 전투 관련
-        self.current_brv = 0  # 현재 BRV (전투 중에만 사용)
+        # 전투 관련 - BRV 시스템 (직업별로 차별화)
+        self.max_brv = self._calculate_max_brv()
+        self.current_brv = self._calculate_init_brv()
         self.is_alive = True
         self.is_enemy = False  # 적 여부
 
@@ -490,6 +491,59 @@ class Character:
 
         return item
 
+    # ===== BRV 계산 =====
+
+    def _calculate_max_brv(self) -> int:
+        """직업별 최대 BRV 계산"""
+        # 기본 max BRV: 레벨 * 40
+        base_max_brv = self.level * 40
+
+        # 직업 아키타입에 따른 보정
+        archetype = self.class_data.get('archetype', 'Balanced')
+
+        if archetype == 'Tank':
+            # 탱커: 낮은 BRV (0.8배)
+            return int(base_max_brv * 0.8)
+        elif archetype == 'Attacker':
+            # 어택커: 높은 BRV (1.3배)
+            return int(base_max_brv * 1.3)
+        elif archetype == 'Mage':
+            # 마법사: 중간 BRV (1.0배)
+            return int(base_max_brv * 1.0)
+        elif archetype == 'Healer':
+            # 힐러: 낮은 BRV (0.7배)
+            return int(base_max_brv * 0.7)
+        elif archetype == 'Specialist':
+            # 스페셜리스트: 중상 BRV (1.2배)
+            return int(base_max_brv * 1.2)
+        else:
+            # 균형잡힌 직업 (1.0배)
+            return base_max_brv
+
+    def _calculate_init_brv(self) -> int:
+        """전투 시작 시 초기 BRV 계산"""
+        # 직업 아키타입에 따른 초기 BRV 비율
+        archetype = self.class_data.get('archetype', 'Balanced')
+
+        if archetype == 'Tank':
+            # 탱커: 20% 시작 (방어에 집중)
+            return int(self.max_brv * 0.2)
+        elif archetype == 'Attacker':
+            # 어택커: 30% 시작 (공격적)
+            return int(self.max_brv * 0.3)
+        elif archetype == 'Mage':
+            # 마법사: 15% 시작 (마나 의존)
+            return int(self.max_brv * 0.15)
+        elif archetype == 'Healer':
+            # 힐러: 10% 시작 (지원 역할)
+            return int(self.max_brv * 0.1)
+        elif archetype == 'Specialist':
+            # 스페셜리스트: 25% 시작
+            return int(self.max_brv * 0.25)
+        else:
+            # 균형잡힌 직업: 20% 시작
+            return int(self.max_brv * 0.2)
+
     # ===== 유틸리티 =====
 
     def to_dict(self) -> Dict[str, Any]:
@@ -520,7 +574,12 @@ class Character:
         # StatManager 복원
         character.stat_manager = StatManager.from_dict(data["stats"])
 
-        character.current_brv = 0
+        # YAML 데이터 로드
+        character.class_data = load_character_data(character.character_class)
+
+        # BRV 시스템
+        character.max_brv = character._calculate_max_brv()
+        character.current_brv = 0  # 전투 밖에서는 0
         character.is_alive = character.current_hp > 0
         character.is_enemy = False
         character.equipment = {"weapon": None, "armor": None, "accessory": None}

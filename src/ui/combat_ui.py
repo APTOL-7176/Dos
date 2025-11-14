@@ -9,6 +9,7 @@ from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
 import tcod
+import random
 
 from src.ui.input_handler import InputHandler, GameAction
 from src.ui.cursor_menu import CursorMenu, MenuItem
@@ -16,6 +17,7 @@ from src.ui.gauge_renderer import GaugeRenderer
 from src.combat.combat_manager import CombatManager, CombatState, ActionType
 from src.combat.casting_system import get_casting_system, CastingSystem
 from src.core.logger import get_logger, Loggers
+from src.audio import play_sfx, play_bgm
 
 
 logger = get_logger(Loggers.UI)
@@ -367,6 +369,9 @@ class CombatUI:
         # 아군 턴
         for combatant in ready:
             if combatant in self.combat_manager.allies:
+                # 아군 턴 시작 SFX
+                play_sfx("combat", "turn_start")
+
                 self.current_actor = combatant
                 self.action_menu = self._create_action_menu()
                 self.state = CombatUIState.ACTION_MENU
@@ -484,20 +489,49 @@ class CombatUI:
                 ally.current_hp, ally.max_hp, show_numbers=True
             )
 
-            # MP 게이지
-            console.print(8, y + 2, "MP:", fg=(200, 200, 200))
-            gauge_renderer.render_bar(
-                console, 12, y + 2, 10,
-                ally.current_mp, ally.max_mp, show_numbers=True, color_gradient=False
-            )
+            # MP 게이지 (파란색)
+            console.print(33, y + 2, "MP:", fg=(200, 200, 200))
+            # MP 게이지: 파란색 계열
+            mp_ratio = ally.current_mp / max(1, ally.max_mp)
+            if mp_ratio > 0.6:
+                mp_fg = (100, 150, 255)  # 밝은 파랑
+                mp_bg = (50, 75, 150)
+            elif mp_ratio > 0.3:
+                mp_fg = (80, 120, 200)  # 중간 파랑
+                mp_bg = (40, 60, 100)
+            else:
+                mp_fg = (60, 90, 150)  # 어두운 파랑
+                mp_bg = (30, 45, 75)
+            console.draw_rect(37, y + 2, 10, 1, ord(" "), bg=mp_bg)
+            filled_mp = int(mp_ratio * 10)
+            if filled_mp > 0:
+                console.draw_rect(37, y + 2, filled_mp, 1, ord(" "), bg=mp_fg)
+            mp_text = f"{ally.current_mp}/{ally.max_mp}"
+            console.print(37 + (10 - len(mp_text)) // 2, y + 2, mp_text, fg=(255, 255, 255))
 
-            # BRV 게이지
-            max_brv = getattr(ally, 'max_brv', 9999)
-            console.print(8, y + 3, "BRV:", fg=(200, 200, 200))
-            gauge_renderer.render_bar(
-                console, 13, y + 3, 10,
-                ally.current_brv, max_brv, show_numbers=True, color_gradient=False
-            )
+            # BRV 게이지 (노란색)
+            max_brv = getattr(ally, 'max_brv', 999)
+            console.print(8, y + 2, "BRV:", fg=(200, 200, 200))
+            # BRV 게이지: 노란색 계열
+            brv_ratio = ally.current_brv / max(1, max_brv)
+            if brv_ratio > 0.8:
+                brv_fg = (255, 220, 100)  # 황금색
+                brv_bg = (150, 130, 50)
+            elif brv_ratio > 0.5:
+                brv_fg = (255, 200, 80)  # 밝은 노랑
+                brv_bg = (120, 100, 40)
+            elif brv_ratio > 0.2:
+                brv_fg = (200, 160, 60)  # 중간 노랑
+                brv_bg = (100, 80, 30)
+            else:
+                brv_fg = (150, 120, 40)  # 어두운 노랑
+                brv_bg = (75, 60, 20)
+            console.draw_rect(13, y + 2, 10, 1, ord(" "), bg=brv_bg)
+            filled_brv = int(brv_ratio * 10)
+            if filled_brv > 0:
+                console.draw_rect(13, y + 2, filled_brv, 1, ord(" "), bg=brv_fg)
+            brv_text = f"{int(ally.current_brv)}/{int(max_brv)}"
+            console.print(13 + (10 - len(brv_text)) // 2, y + 2, brv_text, fg=(255, 255, 255))
 
             # ATB 게이지 (더 정밀)
             gauge = self.combat_manager.atb.get_gauge(ally)
@@ -660,6 +694,14 @@ def run_combat(
     Returns:
         전투 결과 (승리/패배/도주)
     """
+    # 전투 시작 SFX (swirl)
+    play_sfx("combat", "swirl")
+
+    # 전투 BGM 랜덤 재생 (보스 BGM 제외)
+    battle_bgm_tracks = ["battle_normal", "battle_1", "battle_2", "battle_3"]
+    selected_bgm = random.choice(battle_bgm_tracks)
+    play_bgm(selected_bgm, loop=True, fade_in=True)
+
     # 전투 매니저 생성
     combat_manager = CombatManager()
     combat_manager.start_combat(party, enemies)
@@ -668,7 +710,7 @@ def run_combat(
     ui = CombatUI(console.width, console.height, combat_manager)
     handler = InputHandler()
 
-    logger.info(f"전투 시작: 아군 {len(party)}명 vs 적군 {len(enemies)}명")
+    logger.info(f"전투 시작: 아군 {len(party)}명 vs 적군 {len(enemies)}명 (BGM: {selected_bgm})")
 
     # 전투 루프
     while not ui.battle_ended:
