@@ -337,6 +337,24 @@ class CombatUI:
 
     def update(self, delta_time: float = 1.0):
         """업데이트 (매 프레임)"""
+        # 플레이어가 선택 중인지 확인
+        is_player_selecting = self.state in [
+            CombatUIState.ACTION_MENU,
+            CombatUIState.SKILL_MENU,
+            CombatUIState.TARGET_SELECT,
+            CombatUIState.ITEM_MENU
+        ]
+
+        # 플레이어가 선택 중일 때는 ATB 증가를 멈춤
+        if is_player_selecting:
+            # ATB 업데이트 스킵 (시간 정지)
+            # 플레이어 턴으로 표시하여 ATB 증가 방지
+            self.combat_manager.state = CombatState.PLAYER_TURN
+        else:
+            # 일반 진행
+            if self.combat_manager.state == CombatState.PLAYER_TURN:
+                self.combat_manager.state = CombatState.IN_PROGRESS
+
         # 전투 매니저 업데이트
         self.combat_manager.update(delta_time)
 
