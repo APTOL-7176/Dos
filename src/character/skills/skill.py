@@ -41,12 +41,12 @@ class Skill:
         can_use, reason = self.can_use(user, context)
         if not can_use:
             return SkillResult(success=False, message=f"사용 불가: {reason}")
-        
+
         # 비용 소비
         for cost in self.costs:
             if not cost.consume(user, context):
                 return SkillResult(success=False, message="비용 소비 실패")
-        
+
         # 효과 실행
         total_dmg = 0
         total_heal = 0
@@ -57,7 +57,19 @@ class Skill:
                     total_dmg += result.damage_dealt
                 if hasattr(result, 'heal_amount'):
                     total_heal += result.heal_amount
-        
+
+        # AOE 효과 실행 (적 전체 대상)
+        if hasattr(self, 'aoe_effect') and self.aoe_effect:
+            # context에서 모든 적 가져오기
+            all_enemies = context.get('all_enemies', [])
+            if all_enemies and len(all_enemies) > 1:
+                # 메인 타겟을 제외한 다른 적들에게 AOE 피해
+                other_enemies = [e for e in all_enemies if e != target and hasattr(e, 'is_alive') and e.is_alive]
+                if other_enemies and hasattr(self.aoe_effect, 'execute'):
+                    aoe_result = self.aoe_effect.execute(user, other_enemies, context)
+                    if hasattr(aoe_result, 'damage_dealt'):
+                        total_dmg += aoe_result.damage_dealt
+
         return SkillResult(
             success=True,
             message=f"{user.name}이(가) {self.name} 사용!",

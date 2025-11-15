@@ -349,8 +349,16 @@ class CombatManager:
         from src.character.skills.skill_manager import get_skill_manager
         skill_manager = get_skill_manager()
 
+        # context에 모든 적 정보 추가 (AOE 효과를 위해)
+        all_enemies = self.enemies if actor in getattr(self, 'party', []) else getattr(self, 'party', [])
+
         # SkillManager를 통해 스킬 실행
-        skill_result = skill_manager.execute_skill(skill.skill_id, actor, target, context={"combat_manager": self})
+        skill_result = skill_manager.execute_skill(
+            skill.skill_id,
+            actor,
+            target,
+            context={"combat_manager": self, "all_enemies": all_enemies}
+        )
 
         if skill_result.success:
             result["success"] = True

@@ -25,9 +25,11 @@ def create_battle_mage_skills():
     rune_burst = Skill("bmage_burst", "룬 폭발", "룬 폭발 공격")
     rune_burst.effects = [
         DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "rune_stacks", "multiplier": 0.25}, stat_type="magical"),
-        GimmickEffect(GimmickOperation.CONSUME, "rune_stacks", 1)
+        GimmickEffect(GimmickOperation.CONSUME, "rune_stacks", 1),
+        StatusEffect(StatusType.RUNE, remove=True)  # 적의 룬 마크 제거
     ]
     rune_burst.costs = []  # 기본 공격은 MP 소모 없음
+    rune_burst.aoe_effect = DamageEffect(DamageType.BRV, 0.3, stat_type="magical")  # 룬 폭발 광역 피해 (약함)
     skills.append(rune_burst)
     
     # 3. 룬 강화
@@ -45,10 +47,12 @@ def create_battle_mage_skills():
     chain_burst = Skill("bmage_chain", "연쇄 폭발", "다중 룬 폭발")
     chain_burst.effects = [
         DamageEffect(DamageType.BRV_HP, 1.8, gimmick_bonus={"field": "rune_stacks", "multiplier": 0.3}, stat_type="magical"),
-        GimmickEffect(GimmickOperation.CONSUME, "rune_stacks", 2)
+        GimmickEffect(GimmickOperation.CONSUME, "rune_stacks", 2),
+        StatusEffect(StatusType.RUNE, remove=True)  # 적의 룬 마크 제거
     ]
     chain_burst.costs = [MPCost(9), StackCost("rune_stacks", 2)]
     chain_burst.cooldown = 2
+    chain_burst.aoe_effect = DamageEffect(DamageType.BRV, 0.4, stat_type="magical")  # 룬 폭발 광역 피해
     skills.append(chain_burst)
     
     # 5. 마법검
@@ -78,10 +82,12 @@ def create_battle_mage_skills():
     rune_storm = Skill("bmage_storm", "룬 폭풍", "광역 룬 공격")
     rune_storm.effects = [
         DamageEffect(DamageType.BRV_HP, 2.0, gimmick_bonus={"field": "rune_stacks", "multiplier": 0.35}, stat_type="magical"),
-        GimmickEffect(GimmickOperation.CONSUME, "rune_stacks", 3)
+        GimmickEffect(GimmickOperation.CONSUME, "rune_stacks", 3),
+        StatusEffect(StatusType.RUNE, remove=True)  # 적의 룬 마크 제거
     ]
     rune_storm.costs = [MPCost(11), StackCost("rune_stacks", 3)]
     rune_storm.cooldown = 4
+    rune_storm.aoe_effect = DamageEffect(DamageType.BRV, 0.5, stat_type="magical")  # 룬 폭발 광역 피해
     skills.append(rune_storm)
     
     # 8. 고대 룬
@@ -102,11 +108,13 @@ def create_battle_mage_skills():
         DamageEffect(DamageType.BRV, 2.0, gimmick_bonus={"field": "rune_stacks", "multiplier": 0.4}, stat_type="magical"),
         DamageEffect(DamageType.HP, 3.5, stat_type="magical"),
         BuffEffect(BuffType.MAGIC_UP, 0.6, duration=5),
-        GimmickEffect(GimmickOperation.SET, "rune_stacks", 0)
+        GimmickEffect(GimmickOperation.SET, "rune_stacks", 0),
+        StatusEffect(StatusType.RUNE, remove=True)  # 적의 룬 마크 제거
     ]
     ultimate.costs = [MPCost(25)]
     ultimate.is_ultimate = True
     ultimate.cooldown = 10
+    ultimate.aoe_effect = DamageEffect(DamageType.BRV_HP, 1.0, stat_type="magical")  # 룬 대폭발 강력한 광역 피해
     skills.append(ultimate)
     
     return skills
