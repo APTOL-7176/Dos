@@ -51,7 +51,7 @@ class MetaProgress:
         # 초기 해금 직업 (초보자용 쉬운 직업들)
         default_jobs = {
             "warrior",    # 전사 - 기본 물리 딜러
-            "mage",       # 마법사 - 기본 마법 딜러
+            "archmage",   # 아크메이지 - 기본 마법 딜러
             "cleric",     # 성직자 - 기본 힐러
             "rogue",      # 도적 - 기본 빠른 딜러
             "knight",     # 기사 - 기본 탱커
@@ -67,12 +67,12 @@ class MetaProgress:
 
     def _ensure_default_unlocked_traits(self):
         """기본 해금 특성 확인 및 설정"""
-        # 모든 직업 목록
+        # 모든 직업 목록 (총 33개)
         all_jobs = [
             "alchemist", "archer", "archmage", "assassin", "bard",
             "battle_mage", "berserker", "breaker", "cleric", "dark_knight",
             "dimensionist", "dragon_knight", "druid", "elementalist", "engineer",
-            "gladiator", "hacker", "knight", "mage", "monk",
+            "gladiator", "hacker", "knight", "monk",
             "necromancer", "paladin", "philosopher", "pirate", "priest",
             "rogue", "samurai", "shaman", "sniper", "spellblade",
             "sword_saint", "time_mage", "vampire", "warrior"

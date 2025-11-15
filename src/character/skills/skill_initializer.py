@@ -39,7 +39,6 @@ def initialize_all_skills():
         from src.character.skills.job_skills.gladiator_skills import register_gladiator_skills
         from src.character.skills.job_skills.hacker_skills import register_hacker_skills
         from src.character.skills.job_skills.knight_skills import register_knight_skills
-        from src.character.skills.job_skills.mage_skills import register_mage_skills
         from src.character.skills.job_skills.monk_skills import register_monk_skills
         from src.character.skills.job_skills.necromancer_skills import register_necromancer_skills
         from src.character.skills.job_skills.paladin_skills import register_paladin_skills
@@ -75,7 +74,6 @@ def initialize_all_skills():
             register_gladiator_skills,
             register_hacker_skills,
             register_knight_skills,
-            register_mage_skills,
             register_monk_skills,
             register_necromancer_skills,
             register_paladin_skills,
