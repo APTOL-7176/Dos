@@ -255,24 +255,38 @@ class CombatUI:
 
     def _handle_target_select(self, action: GameAction) -> bool:
         """대상 선택 입력 처리"""
-        enemies = self.combat_manager.enemies
-        alive_indices = [i for i, e in enumerate(enemies) if e.is_alive]
+        # 스킬의 target_type에 따라 대상 결정
+        from src.character.skill_types import SkillTargetType
+
+        if self.selected_skill and hasattr(self.selected_skill, 'target_type'):
+            target_type = self.selected_skill.target_type
+            # 아군 타겟팅 스킬 (회복 등)
+            if target_type in (SkillTargetType.SINGLE_ALLY, SkillTargetType.SELF):
+                targets = self.combat_manager.party
+            else:
+                # 적 타겟팅 스킬 (공격 등)
+                targets = self.combat_manager.enemies
+        else:
+            # 기본 공격은 적 타겟
+            targets = self.combat_manager.enemies
+
+        alive_indices = [i for i, e in enumerate(targets) if getattr(e, 'is_alive', True)]
 
         if not alive_indices:
             return False
 
         if action == GameAction.MOVE_UP or action == GameAction.MOVE_LEFT:
-            # 이전 살아있는 적으로 이동
+            # 이전 살아있는 대상으로 이동
             current_pos = alive_indices.index(self.target_cursor) if self.target_cursor in alive_indices else 0
             new_pos = (current_pos - 1) % len(alive_indices)
             self.target_cursor = alive_indices[new_pos]
         elif action == GameAction.MOVE_DOWN or action == GameAction.MOVE_RIGHT:
-            # 다음 살아있는 적으로 이동
+            # 다음 살아있는 대상으로 이동
             current_pos = alive_indices.index(self.target_cursor) if self.target_cursor in alive_indices else 0
             new_pos = (current_pos + 1) % len(alive_indices)
             self.target_cursor = alive_indices[new_pos]
         elif action == GameAction.CONFIRM:
-            self.selected_target = enemies[self.target_cursor]
+            self.selected_target = targets[self.target_cursor]
             self._execute_current_action()
         elif action == GameAction.CANCEL:
             # 취소 - 이전 상태로
@@ -330,16 +344,31 @@ class CombatUI:
 
     def _start_target_selection(self):
         """대상 선택 시작"""
-        # 살아있는 적만 필터링
-        alive_enemies = [e for e in self.combat_manager.enemies if e.is_alive]
-        if not alive_enemies:
-            # 모든 적이 죽었으면 행동 메뉴로 돌아감
+        from src.character.skill_types import SkillTargetType
+
+        # 스킬의 target_type에 따라 대상 결정
+        if self.selected_skill and hasattr(self.selected_skill, 'target_type'):
+            target_type = self.selected_skill.target_type
+            # 아군 타겟팅 스킬 (회복 등)
+            if target_type in (SkillTargetType.SINGLE_ALLY, SkillTargetType.SELF):
+                targets = self.combat_manager.party
+            else:
+                # 적 타겟팅 스킬 (공격 등)
+                targets = self.combat_manager.enemies
+        else:
+            # 기본 공격은 적 타겟
+            targets = self.combat_manager.enemies
+
+        # 살아있는 대상만 필터링
+        alive_targets = [e for e in targets if getattr(e, 'is_alive', True)]
+        if not alive_targets:
+            # 모든 대상이 죽었으면 행동 메뉴로 돌아감
             self.state = CombatUIState.ACTION_MENU
             return
 
-        # 첫 번째 살아있는 적의 인덱스로 커서 설정
-        for i, enemy in enumerate(self.combat_manager.enemies):
-            if enemy.is_alive:
+        # 첫 번째 살아있는 대상의 인덱스로 커서 설정
+        for i, target in enumerate(targets):
+            if getattr(target, 'is_alive', True):
                 self.target_cursor = i
                 break
 
