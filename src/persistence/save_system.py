@@ -112,6 +112,19 @@ class SaveSystem:
             logger.error(f"저장 파일 삭제 실패: {e}")
             return False
 
+    def save_exists(self, slot: int) -> bool:
+        """
+        저장 파일 존재 여부 확인
+
+        Args:
+            slot: 슬롯 번호
+
+        Returns:
+            저장 파일이 존재하면 True, 없으면 False
+        """
+        save_path = self.save_dir / f"save_slot_{slot}.json"
+        return save_path.exists()
+
 
 def serialize_party_member(member: Any) -> Dict[str, Any]:
     """파티원 직렬화"""
