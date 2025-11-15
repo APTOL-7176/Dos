@@ -19,7 +19,7 @@ class Skill:
         self.effects = []
         self.costs = []
         self.target_type = "single_enemy"
-        self.cast_time = 1.0
+        self.cast_time = None  # 기본값: 캐스팅 없음
         self.cooldown = 0
         self.category = "combat"
         self.is_ultimate = False
