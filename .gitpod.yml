@@ -1,0 +1,53 @@
+# Gitpod 설정 파일
+# Dawn of Stellar를 브라우저에서 바로 플레이!
+
+image: gitpod/workspace-python
+
+tasks:
+  - name: Setup and Run
+    init: |
+      echo "🌟 Dawn of Stellar 환경 설정 중..."
+      pip install -r requirements.txt
+    command: |
+      clear
+      echo "╔════════════════════════════════════════════════════════╗"
+      echo "║                                                        ║"
+      echo "║          🌟 Dawn of Stellar - 별빛의 여명 🌟           ║"
+      echo "║                                                        ║"
+      echo "║  Final Fantasy 스타일 ATB + BRV 로그라이크 RPG       ║"
+      echo "║                                                        ║"
+      echo "╚════════════════════════════════════════════════════════╝"
+      echo ""
+      echo "게임을 시작하려면 다음 명령어를 입력하세요:"
+      echo ""
+      echo "  python main.py            # 기본 모드"
+      echo "  python main.py --dev      # 개발 모드 (모든 직업 해금)"
+      echo "  python main.py --debug    # 디버그 모드"
+      echo ""
+      echo "조작법:"
+      echo "  방향키: 이동 / 메뉴 탐색"
+      echo "  Enter: 선택"
+      echo "  ESC: 메뉴 / 뒤로가기"
+      echo ""
+      echo "자세한 가이드: https://github.com/APTOL-7176/Dos/wiki"
+      echo ""
+      echo "즐거운 게임 되세요! May the stars guide you! ⭐"
+      echo ""
+
+vscode:
+  extensions:
+    - ms-python.python
+    - ms-python.vscode-pylance
+
+ports:
+  # 게임은 터미널에서 실행되므로 포트 포워딩 불필요
+
+github:
+  prebuilds:
+    # Push to master/main 시 자동 빌드
+    master: true
+    main: true
+    # Pull requests는 빌드하지 않음
+    pullRequests: false
+    # 새 브랜치는 빌드하지 않음
+    branches: false
