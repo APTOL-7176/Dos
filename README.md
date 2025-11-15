@@ -23,6 +23,9 @@ Python 기반 로그라이크 RPG with Final Fantasy-style Brave Combat
 - 📶 Wi-Fi 연결 권장
 - 🎮 태블릿 + 블루투스 키보드 = 최고의 경험
 
-**자세한 가이드**: [브라우저에서 플레이하기](PLAY_IN_BROWSER.md)
+**자세한 가이드**:
+- 💻 [브라우저에서 플레이하기](PLAY_IN_BROWSER.md)
+- 📚 [GitHub Wiki](https://github.com/APTOL-7176/Dos/wiki) - 완전한 게임 가이드
+- 🪟 [Windows에서 Wiki 푸시하기](docs/WIKI_PUSH_GUIDE_WINDOWS.md)
 
 ---
