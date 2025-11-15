@@ -41,14 +41,10 @@ class ItemType(Enum):
 
 
 class EquipSlot(Enum):
-    """장비 슬롯"""
+    """장비 슬롯 (3가지만 사용)"""
     WEAPON = "weapon"
-    HEAD = "head"
-    BODY = "body"
-    HANDS = "hands"
-    FEET = "feet"
-    ACCESSORY1 = "accessory1"
-    ACCESSORY2 = "accessory2"
+    ARMOR = "armor"
+    ACCESSORY = "accessory"
 
 
 @dataclass
@@ -2419,7 +2415,7 @@ class ItemGenerator:
             level_requirement=template["level_requirement"],
             base_stats=template["base_stats"].copy(),
             affixes=affixes,
-            equip_slot=EquipSlot.BODY,
+            equip_slot=EquipSlot.ARMOR,
             sell_price=template["sell_price"],
             weight=weight
         )
@@ -2455,7 +2451,7 @@ class ItemGenerator:
             level_requirement=template["level_requirement"],
             base_stats=template["base_stats"].copy(),
             affixes=affixes,
-            equip_slot=EquipSlot.ACCESSORY1,
+            equip_slot=EquipSlot.ACCESSORY,
             sell_price=template["sell_price"],
             weight=weight
         )

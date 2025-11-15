@@ -184,7 +184,7 @@ def get_gold_shop_items(floor_level: int = 1) -> dict:
                 level_requirement=template["level_requirement"],
                 base_stats=template["base_stats"],
                 sell_price=template["sell_price"],
-                equip_slot=EquipSlot.BODY,
+                equip_slot=EquipSlot.ARMOR,
                 unique_effect=template.get("unique_effect")  # 특수 효과 추가
             )
             items[GoldShopTab.EQUIPMENT].append(
@@ -202,7 +202,7 @@ def get_gold_shop_items(floor_level: int = 1) -> dict:
                 level_requirement=template["level_requirement"],
                 base_stats=template["base_stats"],
                 sell_price=template["sell_price"],
-                equip_slot=EquipSlot.ACCESSORY1,
+                equip_slot=EquipSlot.ACCESSORY,
                 unique_effect=template.get("unique_effect")  # 특수 효과 추가
             )
             items[GoldShopTab.EQUIPMENT].append(

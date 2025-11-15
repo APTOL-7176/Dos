@@ -65,7 +65,7 @@ class Character:
         self.is_alive = True
         self.is_enemy = False  # 적 여부
 
-        # 장비
+        # 장비 (3가지 슬롯만 사용)
         self.equipment: Dict[str, Any] = {
             "weapon": None,
             "armor": None,
