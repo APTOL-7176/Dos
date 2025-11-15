@@ -117,12 +117,14 @@ class Character:
         for yaml_key, stat_enum in stat_mapping.items():
             base_value = base_stats.get(yaml_key, 50)
 
-            # 성장률 설정 (기본값)
+            # 성장률 설정 (기초 스탯의 %로 선형 성장)
             if yaml_key == "hp":
-                growth_rate = 10
+                # HP: 기초 스탯의 8~15% (평균 11.5%)
+                growth_rate = base_value * 0.115
                 growth_type = "linear"
             elif yaml_key == "mp":
-                growth_rate = 5
+                # MP: 기초 스탯의 8~15% (평균 11.5%)
+                growth_rate = base_value * 0.115
                 growth_type = "linear"
             elif yaml_key == "init_brv":
                 growth_rate = 50
@@ -131,16 +133,19 @@ class Character:
                 growth_rate = 75
                 growth_type = "linear"
             elif yaml_key in ["physical_attack", "magic_attack"]:
-                growth_rate = 1.1
-                growth_type = "exponential"
+                # 공격/마법: 기초 스탯의 15~25% (평균 20%)
+                growth_rate = base_value * 0.20
+                growth_type = "linear"
             elif yaml_key in ["physical_defense", "magic_defense"]:
-                growth_rate = 1.08
-                growth_type = "exponential"
+                # 방어: 기초 스탯의 15~25% (평균 20%)
+                growth_rate = base_value * 0.20
+                growth_type = "linear"
             elif yaml_key == "speed":
-                growth_rate = 1.05
-                growth_type = "exponential"
+                # 속도: 기초 스탯의 15~25% (평균 20%)
+                growth_rate = base_value * 0.20
+                growth_type = "linear"
             else:
-                growth_rate = 1.0
+                growth_rate = base_value * 0.10
                 growth_type = "linear"
 
             stats_config[stat_enum] = {
