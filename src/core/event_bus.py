@@ -104,6 +104,8 @@ class Events:
     COMBAT_TURN_START = "combat.turn_start"
     COMBAT_TURN_END = "combat.turn_end"
     COMBAT_ACTION = "combat.action"
+    COMBAT_DAMAGE_DEALT = "combat.damage_dealt"
+    COMBAT_DAMAGE_TAKEN = "combat.damage_taken"
 
     # Character Events
     CHARACTER_CREATED = "character.created"
