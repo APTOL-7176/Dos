@@ -318,7 +318,7 @@ class Character:
         # 엔지니어 - 구조물
         elif gimmick_type == "construct_system":
             self.machine_parts = 0
-            self.max_machine_parts = self.gimmick_data.get("max_machine_parts", 100)
+            self.max_machine_parts = self.gimmick_data.get("max_machine_parts", 5)
 
         # 사무라이 - 거합
         elif gimmick_type == "iaijutsu_system":

@@ -937,8 +937,8 @@ class CombatUI:
 
         elif gimmick_type == "rune_system":
             # 전투마법사 - 룬
-            runes = getattr(character, 'rune_count', 0)
-            max_runes = getattr(character, 'max_runes', 3)
+            runes = getattr(character, 'rune_stacks', 0)
+            max_runes = getattr(character, 'max_rune_stacks', 8)
             return f"[룬:{runes}/{max_runes}]"
 
         elif gimmick_type == "dimension_system":
@@ -946,6 +946,12 @@ class CombatUI:
             dimension = getattr(character, 'dimension_energy', 0)
             max_dimension = getattr(character, 'max_dimension_energy', 50)
             return f"[차원:{dimension}/{max_dimension}]"
+
+        elif gimmick_type == "construct_system":
+            # 기계공학자 - 부품
+            parts = getattr(character, 'machine_parts', 0)
+            max_parts = getattr(character, 'max_machine_parts', 5)
+            return f"[부품:{parts}/{max_parts}]"
 
         elif gimmick_type == "honor_system":
             # 검투사/기사 - 명예
