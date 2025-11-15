@@ -475,6 +475,97 @@ class IntroStorySystem:
             ),
 
             # 빈 줄 - 화면 클리어
+            StoryLine("", pause=1.0),
+
+            # 상반되는 상황들 - 혼돈에서 새로운 가능성으로
+            StoryLine(
+                "미래의 과학자가 돌도끼로 실험을 한다.",
+                color=(255, 0, 0),  # 빨간색 (문제)
+                delay=0.05,
+                pause=2.0,
+                effect="typing"
+            ),
+            StoryLine(
+                "모든 것이 뒤섞인 채로 새로운 질서를 찾기 시작한다.",
+                color=(255, 255, 0),  # 노란색 (희망)
+                delay=0.05,
+                pause=1.8,
+                effect="typing"
+            ),
+
+            # 빈 줄 - 화면 클리어
+            StoryLine("", pause=0.5),
+
+            StoryLine(
+                "그리스의 철학자가 고장난 컴퓨터 앞에서 좌절하지만,",
+                color=(255, 0, 0),
+                delay=0.05,
+                pause=2.0,
+                effect="typing"
+            ),
+            StoryLine(
+                "AI와 함께 새로운 진리를 탐구한다.",
+                color=(255, 255, 0),
+                delay=0.05,
+                pause=1.8,
+                effect="typing"
+            ),
+
+            # 빈 줄 - 화면 클리어
+            StoryLine("", pause=0.5),
+
+            StoryLine(
+                "해적이 우주선 조종법을 몰라 표류하지만,",
+                color=(255, 0, 0),
+                delay=0.05,
+                pause=2.0,
+                effect="typing"
+            ),
+            StoryLine(
+                "성간 항해의 새로운 길을 개척해낸다.",
+                color=(255, 255, 0),
+                delay=0.05,
+                pause=1.8,
+                effect="typing"
+            ),
+
+            # 빈 줄 - 화면 클리어
+            StoryLine("", pause=0.5),
+
+            StoryLine(
+                "기사가 레이저 검에 당황하면서도,",
+                color=(255, 0, 0),
+                delay=0.05,
+                pause=2.0,
+                effect="typing"
+            ),
+            StoryLine(
+                "과거의 기사도와 미래의 기술을 융합해낸다.",
+                color=(255, 255, 0),
+                delay=0.05,
+                pause=1.8,
+                effect="typing"
+            ),
+
+            # 빈 줄 - 화면 클리어
+            StoryLine("", pause=1.0),
+
+            StoryLine(
+                "모든 것이 혼란스럽지만,",
+                color=(255, 0, 0),
+                delay=0.05,
+                pause=2.0,
+                effect="typing"
+            ),
+            StoryLine(
+                "새로운 가능성들이 태어나고 있었다.",
+                color=(255, 255, 0),
+                delay=0.05,
+                pause=2.5,
+                effect="typing"
+            ),
+
+            # 빈 줄 - 화면 클리어
             StoryLine("", pause=1.5),
 
             # 주인공의 등장
