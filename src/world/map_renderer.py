@@ -84,7 +84,9 @@ class MapRenderer:
         minimap_x: int,
         minimap_y: int,
         minimap_width: int = 20,
-        minimap_height: int = 15
+        minimap_height: int = 15,
+        player_pos: tuple = None,
+        enemies: list = None
     ):
         """
         미니맵 렌더링
@@ -96,6 +98,8 @@ class MapRenderer:
             minimap_y: 미니맵 Y 위치
             minimap_width: 미니맵 너비
             minimap_height: 미니맵 높이
+            player_pos: 플레이어 위치 (x, y) 튜플
+            enemies: 적 리스트
         """
         # 스케일 계산
         scale_x = dungeon.width / minimap_width
@@ -111,6 +115,25 @@ class MapRenderer:
             fg=(200, 200, 200)
         )
 
+        # 범례 표시
+        legend_y = minimap_y + minimap_height + 1
+        console.print(minimap_x, legend_y, "@=나 E=적 S=계단", fg=(180, 180, 180))
+
+        # 적 위치를 미니맵 좌표로 변환 (미리 계산)
+        enemy_minimap_positions = set()
+        if enemies:
+            for enemy in enemies:
+                enemy_mx = int(enemy.x / scale_x)
+                enemy_my = int(enemy.y / scale_y)
+                if 0 <= enemy_mx < minimap_width and 0 <= enemy_my < minimap_height:
+                    enemy_minimap_positions.add((enemy_mx, enemy_my))
+
+        # 플레이어 위치를 미니맵 좌표로 변환
+        player_mx, player_my = None, None
+        if player_pos:
+            player_mx = int(player_pos[0] / scale_x)
+            player_my = int(player_pos[1] / scale_y)
+
         # 미니맵 렌더링
         for my in range(minimap_height):
             for mx in range(minimap_width):
@@ -124,7 +147,16 @@ class MapRenderer:
                 char = " "
                 fg = (50, 50, 50)
 
-                if tile.tile_type == TileType.FLOOR:
+                # 플레이어 위치 (최우선)
+                if player_mx == mx and player_my == my:
+                    char = "@"
+                    fg = (0, 255, 0)  # 초록색
+                # 적 위치
+                elif (mx, my) in enemy_minimap_positions:
+                    char = "E"
+                    fg = (255, 50, 50)  # 빨간색
+                # 타일 타입
+                elif tile.tile_type == TileType.FLOOR:
                     char = "."
                     fg = (100, 100, 100)
                 elif tile.tile_type == TileType.WALL:
@@ -132,9 +164,12 @@ class MapRenderer:
                     fg = (80, 80, 80)
                 elif tile.tile_type in [TileType.STAIRS_UP, TileType.STAIRS_DOWN]:
                     char = "S"
-                    fg = (255, 255, 255)
+                    fg = (255, 255, 0)  # 노란색 (더 눈에 띄게)
                 elif tile.tile_type == TileType.BOSS_ROOM:
                     char = "B"
                     fg = (255, 50, 50)
+                elif tile.tile_type == TileType.CHEST:
+                    char = "C"
+                    fg = (255, 215, 0)  # 금색
 
                 console.print(minimap_x + mx, minimap_y + my, char, fg=fg)

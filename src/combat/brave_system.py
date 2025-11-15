@@ -299,6 +299,16 @@ class BraveSystem:
         # HP 데미지 적용
         hp_damage = defender.take_damage(damage_result.final_damage)
 
+        # 상처 데미지 적용 (HP 데미지의 일부가 상처로 전환)
+        if hasattr(defender, "wound"):
+            # config의 max_wound_percentage 확인 (기본 50%)
+            max_wound = int(defender.max_hp * 0.5)
+            if defender.wound + wound_damage > max_wound:
+                wound_damage = max(0, max_wound - defender.wound)
+
+            defender.wound += wound_damage
+            self.logger.info(f"상처 축적: {defender.name} +{wound_damage} (총 {defender.wound}/{max_wound})")
+
         # BRV 소비
         brv_consumed = attacker.current_brv
         self.logger.warning(f"[HP 공격] {attacker.name} BRV 리셋 전: {attacker.current_brv}")
@@ -317,6 +327,8 @@ class BraveSystem:
             {
                 "brv_consumed": brv_consumed,
                 "hp_damage": hp_damage,
+                "wound_damage": wound_damage,
+                "total_wound": defender.wound if hasattr(defender, "wound") else 0,
                 "damage_type": damage_type,
                 "stat_modifier": damage_result.variance,
                 "is_critical": damage_result.is_critical,
@@ -327,6 +339,7 @@ class BraveSystem:
 
         return {
             "hp_damage": hp_damage,
+            "wound_damage": wound_damage,
             "brv_consumed": brv_consumed,
             "is_break_bonus": is_defender_broken,
             "is_critical": damage_result.is_critical,

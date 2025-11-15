@@ -57,6 +57,9 @@ class Character:
         self.current_hp = self.max_hp
         self.current_mp = self.max_mp
 
+        # 상처 시스템 (HP 데미지의 일부가 상처로 전환)
+        self.wound = 0  # 누적된 상처 (최대 HP 감소)
+
         # 전투 관련
         self.current_brv = 0  # 현재 BRV (전투 중에만 사용)
         self.is_alive = True
