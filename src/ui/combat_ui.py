@@ -119,7 +119,7 @@ class CombatUI:
             title="행동 선택",
             items=items,
             x=5,
-            y=35,
+            y=33,  # 2줄 위로 이동 (35 → 33)
             width=30,
             show_description=True
         )
@@ -174,7 +174,7 @@ class CombatUI:
             title=f"{actor.name}의 스킬",
             items=items,
             x=5,
-            y=30,
+            y=28,  # 2줄 위로 이동 (30 → 28)
             width=40,
             show_description=True
         )
