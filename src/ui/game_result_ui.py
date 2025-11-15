@@ -47,26 +47,26 @@ class GameResultUI:
         self.star_fragments = self._calculate_star_fragments()
 
     def _calculate_star_fragments(self) -> int:
-        """별의 파편 계산 (5배 증가)"""
+        """별의 파편 계산 (20배 증가)"""
         fragments = 0
 
-        # 층수 보너스 (층당 5, 기존 1에서 5배)
-        fragments += self.max_floor * 5
+        # 층수 보너스 (층당 20, 기존 1에서 20배)
+        fragments += self.max_floor * 20
 
-        # 적 처치 보너스 (2마리당 1, 기존 10마리당 1에서 5배)
-        fragments += self.enemies_defeated // 2
+        # 적 처치 보너스 (1마리당 2, 기존 10마리당 1에서 20배)
+        fragments += self.enemies_defeated * 2
 
-        # 승리 보너스 (250, 기존 50에서 5배)
+        # 승리 보너스 (1000, 기존 50에서 20배)
         if self.is_victory:
-            fragments += 250  # 게임 클리어 시 보너스
+            fragments += 1000  # 게임 클리어 시 보너스
 
-        # 층수 마일스톤 보너스 (5배)
+        # 층수 마일스톤 보너스 (20배)
         if self.max_floor >= 10:
-            fragments += 50  # 기존 10
+            fragments += 200  # 기존 10
         if self.max_floor >= 20:
-            fragments += 100  # 기존 20
+            fragments += 400  # 기존 20
         if self.max_floor >= 30:
-            fragments += 150  # 기존 30
+            fragments += 600  # 기존 30
 
         return fragments
 
@@ -120,20 +120,20 @@ class GameResultUI:
         breakdown_y = fragments_y + 2
         breakdown = []
 
-        breakdown.append(f"층수 보너스: {self.max_floor * 5} ★")
-        breakdown.append(f"처치 보너스: {self.enemies_defeated // 2} ★")
+        breakdown.append(f"층수 보너스: {self.max_floor * 20} ★")
+        breakdown.append(f"처치 보너스: {self.enemies_defeated * 2} ★")
 
         if self.is_victory:
-            breakdown.append(f"클리어 보너스: 250 ★")
+            breakdown.append(f"클리어 보너스: 1000 ★")
 
         # 마일스톤 보너스
         milestone_bonus = 0
         if self.max_floor >= 10:
-            milestone_bonus += 50  # 5배
+            milestone_bonus += 200  # 20배
         if self.max_floor >= 20:
-            milestone_bonus += 100  # 5배
+            milestone_bonus += 400  # 20배
         if self.max_floor >= 30:
-            milestone_bonus += 150  # 5배
+            milestone_bonus += 600  # 20배
 
         if milestone_bonus > 0:
             breakdown.append(f"마일스톤 보너스: {milestone_bonus} ★")
