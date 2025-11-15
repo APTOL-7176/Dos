@@ -482,12 +482,27 @@ class ExplorationSystem:
 
     def _trigger_combat_with_enemy(self, enemy: Enemy) -> ExplorationResult:
         """적 엔티티와의 전투"""
-        # 적 수를 1~4마리 랜덤으로 결정
-        num_enemies = random.randint(1, 4)
+        # 충돌한 적을 기준으로 주변 적들도 전투에 참여
+        combat_enemies = [enemy]
 
-        # 보스 포함 여부 확인
-        has_boss = enemy.is_boss
+        # 주변 일정 거리(3칸) 내의 다른 적들도 전투에 참가
+        combat_range = 3
+        for other_enemy in self.enemies:
+            if other_enemy == enemy:
+                continue
 
+            distance = abs(other_enemy.x - enemy.x) + abs(other_enemy.y - enemy.y)
+            if distance <= combat_range:
+                combat_enemies.append(other_enemy)
+                logger.warning(f"[DEBUG] 주변 적 추가: ({other_enemy.x}, {other_enemy.y}), 거리={distance}")
+                # 최대 4마리까지만
+                if len(combat_enemies) >= 4:
+                    break
+
+        num_enemies = len(combat_enemies)
+        has_boss = any(e.is_boss for e in combat_enemies)
+
+        logger.warning(f"[DEBUG] 전투 생성: 충돌한 적 1마리 + 주변 적 {len(combat_enemies) - 1}마리 = 총 {num_enemies}마리")
         logger.info(f"적과 조우! {num_enemies}마리 (레벨 {enemy.level})")
 
         return ExplorationResult(
@@ -499,7 +514,7 @@ class ExplorationSystem:
                 "floor": self.floor_number,
                 "enemy_level": enemy.level,  # 조우한 적의 레벨 전달
                 "is_boss": has_boss,
-                "enemies": [enemy]  # 전투 승리 후 제거할 적 엔티티 전달
+                "enemies": combat_enemies  # 전투 승리 후 제거할 적 엔티티 전달 (실제 참여한 적들)
             }
         )
 
