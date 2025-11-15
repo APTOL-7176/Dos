@@ -78,7 +78,7 @@ class IntroStorySystem:
                 self._show_glitch_line(line, i)
 
             # 일시정지
-            if not self._wait_with_skip_check(line.pause):
+            if self._wait_with_skip_check(line.pause):
                 logger.info("인트로 스킵됨")
                 return False
 
@@ -412,7 +412,12 @@ class IntroStorySystem:
         self.context.present(self.console)
 
     def _show_continue_prompt(self) -> bool:
-        """계속 진행 프롬프트"""
+        """
+        계속 진행 프롬프트
+
+        Returns:
+            True: 정상 진행 (Enter 누르거나 타임아웃), False: 스킵
+        """
         prompt = "Press Enter to continue..."
         y = self.screen_height - 3
         x = (self.screen_width - len(prompt)) // 2
@@ -434,7 +439,7 @@ class IntroStorySystem:
             if self._wait_with_skip_check(0.5):
                 return True
 
-        return True
+        return True  # 타임아웃 - 정상 진행
 
     def _check_skip(self) -> bool:
         """스킵 체크 (Enter 키)"""

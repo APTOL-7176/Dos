@@ -342,6 +342,7 @@ audio:
     # BGM 매핑 (FFVII OST 기반)
     tracks:
       # 메인 메뉴 & UI
+      intro: "02-Opening ~ Bombing Mission"                    # Opening ~ Bombing Mission (인트로 스토리)
       main_menu: "01-The Prelude"                              # The Prelude
       party_setup: "24-Holding My Thoughts in My Heart"        # Holding My Thoughts in My Heart
 
