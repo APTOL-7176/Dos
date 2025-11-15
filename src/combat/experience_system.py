@@ -62,8 +62,9 @@ class ExperienceSystem:
         Returns:
             획득 경험치
         """
-        # 기본 경험치: 적 레벨 * 20
-        base_exp = enemy_level * 20
+        # 기본 경험치: 적 레벨에 비례하여 증가 (레벨^1.3 * 25)
+        # Lv1: 25, Lv2: 48, Lv3: 74, Lv5: 135, Lv10: 499, Lv20: 1462
+        base_exp = int(math.pow(enemy_level, 1.3) * 25)
 
         # 다수의 적: 각 적마다 90%씩 경험치 (무한 파밍 방지)
         total_exp = 0
