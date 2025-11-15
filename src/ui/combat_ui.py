@@ -72,6 +72,7 @@ class CombatUI:
         self.action_menu: Optional[CursorMenu] = None
         self.skill_menu: Optional[CursorMenu] = None
         self.target_cursor = 0
+        self.current_target_list: List[Any] = []  # 현재 타겟 선택 리스트
 
         # 전투 종료 플래그
         self.battle_ended = False
@@ -255,20 +256,8 @@ class CombatUI:
 
     def _handle_target_select(self, action: GameAction) -> bool:
         """대상 선택 입력 처리"""
-        # 스킬의 target_type에 따라 대상 결정
-        from src.character.skill_types import SkillTargetType
-
-        if self.selected_skill and hasattr(self.selected_skill, 'target_type'):
-            target_type = self.selected_skill.target_type
-            # 아군 타겟팅 스킬 (회복 등)
-            if target_type in (SkillTargetType.SINGLE_ALLY, SkillTargetType.SELF):
-                targets = self.combat_manager.party
-            else:
-                # 적 타겟팅 스킬 (공격 등)
-                targets = self.combat_manager.enemies
-        else:
-            # 기본 공격은 적 타겟
-            targets = self.combat_manager.enemies
+        # 저장된 타겟 리스트 사용
+        targets = self.current_target_list
 
         alive_indices = [i for i, e in enumerate(targets) if getattr(e, 'is_alive', True)]
 
@@ -351,23 +340,23 @@ class CombatUI:
             target_type = self.selected_skill.target_type
             # 아군 타겟팅 스킬 (회복 등)
             if target_type in (SkillTargetType.SINGLE_ALLY, SkillTargetType.SELF):
-                targets = self.combat_manager.party
+                self.current_target_list = self.combat_manager.party
             else:
                 # 적 타겟팅 스킬 (공격 등)
-                targets = self.combat_manager.enemies
+                self.current_target_list = self.combat_manager.enemies
         else:
             # 기본 공격은 적 타겟
-            targets = self.combat_manager.enemies
+            self.current_target_list = self.combat_manager.enemies
 
         # 살아있는 대상만 필터링
-        alive_targets = [e for e in targets if getattr(e, 'is_alive', True)]
+        alive_targets = [e for e in self.current_target_list if getattr(e, 'is_alive', True)]
         if not alive_targets:
             # 모든 대상이 죽었으면 행동 메뉴로 돌아감
             self.state = CombatUIState.ACTION_MENU
             return
 
         # 첫 번째 살아있는 대상의 인덱스로 커서 설정
-        for i, target in enumerate(targets):
+        for i, target in enumerate(self.current_target_list):
             if getattr(target, 'is_alive', True):
                 self.target_cursor = i
                 break
@@ -732,11 +721,17 @@ class CombatUI:
             console.print(x, y, cursor, fg=cursor_color)
             console.print(x + 2, y, f"{chr(65+i)}. {enemy.name}", fg=name_color)
 
+            # 기믹 상태 표시 (룬 스택 등)
+            gimmick_text = self._get_gimmick_display(enemy)
+            if gimmick_text:
+                console.print(x + 2 + len(f"{chr(65+i)}. {enemy.name}") + 1, y, gimmick_text, fg=(150, 255, 200))
+
             # 상태이상
-            status_effects = getattr(enemy, 'status_effects', {})
+            status_effects = getattr(enemy, 'status_effects', [])
             if status_effects:
                 status_text = gauge_renderer.render_status_icons(status_effects)
-                console.print(x, y + 1, status_text, fg=(200, 200, 255))
+                if status_text:
+                    console.print(x, y + 1, status_text, fg=(200, 200, 255))
 
             # HP 게이지
             console.print(x + 3, y + 2, "HP:", fg=(200, 200, 200))

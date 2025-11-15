@@ -44,6 +44,11 @@ class ATBGauge:
     @property
     def can_act(self) -> bool:
         """행동 가능 여부"""
+        # 죽은 캐릭터는 행동 불가
+        is_alive = getattr(self.owner, 'is_alive', True)
+        if not is_alive:
+            return False
+
         return (self.current >= self.threshold and
                 not self.is_stunned and
                 not self.is_sleeping and
@@ -51,6 +56,11 @@ class ATBGauge:
 
     def get_effective_speed(self) -> float:
         """실제 속도 계산 (버프/디버프 포함)"""
+        # 죽은 캐릭터는 ATB 증가 안함
+        is_alive = getattr(self.owner, 'is_alive', True)
+        if not is_alive:
+            return 0.0
+
         if self.is_stunned or self.is_paralyzed or self.is_sleeping:
             return 0.0
 
