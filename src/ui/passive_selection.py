@@ -13,6 +13,7 @@ import tcod
 
 from src.ui.input_handler import InputHandler, GameAction
 from src.core.logger import get_logger, Loggers
+from src.core.config import get_config
 
 
 logger = get_logger(Loggers.UI)
@@ -79,20 +80,28 @@ class PassiveSelectionUI:
             with open(yaml_path, 'r', encoding='utf-8') as f:
                 data = yaml.safe_load(f)
 
+            # 개발 모드 확인
+            config = get_config()
+            dev_mode = config.get("development.unlock_all_classes", False)
+
             passives = []
             for passive_data in data.get('passives', []):
+                # 개발 모드이면 모든 패시브 해금
+                is_unlocked = dev_mode or passive_data.get('unlocked', False)
+
                 passive = Passive(
                     id=passive_data['id'],
                     name=passive_data['name'],
                     description=passive_data['description'],
                     cost=passive_data['cost'],
-                    unlocked=passive_data.get('unlocked', False),
+                    unlocked=is_unlocked,
                     unlock_cost=passive_data.get('unlock_cost', 0),
                     effects=passive_data.get('effects', [])
                 )
                 passives.append(passive)
 
-            logger.info(f"패시브 {len(passives)}개 로드 완료")
+            unlocked_count = sum(1 for p in passives if p.unlocked)
+            logger.info(f"패시브 {len(passives)}개 로드 완료 (해금: {unlocked_count}개)")
             return passives
 
         except Exception as e:
