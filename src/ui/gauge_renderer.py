@@ -388,12 +388,12 @@ class GaugeRenderer:
         console.print(text_x, y, text, fg=(255, 255, 255))
 
     @staticmethod
-    def render_status_icons(status_effects: dict) -> str:
+    def render_status_icons(status_effects) -> str:
         """
         상태이상 아이콘 렌더링
 
         Args:
-            status_effects: {status_name: turns_remaining}
+            status_effects: 딕셔너리 {status_name: turns_remaining} 또는 리스트
 
         Returns:
             아이콘 문자열
@@ -407,19 +407,48 @@ class GaugeRenderer:
             "silence": "[침묵]",
             "blind": "[암흑]",
             "berserk": "[광폭]",
-            "haste": "[헤이스트]",
-            "slow": "[슬로우]",
+            "haste": "[가속]",
+            "slow": "[감속]",
             "regen": "[재생]",
             "reflect": "[반사]",
             "barrier": "[방벽]",
             "break": "[브레이크]",
-            "doom": "[죽음]"
+            "doom": "[죽음]",
+            "rune": "[룬]",
+            "curse": "[저주]",
+            "blessing": "[축복]",
+            "mark": "[표식]",
+            "weaken": "[약화]",
+            "strengthen": "[강화]",
+            "defense_down": "[방↓]",
+            "defense_up": "[방↑]",
+            "attack_down": "[공↓]",
+            "attack_up": "[공↑]",
         }
 
         icons = []
-        for status, turns in status_effects.items():
-            icon = icon_map.get(status.lower(), f"[{status}]")
-            icons.append(f"{icon}{turns}")
+
+        # 딕셔너리인 경우
+        if isinstance(status_effects, dict):
+            for status, turns in status_effects.items():
+                icon = icon_map.get(status.lower(), f"[{status[:2]}]")
+                icons.append(f"{icon}{turns}")
+        # 리스트인 경우
+        elif isinstance(status_effects, list):
+            for effect in status_effects:
+                if hasattr(effect, 'name'):
+                    status_name = effect.name.lower()
+                    turns = getattr(effect, 'duration', '')
+                    icon = icon_map.get(status_name, f"[{effect.name[:2]}]")
+                    if turns:
+                        icons.append(f"{icon}{turns}")
+                    else:
+                        icons.append(icon)
+                else:
+                    # 문자열인 경우
+                    status_name = str(effect).lower()
+                    icon = icon_map.get(status_name, f"[{str(effect)[:2]}]")
+                    icons.append(icon)
 
         return " ".join(icons) if icons else ""
 
