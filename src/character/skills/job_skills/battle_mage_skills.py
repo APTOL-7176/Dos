@@ -3,18 +3,20 @@ from src.character.skills.skill import Skill
 from src.character.skills.effects.damage_effect import DamageEffect, DamageType
 from src.character.skills.effects.gimmick_effect import GimmickEffect, GimmickOperation
 from src.character.skills.effects.buff_effect import BuffEffect, BuffType
+from src.character.skills.effects.status_effect import StatusEffect, StatusType
 from src.character.skills.costs.mp_cost import MPCost
 from src.character.skills.costs.stack_cost import StackCost
 
 def create_battle_mage_skills():
     """배틀메이지 9개 스킬"""
     skills = []
-    
+
     # 1. 기본 BRV: 룬 새기기
-    engrave_rune = Skill("bmage_engrave", "룬 새기기", "룬 각인")
+    engrave_rune = Skill("bmage_engrave", "룬 새기기", "적에게 룬 각인")
     engrave_rune.effects = [
         DamageEffect(DamageType.BRV, 1.5, stat_type="magical"),
-        GimmickEffect(GimmickOperation.ADD, "rune_stacks", 1, max_value=8)
+        StatusEffect(StatusType.RUNE, duration=99, stackable=True),  # 적에게 룬 마크
+        GimmickEffect(GimmickOperation.ADD, "rune_stacks", 1, max_value=8)  # 자신의 룬 스택 증가
     ]
     engrave_rune.costs = []  # 기본 공격은 MP 소모 없음
     skills.append(engrave_rune)
