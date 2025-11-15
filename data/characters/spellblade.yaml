@@ -43,7 +43,7 @@ traits:
   type: trigger
 - id: combat_casting
   name: 전투 시전
-  description: 마법 시전 시간 -50%, 시전 중 이동 가능
+  description: 마법 시전 시간 -50%
   type: passive
 gimmick:
   type: enchant_system
