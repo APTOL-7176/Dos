@@ -251,6 +251,14 @@ class EnemyAI:
         if skill.target_type == SkillTargetType.SELF:
             return self.enemy
 
+        elif skill.target_type == SkillTargetType.SINGLE_ALLY:
+            # 단일 아군 선택 (회복 스킬 등) - 가장 HP가 낮은 아군
+            alive_allies = [a for a in allies if getattr(a, 'is_alive', True)]
+            if not alive_allies:
+                return None
+            # HP가 가장 낮은 아군 선택
+            return min(alive_allies, key=lambda a: getattr(a, 'current_hp', 0))
+
         elif skill.target_type == SkillTargetType.ALL_ALLIES:
             return allies  # 전체 대상
 

@@ -126,8 +126,8 @@ class Character:
                 growth_rate = base_value * 0.115
                 growth_type = "linear"
             elif yaml_key == "mp":
-                # MP: 레벨당 3~5 정도만 증가 (고정값)
-                growth_rate = 4.0
+                # MP: 레벨당 기초 MP의 5% 성장 (최대 5 정도)
+                growth_rate = base_value * 0.05
                 growth_type = "linear"
             elif yaml_key == "init_brv":
                 # init_brv: 레벨당 기초 값의 20% 성장 (비례 성장)
