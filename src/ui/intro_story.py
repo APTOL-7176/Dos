@@ -61,21 +61,39 @@ class IntroStorySystem:
         # 페이드 인 효과
         self._fade_in()
 
+        # 현재 화면에 표시할 라인들
+        current_lines = []
+        last_clear_index = -1
+
         # 스토리 진행
         for i, line in enumerate(story_lines):
             if self._check_skip():
                 logger.info("인트로 스킵됨")
                 return False
 
+            # 새 섹션 시작 시 화면 클리어 (빈 줄이 나오면)
+            if line.text == "" and len(current_lines) > 0:
+                self.console.clear()
+                current_lines = []
+                last_clear_index = i
+
             # 라인 표시
             if line.effect == "typing":
-                self._show_typing_effect(line, i)
+                self._show_typing_effect(line, len(current_lines))
             elif line.effect == "fade_in":
-                self._show_fade_in_line(line, i)
+                self._show_fade_in_line(line, len(current_lines))
             elif line.effect == "flash":
-                self._show_flash_line(line, i)
+                self._show_flash_line(line, len(current_lines))
             elif line.effect == "glitch":
-                self._show_glitch_line(line, i)
+                self._show_glitch_line(line, len(current_lines))
+
+            if line.text != "":
+                current_lines.append(line)
+
+            # 화면이 너무 차면 클리어
+            if len(current_lines) > 8:
+                self.console.clear()
+                current_lines = []
 
             # 일시정지
             if self._wait_with_skip_check(line.pause):
@@ -94,7 +112,7 @@ class IntroStorySystem:
         return True
 
     def _get_story_lines(self) -> List[StoryLine]:
-        """스토리 라인 목록"""
+        """스토리 라인 목록 - 현장감 있는 1인칭 시점"""
         return [
             # 시작
             StoryLine(
@@ -112,153 +130,196 @@ class IntroStorySystem:
                 effect="typing"
             ),
 
-            # 빈 줄
+            # 빈 줄 - 화면 클리어
             StoryLine("", pause=1.0),
 
-            # 스토리 시작
+            # 현장 1: 연구소
             StoryLine(
-                "서기 2157년, 지구...",
+                "시공간 연구소 제어실.",
                 color=(220, 220, 220),
                 delay=0.04,
+                pause=1.5,
+                effect="typing"
+            ),
+            StoryLine(
+                "2157년 3월 15일. 오전 9시 27분.",
+                color=(200, 200, 200),
+                delay=0.03,
                 pause=1.8,
                 effect="typing"
             ),
             StoryLine(
-                "인류는 마침내 수백 년의 꿈을 이루어냈다.",
-                color=(200, 200, 200),
+                "당신은 모니터를 응시하고 있다.",
+                color=(180, 180, 180),
                 delay=0.03,
                 pause=1.5,
                 effect="typing"
             ),
-            StoryLine(
-                "전쟁은 역사책 속 이야기가 되었고,",
-                color=(180, 180, 180),
-                delay=0.03,
-                pause=1.2,
-                effect="typing"
-            ),
-            StoryLine(
-                "병과 기아는 정복되었으며,",
-                color=(180, 180, 180),
-                delay=0.03,
-                pause=1.2,
-                effect="typing"
-            ),
-            StoryLine(
-                "인간의 평균 수명은 150세를 넘어섰다.",
-                color=(160, 160, 160),
-                delay=0.03,
-                pause=2.0,
-                effect="typing"
-            ),
 
-            # 빈 줄
+            # 빈 줄 - 화면 클리어
             StoryLine("", pause=1.0),
 
-            # 전환
+            # 현장 2: 경고
             StoryLine(
-                "그러나...",
-                color=(255, 100, 100),  # 붉은색
-                delay=0.06,
-                pause=2.0,
+                "삐- 삐- 삐-",
+                color=(255, 150, 50),
+                delay=0.15,
+                pause=1.0,
                 effect="flash"
             ),
-
-            # 사건
             StoryLine(
-                "2157년 3월 15일, 오전 9시 27분.",
-                color=(255, 255, 100),  # 노란색
+                "경고음.",
+                color=(255, 100, 100),
                 delay=0.04,
-                pause=1.5,
-                effect="typing"
-            ),
-            StoryLine(
-                "시공간 연구소에서 실험 중이던 시간 도약 장치가",
-                color=(200, 200, 200),
-                delay=0.03,
                 pause=1.2,
                 effect="typing"
             ),
             StoryLine(
-                "예기치 않은 공명을 일으켰다.",
-                color=(200, 200, 200),
+                "시공간 게이트의 에너지 수치가 급상승한다.",
+                color=(255, 150, 100),
                 delay=0.03,
-                pause=2.0,
+                pause=1.5,
+                effect="typing"
+            ),
+            StoryLine(
+                "\"제어 시스템 오류! 게이트 출력 157%!\"",
+                color=(255, 200, 100),
+                delay=0.03,
+                pause=1.5,
                 effect="typing"
             ),
 
-            # 빈 줄
+            # 빈 줄 - 화면 클리어
             StoryLine("", pause=1.0),
 
-            # 글리치 효과
+            # 현장 3: 긴급 상황
             StoryLine(
-                "[ 시 공 교 란 발 생 ]",
+                "바닥이 흔들린다.",
+                color=(255, 100, 100),
+                delay=0.04,
+                pause=1.0,
+                effect="typing"
+            ),
+            StoryLine(
+                "공기가 일그러진다.",
+                color=(255, 80, 80),
+                delay=0.04,
+                pause=1.0,
+                effect="typing"
+            ),
+            StoryLine(
+                "눈앞에 보라색 균열이 갈라진다.",
+                color=(200, 100, 255),
+                delay=0.03,
+                pause=1.5,
+                effect="typing"
+            ),
+
+            # 빈 줄 - 화면 클리어
+            StoryLine("", pause=0.5),
+
+            # 글리치 효과 - 시공 붕괴
+            StoryLine(
+                "[ ! ! !  차 원  균 열  감 지 ! ! ! ]",
                 color=(255, 50, 50),
                 delay=0.08,
-                pause=2.0,
+                pause=1.5,
                 effect="glitch"
             ),
 
-            # 빈 줄
+            # 빈 줄 - 화면 클리어
             StoryLine("", pause=1.0),
 
-            # 결과
+            # 현장 4: 혼돈
             StoryLine(
-                "과거와 미래, 다른 차원의 역사들이",
-                color=(150, 200, 255),
+                "균열에서 빛이 쏟아져 나온다.",
+                color=(255, 255, 200),
                 delay=0.03,
                 pause=1.2,
                 effect="typing"
             ),
             StoryLine(
-                "뒤섞이기 시작했다.",
+                "과거의 유령들.",
                 color=(150, 200, 255),
+                delay=0.04,
+                pause=1.0,
+                effect="typing"
+            ),
+            StoryLine(
+                "미래의 그림자들.",
+                color=(150, 200, 255),
+                delay=0.04,
+                pause=1.0,
+                effect="typing"
+            ),
+            StoryLine(
+                "다른 차원의 존재들.",
+                color=(200, 150, 255),
                 delay=0.03,
+                pause=1.5,
+                effect="typing"
+            ),
+
+            # 빈 줄 - 화면 클리어
+            StoryLine("", pause=1.0),
+
+            # 현장 5: 의식 상실
+            StoryLine(
+                "눈부신 섬광.",
+                color=(255, 255, 255),
+                delay=0.04,
+                pause=1.0,
+                effect="flash"
+            ),
+            StoryLine(
+                "귀청을 찢는 굉음.",
+                color=(255, 100, 100),
+                delay=0.04,
+                pause=1.0,
+                effect="typing"
+            ),
+            StoryLine(
+                "의식이 흐려진다...",
+                color=(150, 150, 150),
+                delay=0.05,
                 pause=2.0,
                 effect="typing"
             ),
-            StoryLine(
-                "전설 속의 영웅들, 신화의 괴물들,",
-                color=(200, 150, 255),
-                delay=0.03,
-                pause=1.2,
-                effect="typing"
-            ),
-            StoryLine(
-                "그리고 이름 없는 모험가들이",
-                color=(200, 150, 255),
-                delay=0.03,
-                pause=1.2,
-                effect="typing"
-            ),
-            StoryLine(
-                "우리의 세계로 쏟아져 들어왔다.",
-                color=(200, 150, 255),
-                delay=0.03,
-                pause=2.5,
-                effect="typing"
-            ),
 
-            # 빈 줄
+            # 빈 줄 - 화면 클리어
             StoryLine("", pause=1.5),
 
-            # 마지막
+            # 깨어남
             StoryLine(
-                "당신은 그 혼돈 속에서 깨어난",
-                color=(255, 255, 255),
+                "...",
+                color=(100, 100, 100),
+                delay=0.2,
+                pause=1.0,
+                effect="typing"
+            ),
+            StoryLine(
+                "눈을 뜬다.",
+                color=(150, 150, 150),
                 delay=0.04,
                 pause=1.5,
                 effect="fade_in"
             ),
             StoryLine(
-                "한 명의 모험가이다.",
-                color=(255, 255, 255),
+                "낯선 장소.",
+                color=(200, 200, 200),
                 delay=0.04,
+                pause=1.2,
+                effect="typing"
+            ),
+            StoryLine(
+                "당신의 모험이 시작된다.",
+                color=(255, 255, 255),
+                delay=0.03,
                 pause=2.5,
                 effect="fade_in"
             ),
 
-            # 빈 줄
+            # 빈 줄 - 화면 클리어
             StoryLine("", pause=1.0),
 
             # 제목 반복
