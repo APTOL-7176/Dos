@@ -227,13 +227,27 @@ def main() -> int:
                             # 전투 처리 (새 게임과 동일)
                             logger.info("⚔ 전투 시작!")
 
-                            if data and len(data) > 0:
+                            # 전투 데이터 처리 (딕셔너리 형식)
+                            if data and isinstance(data, dict):
+                                num_enemies = data.get("num_enemies", 0)
+                                map_enemies = data.get("enemies", [])
+                                logger.info(f"전투 데이터: 적 {num_enemies}마리, 맵 엔티티 {len(map_enemies)}개")
+                            elif data and isinstance(data, list):
+                                # 하위 호환성: 리스트로 받은 경우
                                 num_enemies = len(data)
+                                map_enemies = data
+                                logger.info(f"전투 데이터(레거시): 적 {num_enemies}마리")
+                            else:
+                                num_enemies = 0
+                                map_enemies = []
+                                logger.info("전투 데이터 없음")
+
+                            if num_enemies > 0:
                                 enemies = EnemyGenerator.generate_enemies(floor_number, num_enemies)
-                                logger.info(f"적 {len(enemies)}명 조우: {[e.name for e in enemies]}")
+                                logger.info(f"적 {len(enemies)}명 생성: {[e.name for e in enemies]}")
                             else:
                                 enemies = EnemyGenerator.generate_enemies(floor_number)
-                                logger.info(f"적 {len(enemies)}명: {[e.name for e in enemies]}")
+                                logger.info(f"적 {len(enemies)}명 생성(기본값)")
 
                             combat_result = run_combat(
                                 display.console,
@@ -247,12 +261,13 @@ def main() -> int:
                             if combat_result == CombatState.VICTORY:
                                 logger.info("✅ 승리!")
 
-                                if data:
-                                    exploration.game_stats["enemies_defeated"] += len(data)  # 통계 업데이트
-                                    for enemy_entity in data:
+                                # 맵에서 적 엔티티 제거
+                                if map_enemies:
+                                    exploration.game_stats["enemies_defeated"] += len(map_enemies)
+                                    for enemy_entity in map_enemies:
                                         if enemy_entity in exploration.enemies:
                                             exploration.enemies.remove(enemy_entity)
-                                    logger.info(f"적 {len(data)}명 제거됨 (총 {exploration.game_stats['enemies_defeated']}마리)")
+                                    logger.info(f"맵 적 엔티티 {len(map_enemies)}개 제거 (총 격파: {exploration.game_stats['enemies_defeated']}마리)")
 
                                 rewards = RewardCalculator.calculate_combat_rewards(
                                     enemies,

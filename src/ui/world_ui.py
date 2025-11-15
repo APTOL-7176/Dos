@@ -47,7 +47,8 @@ class WorldUI:
         # 상태
         self.quit_requested = False
         self.combat_requested = False
-        self.combat_enemies = None  # 전투에 참여할 적들
+        self.combat_enemies = None  # 전투에 참여할 적들 (맵에서 제거용)
+        self.combat_num_enemies = 0  # 실제 전투 적 수
         self.floor_change_requested = None  # "up" or "down"
 
         # 종료 확인
@@ -176,9 +177,13 @@ class WorldUI:
             logger.warning(f"[DEBUG] 전투 이벤트 감지! combat_requested를 True로 설정")
             self.combat_requested = True
             # 전투에 참여할 적들 저장
-            if result.data and "enemies" in result.data:
-                self.combat_enemies = result.data["enemies"]
-                logger.warning(f"[DEBUG] 적 {len(self.combat_enemies)}마리 저장됨")
+            if result.data:
+                if "num_enemies" in result.data:
+                    self.combat_num_enemies = result.data["num_enemies"]
+                    logger.warning(f"[DEBUG] 전투 적 수: {self.combat_num_enemies}마리")
+                if "enemies" in result.data:
+                    self.combat_enemies = result.data["enemies"]
+                    logger.warning(f"[DEBUG] 맵 적 엔티티: {len(self.combat_enemies)}개")
 
         elif result.event == ExplorationEvent.TRAP_TRIGGERED:
             # 함정 데미지는 이미 적용됨
@@ -423,7 +428,12 @@ def run_exploration(
         if ui.quit_requested:
             return ("quit", None)
         elif ui.combat_requested:
-            logger.warning(f"[DEBUG] 전투 반환! 적 {len(ui.combat_enemies) if ui.combat_enemies else 0}마리")
-            return ("combat", ui.combat_enemies)
+            logger.warning(f"[DEBUG] 전투 반환! 적 {ui.combat_num_enemies}마리 (맵 엔티티: {len(ui.combat_enemies) if ui.combat_enemies else 0}개)")
+            # 전투 데이터 반환: (적 수, 맵 적 엔티티)
+            combat_data = {
+                "num_enemies": ui.combat_num_enemies,
+                "enemies": ui.combat_enemies
+            }
+            return ("combat", combat_data)
         elif ui.floor_change_requested:
             return (ui.floor_change_requested, None)
