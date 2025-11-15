@@ -49,7 +49,7 @@ gimmick:
   type: construct_system
   name: 기계 부품
   description: 전투 중 기계 부품을 수집하여 포탑과 장치 제작
-  max_machine_parts: 100
+  max_machine_parts: 5
 
 skills:
 - turret_shot

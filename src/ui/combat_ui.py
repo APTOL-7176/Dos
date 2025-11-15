@@ -853,46 +853,11 @@ class CombatUI:
             max_necro = getattr(character, 'max_necro_energy', 50)
             return f"[사령:{necro}/{max_necro}]"
 
-        elif gimmick_type == "dragon_power":
-            # 용기사 - 드래곤 파워
-            power = getattr(character, 'dragon_power', 0)
-            max_power = getattr(character, 'max_dragon_power', 100)
-            return f"[용력:{power}/{max_power}]"
-
-        elif gimmick_type == "spirit_system":
-            # 정령술사 - 정령
-            count = getattr(character, 'spirit_count', 0)
-            max_count = getattr(character, 'max_spirits', 4)
-            return f"[정령:{count}/{max_count}]"
-
-        elif gimmick_type == "construct_system":
-            # 기계공학자 - 부품
-            parts = getattr(character, 'construct_parts', 0)
-            max_parts = getattr(character, 'max_parts', 5)
-            return f"[부품:{parts}/{max_parts}]"
-
         elif gimmick_type == "totem_system":
-            # 무당 - 토템
-            totems = getattr(character, 'totem_count', 0)
-            max_totems = getattr(character, 'max_totems', 3)
-            return f"[토템:{totems}/{max_totems}]"
-
-        elif gimmick_type == "treasure_system":
-            # 해적 - 보물
-            treasure = getattr(character, 'treasure_points', 0)
-            return f"[보물:{treasure}]"
-
-        elif gimmick_type == "bushido_system":
-            # 사무라이 - 명상
-            meditation = getattr(character, 'meditation_stacks', 0)
-            max_meditation = getattr(character, 'max_meditation_stacks', 3)
-            return f"[명상:{meditation}/{max_meditation}]"
-
-        elif gimmick_type == "nature_system":
-            # 드루이드 - 자연력
-            nature = getattr(character, 'nature_energy', 0)
-            max_nature = getattr(character, 'max_nature_energy', 100)
-            return f"[자연:{nature}/{max_nature}]"
+            # 무당 - 저주
+            curses = getattr(character, 'curse_stacks', 0)
+            max_curses = getattr(character, 'max_curse_stacks', 10)
+            return f"[저주:{curses}/{max_curses}]"
 
         elif gimmick_type == "wisdom_system":
             # 철학자 - 지혜
@@ -901,9 +866,9 @@ class CombatUI:
             return f"[지혜:{knowledge}/{max_knowledge}]"
 
         elif gimmick_type == "time_system":
-            # 시간술사 - 시간 게이지
-            time = getattr(character, 'time_gauge', 0)
-            max_time = getattr(character, 'max_time_gauge', 100)
+            # 시간술사 - 시간 기록점
+            time = getattr(character, 'time_marks', 0)
+            max_time = getattr(character, 'max_time_marks', 7)
             return f"[시간:{time}/{max_time}]"
 
         elif gimmick_type == "alchemy_system":
@@ -943,8 +908,8 @@ class CombatUI:
 
         elif gimmick_type == "dimension_system":
             # 차원술사 - 차원력
-            dimension = getattr(character, 'dimension_energy', 0)
-            max_dimension = getattr(character, 'max_dimension_energy', 50)
+            dimension = getattr(character, 'dimension_points', 0)
+            max_dimension = getattr(character, 'max_dimension_points', 100)
             return f"[차원:{dimension}/{max_dimension}]"
 
         elif gimmick_type == "construct_system":
@@ -952,23 +917,6 @@ class CombatUI:
             parts = getattr(character, 'machine_parts', 0)
             max_parts = getattr(character, 'max_machine_parts', 5)
             return f"[부품:{parts}/{max_parts}]"
-
-        elif gimmick_type == "honor_system":
-            # 검투사/기사 - 명예
-            honor = getattr(character, 'honor_points', 0)
-            return f"[명예:{honor}]"
-
-        elif gimmick_type == "faith_system":
-            # 클레릭 - 신앙
-            faith = getattr(character, 'faith_stacks', 0)
-            max_faith = getattr(character, 'max_faith_stacks', 5)
-            return f"[신앙:{faith}/{max_faith}]"
-
-        elif gimmick_type == "spell_layer":
-            # 마검사 - 마법 레이어
-            layers = getattr(character, 'spell_layers', 0)
-            max_layers = getattr(character, 'max_spell_layers', 3)
-            return f"[레이어:{layers}/{max_layers}]"
 
         elif gimmick_type == "duty_system":
             # 기사 - 의무
