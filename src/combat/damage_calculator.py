@@ -158,12 +158,13 @@ class DamageCalculator:
         # 스탯 보정 계산: 공격자 스탯 / (방어자 스탯 + 1)
         stat_modifier = attacker_stat / (defender_stat + 1.0)
 
-        # HP 데미지 계산: BRV × 스킬계수 × 스탯배율
+        # HP 데미지 계산: BRV × 스킬계수 × 스탯배율 × HP배율
         # hp_multiplier: 스킬 계수 (기본 1.0 + 기믹 보너스)
         # stat_modifier: 공격/방어 비율
-        base_damage = int(brv_points * hp_multiplier * stat_modifier)
+        # hp_damage_multiplier: HP 데미지 조정 계수 (config에서 설정)
+        base_damage = int(brv_points * hp_multiplier * stat_modifier * self.hp_damage_multiplier)
 
-        self.logger.warning(f"[HP 데미지 계산] BRV:{brv_points} × 스킬계수:{hp_multiplier:.2f} × 스탯배율:{stat_modifier:.2f} = {base_damage}")
+        self.logger.warning(f"[HP 데미지 계산] BRV:{brv_points} × 스킬계수:{hp_multiplier:.2f} × 스탯배율:{stat_modifier:.2f} × HP배율:{self.hp_damage_multiplier} = {base_damage}")
 
         damage = base_damage
 
