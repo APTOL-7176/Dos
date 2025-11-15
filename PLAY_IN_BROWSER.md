@@ -338,6 +338,275 @@ python main.py
 
 ---
 
+## 💻 Windows에서 로컬 설치하기
+
+브라우저 플레이가 불편하거나, 오프라인에서 플레이하고 싶다면 Windows에 직접 설치할 수 있습니다!
+
+### 1️⃣ Python 설치 (필수)
+
+**Python 3.10 이상이 필요합니다.**
+
+#### 방법 1: Python 공식 웹사이트 (권장)
+1. [Python 공식 다운로드](https://www.python.org/downloads/) 방문
+2. "Download Python 3.12.x" 버튼 클릭
+3. 다운로드한 설치 파일 실행
+4. ⚠️ **중요**: "Add Python to PATH" 체크박스 **반드시 체크**
+5. "Install Now" 클릭
+6. 설치 완료 후 확인:
+   ```cmd
+   python --version
+   ```
+   출력: `Python 3.12.x` 또는 그 이상
+
+#### 방법 2: Microsoft Store (간편)
+1. Microsoft Store 앱 열기
+2. "Python 3.12" 검색
+3. "Python 3.12" (또는 최신 버전) 설치
+4. 자동으로 PATH 설정됨
+
+### 2️⃣ Git 설치 (선택)
+
+Git이 있으면 업데이트가 편리합니다.
+
+#### Git 설치 방법:
+1. [Git for Windows](https://git-scm.com/download/win) 다운로드
+2. 설치 파일 실행
+3. 모든 기본 설정 그대로 "Next" 클릭
+4. 설치 완료 후 확인:
+   ```cmd
+   git --version
+   ```
+
+**Git 없이 설치:**
+- GitHub에서 [ZIP 파일 다운로드](https://github.com/APTOL-7176/Dos/archive/refs/heads/master.zip)
+- 압축 해제 후 사용
+
+### 3️⃣ 게임 다운로드
+
+#### Git 사용 (권장):
+```cmd
+# 원하는 폴더로 이동 (예: 내 문서)
+cd %USERPROFILE%\Documents
+
+# 게임 다운로드
+git clone https://github.com/APTOL-7176/Dos.git
+
+# 게임 폴더로 이동
+cd Dos
+```
+
+#### ZIP 파일 사용:
+1. [게임 ZIP 다운로드](https://github.com/APTOL-7176/Dos/archive/refs/heads/master.zip)
+2. 다운로드 폴더에서 ZIP 파일 우클릭 → "압축 풀기"
+3. 압축 푼 폴더 이름을 "Dos"로 변경
+4. 명령 프롬프트에서 해당 폴더로 이동
+
+### 4️⃣ 의존성 설치
+
+게임 폴더에서 다음 명령어 실행:
+
+```cmd
+# 의존성 설치
+pip install -r requirements.txt
+```
+
+만약 `pip`가 인식되지 않으면:
+```cmd
+python -m pip install -r requirements.txt
+```
+
+### 5️⃣ 게임 실행
+
+```cmd
+# 기본 모드로 실행
+python main.py
+
+# 개발 모드 (모든 직업 해금)
+python main.py --dev
+
+# 디버그 모드
+python main.py --debug
+```
+
+### 🎮 실행 방법 요약
+
+**처음 설치 시:**
+```cmd
+cd %USERPROFILE%\Documents
+git clone https://github.com/APTOL-7176/Dos.git
+cd Dos
+pip install -r requirements.txt
+python main.py
+```
+
+**다음부터:**
+```cmd
+cd %USERPROFILE%\Documents\Dos
+python main.py
+```
+
+### ⚡ 편리한 실행 방법
+
+#### 방법 1: 배치 파일 만들기 (더블클릭으로 실행)
+게임 폴더에 `play.bat` 파일 생성:
+```bat
+@echo off
+python main.py
+pause
+```
+
+이제 `play.bat` 파일을 더블클릭하면 게임이 실행됩니다!
+
+#### 방법 2: 바로가기 만들기
+1. `play.bat` 파일 우클릭 → "바로 가기 만들기"
+2. 바로가기를 바탕화면으로 이동
+3. 바탕화면 아이콘 더블클릭으로 게임 실행
+
+#### 방법 3: Windows Terminal 사용 (추천)
+1. [Windows Terminal](https://apps.microsoft.com/store/detail/windows-terminal/9N0DX20HK701) 설치
+2. 더 나은 터미널 환경에서 게임 플레이
+3. UTF-8 한글 지원 우수
+
+### 🐛 Windows 전용 문제 해결
+
+#### Q: "python을 찾을 수 없습니다" 오류
+**A:**
+1. Python 설치 시 "Add Python to PATH" 체크 확인
+2. 환경 변수 수동 설정:
+   - 시작 → "환경 변수" 검색
+   - "시스템 환경 변수 편집" 클릭
+   - "환경 변수" 버튼 클릭
+   - "Path" 선택 → "편집"
+   - "새로 만들기" → Python 설치 경로 추가 (예: `C:\Python312`)
+3. 명령 프롬프트 재시작 필수
+
+#### Q: 한글이 깨져 보여요 (Windows)
+**A:**
+1. **Windows Terminal 사용** (가장 쉬운 해결책)
+   - Microsoft Store에서 "Windows Terminal" 설치
+   - UTF-8 완벽 지원
+
+2. **명령 프롬프트 설정 변경**
+   ```cmd
+   # 코드페이지 UTF-8로 변경
+   chcp 65001
+   ```
+
+3. **레지스트리 설정 (영구 적용)**
+   - 시작 → `regedit` 실행
+   - `HKEY_CURRENT_USER\Console` 이동
+   - 우클릭 → 새로 만들기 → DWORD (32비트) 값
+   - 이름: `CodePage`, 값: `65001`
+   - 재부팅
+
+4. **Windows 설정 변경**
+   - 설정 → 시간 및 언어 → 언어 및 지역
+   - 관리 언어 설정 → 시스템 로캘 변경
+   - "Beta: 세계 언어 지원을 위해 Unicode UTF-8 사용" 체크
+   - 재부팅
+
+#### Q: `pip install` 시 권한 오류
+**A:**
+```cmd
+# 관리자 권한 없이 설치
+pip install --user -r requirements.txt
+
+# 또는 가상환경 사용 (권장)
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+python main.py
+```
+
+#### Q: 터미널 창이 너무 작아요
+**A:**
+1. 명령 프롬프트 창 상단 우클릭 → "속성"
+2. "레이아웃" 탭
+3. 화면 버퍼 크기: 너비 120, 높이 3000
+4. 창 크기: 너비 120, 높이 50
+5. 적용
+
+**Windows Terminal 사용 시:**
+- 설정 (Ctrl+,) → 모양 → 글꼴 크기 조정
+- 전체 화면 모드: Alt+Enter
+
+#### Q: Python 버전이 너무 낮아요
+**A:**
+```cmd
+# Python 버전 확인
+python --version
+
+# 3.10 미만이면 최신 Python 설치 필요
+# https://www.python.org/downloads/
+```
+
+여러 Python 버전이 설치되어 있다면:
+```cmd
+# 특정 버전 사용
+py -3.12 -m pip install -r requirements.txt
+py -3.12 main.py
+```
+
+#### Q: 게임 업데이트는 어떻게 하나요?
+**A:**
+
+**Git 사용 시 (권장):**
+```cmd
+cd %USERPROFILE%\Documents\Dos
+git pull
+pip install -r requirements.txt
+```
+
+**ZIP 파일 사용 시:**
+1. 세이브 파일 백업 (`saves/` 폴더 복사)
+2. 새 ZIP 다운로드 및 압축 해제
+3. 백업한 세이브 파일을 새 폴더에 복사
+4. `pip install -r requirements.txt` 재실행
+
+#### Q: 백신 프로그램이 차단해요
+**A:**
+- Python은 안전한 프로그램입니다
+- 백신 프로그램 예외 목록에 게임 폴더 추가
+- 또는 Windows Defender 제외 목록에 추가:
+  - 설정 → 업데이트 및 보안 → Windows 보안 → 바이러스 및 위협 방지
+  - 설정 관리 → 제외 추가 → 폴더 → 게임 폴더 선택
+
+### 💡 Windows 플레이 최적화 팁
+
+**최상의 경험을 위해:**
+1. ✅ **Windows Terminal 사용** (한글 깨짐 방지)
+2. ✅ **가상환경 사용** (의존성 충돌 방지)
+   ```cmd
+   python -m venv venv
+   venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
+3. ✅ **바로가기 만들기** (편리한 실행)
+4. ✅ **정기적으로 업데이트** (`git pull`)
+5. ✅ **세이브 파일 백업** (`saves/` 폴더)
+
+**성능 최적화:**
+- 터미널 글꼴: Consolas 또는 Cascadia Code
+- 전체 화면 모드 사용 (Alt+Enter in Windows Terminal)
+- 배경 프로그램 최소화
+
+### 📁 게임 폴더 구조
+
+설치 후 폴더 구조:
+```
+Dos/
+├── main.py              # 게임 실행 파일
+├── requirements.txt     # 의존성 목록
+├── src/                 # 소스 코드
+├── data/                # 게임 데이터
+├── assets/              # 에셋 파일
+├── saves/               # 세이브 파일 (자동 생성)
+├── logs/                # 로그 파일 (자동 생성)
+└── play.bat             # 실행 배치 파일 (직접 생성)
+```
+
+---
+
 ## 🚀 빠른 시작 명령어 모음
 
 ```bash
