@@ -437,7 +437,7 @@ def main() -> int:
 
                             # 인벤토리 생성 (무게 기반 - 파티 스탯에 연동)
                             inventory = Inventory(base_weight=50.0, party=party)
-                            inventory.add_gold(1000)  # 시작 골드
+                            inventory.add_gold(200)  # 시작 골드
                             logger.info(f"인벤토리 생성 완료: {inventory.max_weight}kg 가능")
 
                             # 무게 제한 세부 내역 로그

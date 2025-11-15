@@ -60,7 +60,7 @@ ENEMY_TEMPLATES = {
         physical_attack=45, physical_defense=40,
         magic_attack=65, magic_defense=55,  # 마법 특화
         speed=50,
-        max_brv=150, init_brv=20,  # 낮은 BRV
+        max_brv=38, init_brv=3,  # 낮은 BRV (150÷4, 20÷8)
         luck=8, accuracy=62, evasion=10
     ),
     "goblin": EnemyTemplate(
@@ -69,7 +69,7 @@ ENEMY_TEMPLATES = {
         physical_attack=60, physical_defense=45,
         magic_attack=50, magic_defense=42,
         speed=55,
-        max_brv=180, init_brv=25,  # 평균 BRV
+        max_brv=45, init_brv=3,  # 평균 BRV (180÷4, 25÷8)
         luck=10, accuracy=65, evasion=12
     ),
     "wolf": EnemyTemplate(
@@ -78,7 +78,7 @@ ENEMY_TEMPLATES = {
         physical_attack=65, physical_defense=50,
         magic_attack=40, magic_defense=38,
         speed=60,
-        max_brv=200, init_brv=30,  # 약간 높은 BRV
+        max_brv=50, init_brv=4,  # 약간 높은 BRV (200÷4, 30÷8)
         luck=12, accuracy=68, evasion=15
     ),
 
@@ -90,7 +90,7 @@ ENEMY_TEMPLATES = {
         physical_attack=70, physical_defense=60,
         magic_attack=35, magic_defense=40,
         speed=45,
-        max_brv=220, init_brv=40,  # 탱커 BRV
+        max_brv=55, init_brv=5,  # 탱커 BRV (220÷4, 40÷8)
         luck=8, accuracy=62, evasion=6
     ),
     "skeleton": EnemyTemplate(
@@ -99,7 +99,7 @@ ENEMY_TEMPLATES = {
         physical_attack=65, physical_defense=42,
         magic_attack=48, magic_defense=50,
         speed=58,
-        max_brv=190, init_brv=30,  # 균형 BRV
+        max_brv=48, init_brv=4,  # 균형 BRV (190÷4, 30÷8)
         luck=10, accuracy=65, evasion=12
     ),
     "dark_mage": EnemyTemplate(
@@ -108,7 +108,7 @@ ENEMY_TEMPLATES = {
         physical_attack=40, physical_defense=35,
         magic_attack=85, magic_defense=65,
         speed=52,
-        max_brv=250, init_brv=60,  # 높은 BRV (마법사)
+        max_brv=63, init_brv=8,  # 높은 BRV (마법사) (250÷4, 60÷8)
         luck=12, accuracy=68, evasion=14
     ),
 
@@ -120,7 +120,7 @@ ENEMY_TEMPLATES = {
         physical_attack=80, physical_defense=70,
         magic_attack=30, magic_defense=45,
         speed=40,
-        max_brv=280, init_brv=55,  # 높은 탱커 BRV
+        max_brv=70, init_brv=7,  # 높은 탱커 BRV (280÷4, 55÷8)
         luck=6, accuracy=60, evasion=4
     ),
     "wraith": EnemyTemplate(
@@ -129,7 +129,7 @@ ENEMY_TEMPLATES = {
         physical_attack=50, physical_defense=38,
         magic_attack=90, magic_defense=75,
         speed=65,
-        max_brv=300, init_brv=75,  # 매우 높은 BRV (마법)
+        max_brv=75, init_brv=9,  # 매우 높은 BRV (마법) (300÷4, 75÷8)
         luck=14, accuracy=70, evasion=20
     ),
     "golem": EnemyTemplate(
@@ -138,7 +138,7 @@ ENEMY_TEMPLATES = {
         physical_attack=75, physical_defense=85,
         magic_attack=25, magic_defense=55,
         speed=30,
-        max_brv=350, init_brv=70,  # 극단적 탱커 BRV
+        max_brv=88, init_brv=9,  # 극단적 탱커 BRV (350÷4, 70÷8)
         luck=5, accuracy=58, evasion=2
     ),
 
@@ -150,7 +150,7 @@ ENEMY_TEMPLATES = {
         physical_attack=85, physical_defense=72,
         magic_attack=40, magic_defense=48,
         speed=48,
-        max_brv=320, init_brv=80,  # 재생 탱커 BRV
+        max_brv=80, init_brv=10,  # 재생 탱커 BRV (320÷4, 80÷8)
         luck=10, accuracy=62, evasion=8
     ),
     "vampire": EnemyTemplate(
@@ -159,7 +159,7 @@ ENEMY_TEMPLATES = {
         physical_attack=75, physical_defense=55,
         magic_attack=95, magic_defense=70,
         speed=75,
-        max_brv=350, init_brv=100,  # 흡혈 특화 BRV
+        max_brv=88, init_brv=13,  # 흡혈 특화 BRV (350÷4, 100÷8)
         luck=18, accuracy=75, evasion=22
     ),
     "wyvern": EnemyTemplate(
@@ -168,7 +168,7 @@ ENEMY_TEMPLATES = {
         physical_attack=90, physical_defense=62,
         magic_attack=55, magic_defense=50,
         speed=70,
-        max_brv=330, init_brv=85,  # 공격형 BRV
+        max_brv=83, init_brv=11,  # 공격형 BRV (330÷4, 85÷8)
         luck=14, accuracy=70, evasion=18
     ),
 
@@ -180,7 +180,7 @@ ENEMY_TEMPLATES = {
         physical_attack=95, physical_defense=75,
         magic_attack=100, magic_defense=80,
         speed=65,
-        max_brv=400, init_brv=120,  # 강력한 균형 BRV
+        max_brv=100, init_brv=15,  # 강력한 균형 BRV (400÷4, 120÷8)
         luck=16, accuracy=72, evasion=16
     ),
     "dragon": EnemyTemplate(
@@ -189,7 +189,7 @@ ENEMY_TEMPLATES = {
         physical_attack=110, physical_defense=90,
         magic_attack=105, magic_defense=85,
         speed=60,
-        max_brv=500, init_brv=150,  # 드래곤급 BRV
+        max_brv=125, init_brv=19,  # 드래곤급 BRV (500÷4, 150÷8)
         luck=20, accuracy=75, evasion=12
     ),
 
@@ -201,7 +201,7 @@ ENEMY_TEMPLATES = {
         physical_attack=100, physical_defense=80,
         magic_attack=95, magic_defense=75,
         speed=68,
-        max_brv=600, init_brv=200,  # 초반 보스 BRV
+        max_brv=150, init_brv=25,  # 초반 보스 BRV (600÷4, 200÷8)
         luck=18, accuracy=75, evasion=15
     ),
     "boss_lich": EnemyTemplate(
@@ -210,7 +210,7 @@ ENEMY_TEMPLATES = {
         physical_attack=90, physical_defense=70,
         magic_attack=140, magic_defense=110,
         speed=62,
-        max_brv=750, init_brv=280,  # 중반 보스 BRV
+        max_brv=188, init_brv=35,  # 중반 보스 BRV (750÷4, 280÷8)
         luck=22, accuracy=78, evasion=18
     ),
     "boss_dragon_king": EnemyTemplate(
@@ -219,7 +219,7 @@ ENEMY_TEMPLATES = {
         physical_attack=130, physical_defense=105,
         magic_attack=125, magic_defense=100,
         speed=70,
-        max_brv=900, init_brv=350,  # 후반 보스 BRV
+        max_brv=225, init_brv=44,  # 후반 보스 BRV (900÷4, 350÷8)
         luck=25, accuracy=80, evasion=14
     ),
 
@@ -231,7 +231,7 @@ ENEMY_TEMPLATES = {
         physical_attack=150, physical_defense=120,
         magic_attack=160, magic_defense=130,
         speed=100,
-        max_brv=1200, init_brv=480,  # 세피로스급 BRV
+        max_brv=300, init_brv=60,  # 세피로스급 BRV (1200÷4, 480÷8)
         luck=30, accuracy=90, evasion=25
     ),
 }
