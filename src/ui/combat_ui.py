@@ -618,7 +618,7 @@ class CombatUI:
             )
 
             # MP 게이지 (파란색)
-            console.print(33, y + 2, "MP:", fg=(200, 200, 200))
+            console.print(28, y + 2, "MP:", fg=(200, 200, 200))
             # MP 게이지: 파란색 계열
             mp_ratio = ally.current_mp / max(1, ally.max_mp)
             if mp_ratio > 0.6:
@@ -630,12 +630,12 @@ class CombatUI:
             else:
                 mp_fg = (60, 90, 150)  # 어두운 파랑
                 mp_bg = (30, 45, 75)
-            console.draw_rect(37, y + 2, 10, 1, ord(" "), bg=mp_bg)
+            console.draw_rect(32, y + 2, 10, 1, ord(" "), bg=mp_bg)
             filled_mp = int(mp_ratio * 10)
             if filled_mp > 0:
-                console.draw_rect(37, y + 2, filled_mp, 1, ord(" "), bg=mp_fg)
+                console.draw_rect(32, y + 2, filled_mp, 1, ord(" "), bg=mp_fg)
             mp_text = f"{ally.current_mp}/{ally.max_mp}"
-            console.print(37 + (10 - len(mp_text)) // 2, y + 2, mp_text, fg=(255, 255, 255))
+            console.print(32 + (10 - len(mp_text)) // 2, y + 2, mp_text, fg=(255, 255, 255))
 
             # BRV 게이지 (노란색)
             max_brv = getattr(ally, 'max_brv', 999)
@@ -670,9 +670,9 @@ class CombatUI:
             is_casting = cast_info is not None
             cast_progress = cast_info.progress if cast_info else 0.0
 
-            console.print(33, y + 1, "ATB:", fg=(200, 200, 200))
+            console.print(28, y + 1, "ATB:", fg=(200, 200, 200))
             gauge_renderer.render_atb_with_cast(
-                console, 38, y + 1, 15,
+                console, 33, y + 1, 15,
                 atb_current=atb_value,
                 atb_threshold=1000,
                 atb_maximum=2000,

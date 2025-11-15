@@ -219,6 +219,21 @@ class CombatManager:
         # 스킬 배율
         skill_multiplier = getattr(skill, "brv_multiplier", 1.0) if skill else 1.0
 
+        # 방어 스택 보너스 적용 (집중의 힘 특성)
+        defend_stack_bonus = 0
+        if hasattr(attacker, 'defend_stack_count') and attacker.defend_stack_count > 0:
+            has_focus_power = any(
+                (t if isinstance(t, str) else t.get('id')) == 'focus_power'
+                for t in getattr(attacker, 'active_traits', [])
+            )
+
+            if has_focus_power:
+                defend_stack_bonus = attacker.defend_stack_count * 0.50  # 스택당 50%
+                skill_multiplier *= (1.0 + defend_stack_bonus)
+                self.logger.info(
+                    f"[집중의 힘] {attacker.name} 스택 {attacker.defend_stack_count}개 소비 → 데미지 +{defend_stack_bonus * 100:.0f}%"
+                )
+
         # 데미지 계산
         damage_result = self.damage_calc.calculate_brv_damage(
             attacker, defender, skill_multiplier, **kwargs
@@ -227,13 +242,18 @@ class CombatManager:
         # BRV 공격 적용
         brv_result = self.brave.brv_attack(attacker, defender, damage_result.final_damage)
 
+        # 공격 후 방어 스택 초기화
+        if hasattr(attacker, 'defend_stack_count') and attacker.defend_stack_count > 0:
+            attacker.defend_stack_count = 0
+
         return {
             "action": "brv_attack",
             "damage": damage_result.final_damage,
             "is_critical": damage_result.is_critical,
             "brv_stolen": brv_result["brv_stolen"],
             "actual_gain": brv_result["actual_gain"],
-            "is_break": brv_result["is_break"]
+            "is_break": brv_result["is_break"],
+            "defend_stack_bonus": defend_stack_bonus
         }
 
     def _execute_hp_attack(
@@ -253,6 +273,21 @@ class CombatManager:
 
         # 스킬 배율
         hp_multiplier = getattr(skill, "hp_multiplier", 1.0) if skill else 1.0
+
+        # 방어 스택 보너스 적용 (집중의 힘 특성)
+        defend_stack_bonus = 0
+        if hasattr(attacker, 'defend_stack_count') and attacker.defend_stack_count > 0:
+            has_focus_power = any(
+                (t if isinstance(t, str) else t.get('id')) == 'focus_power'
+                for t in getattr(attacker, 'active_traits', [])
+            )
+
+            if has_focus_power:
+                defend_stack_bonus = attacker.defend_stack_count * 0.50  # 스택당 50%
+                hp_multiplier *= (1.0 + defend_stack_bonus)
+                self.logger.info(
+                    f"[집중의 힘] {attacker.name} 스택 {attacker.defend_stack_count}개 소비 → 데미지 +{defend_stack_bonus * 100:.0f}%"
+                )
 
         # BREAK 상태 확인
         is_break = self.brave.is_broken(defender)
@@ -274,12 +309,17 @@ class CombatManager:
             if hasattr(defender, "wound_damage"):
                 defender.wound_damage += wound_damage
 
+        # 공격 후 방어 스택 초기화
+        if hasattr(attacker, 'defend_stack_count') and attacker.defend_stack_count > 0:
+            attacker.defend_stack_count = 0
+
         return {
             "action": "hp_attack",
             "hp_damage": hp_result["hp_damage"],
             "wound_damage": wound_damage,
             "brv_consumed": hp_result["brv_consumed"],
-            "is_break_bonus": is_break
+            "is_break_bonus": is_break,
+            "defend_stack_bonus": defend_stack_bonus
         }
 
     def _execute_brv_hp_attack(
@@ -306,7 +346,7 @@ class CombatManager:
         }
 
         # BRV 결과 추가
-        for key in ["damage", "is_critical", "brv_stolen", "actual_gain", "is_break"]:
+        for key in ["damage", "is_critical", "brv_stolen", "actual_gain", "is_break", "defend_stack_bonus"]:
             if key in brv_attack_result:
                 combined_result[f"brv_{key}"] = brv_attack_result[key]
 
@@ -349,8 +389,16 @@ class CombatManager:
         from src.character.skills.skill_manager import get_skill_manager
         skill_manager = get_skill_manager()
 
+        # context에 모든 적 정보 추가 (AOE 효과를 위해)
+        all_enemies = self.enemies if actor in getattr(self, 'party', []) else getattr(self, 'party', [])
+
         # SkillManager를 통해 스킬 실행
-        skill_result = skill_manager.execute_skill(skill.skill_id, actor, target, context={"combat_manager": self})
+        skill_result = skill_manager.execute_skill(
+            skill.skill_id,
+            actor,
+            target,
+            context={"combat_manager": self, "all_enemies": all_enemies}
+        )
 
         if skill_result.success:
             result["success"] = True
@@ -491,9 +539,26 @@ class CombatManager:
 
     def _execute_defend(self, actor: Any, **kwargs) -> Dict[str, Any]:
         """방어 태세"""
+        # 방어 스택 증가 (저격수 특성: 집중의 힘)
+        if hasattr(actor, 'defend_stack_count'):
+            # focus_power 특성이 활성화되어 있는지 확인
+            has_focus_power = any(
+                (t if isinstance(t, str) else t.get('id')) == 'focus_power'
+                for t in getattr(actor, 'active_traits', [])
+            )
+
+            if has_focus_power:
+                max_stacks = 3
+                if actor.defend_stack_count < max_stacks:
+                    actor.defend_stack_count += 1
+                    self.logger.info(
+                        f"[집중의 힘] {actor.name} 방어 스택 증가: {actor.defend_stack_count}/{max_stacks}"
+                    )
+
         # 방어 버프 적용 (TODO: 버프 시스템 연동)
         return {
-            "action": "defend"
+            "action": "defend",
+            "defend_stack": getattr(actor, 'defend_stack_count', 0)
         }
 
     def _execute_flee(self, actor: Any, **kwargs) -> Dict[str, Any]:

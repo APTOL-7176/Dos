@@ -35,8 +35,8 @@ traits:
   type: passive
 - id: emergency_repair
   name: 긴급 수리
-  description: 장비 내구도 자동 회복, 파괴 방지
-  type: passive
+  description: HP 50% 이하일 때 모든 장비 효과 2배
+  type: conditional
 - id: turret_deploy
   name: 포탑 설치
   description: 턴 종료 시 자동으로 적에게 피해 (공격력의 40%)

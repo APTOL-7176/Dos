@@ -43,27 +43,35 @@ class StatusEffectData:
 
 class StatusEffect(SkillEffect):
     """상태 이상 효과"""
-    def __init__(self, status_type: str, duration: int = 3, value: float = 0, stackable: bool = False):
+    def __init__(self, status_type: str, duration: int = 3, value: float = 0, stackable: bool = False, remove: bool = False):
         super().__init__(EffectType.BUFF)  # 기존 BUFF 타입 재사용
         self.status_type = status_type
         self.duration = duration
         self.value = value
         self.stackable = stackable  # 스택 가능 여부
+        self.remove = remove  # True면 상태 제거
 
     def can_execute(self, user, target, context):
         return True, ""
 
     def execute(self, user, target, context):
-        """상태 이상 적용"""
+        """상태 이상 적용 또는 제거"""
         targets = target if isinstance(target, list) else [target]
 
         affected_count = 0
         for t in targets:
-            if self._apply_status(t):
-                affected_count += 1
+            if self.remove:
+                if self._remove_status(t):
+                    affected_count += 1
+            else:
+                if self._apply_status(t):
+                    affected_count += 1
 
         status_name = self.status_type.replace('_', ' ').title()
-        message = f"{status_name} 적용! ({self.duration}턴)"
+        if self.remove:
+            message = f"{status_name} 제거!"
+        else:
+            message = f"{status_name} 적용! ({self.duration}턴)"
 
         return EffectResult(
             effect_type=EffectType.BUFF,
@@ -100,3 +108,25 @@ class StatusEffect(SkillEffect):
                 target.status_effects[self.status_type] = self.duration
 
         return True
+
+    def _remove_status(self, target):
+        """개별 상태 이상 제거"""
+        if not hasattr(target, 'status_effects'):
+            return False
+
+        removed = False
+
+        # 리스트인 경우
+        if isinstance(target.status_effects, list):
+            original_len = len(target.status_effects)
+            target.status_effects = [e for e in target.status_effects
+                                    if not (hasattr(e, 'name') and e.name == self.status_type)]
+            removed = len(target.status_effects) < original_len
+
+        # 딕셔너리인 경우
+        elif isinstance(target.status_effects, dict):
+            if self.status_type in target.status_effects:
+                del target.status_effects[self.status_type]
+                removed = True
+
+        return removed
