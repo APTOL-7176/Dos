@@ -104,6 +104,13 @@ class ExplorationSystem:
         self.enemies: List[Enemy] = []  # 적 리스트
         self.inventory = inventory  # 인벤토리 추가
 
+        # 인벤토리 초기화 확인 로그
+        logger.error(f"[INIT] ExplorationSystem 초기화 - 인벤토리: {self.inventory}")
+        if self.inventory:
+            logger.error(f"[INIT] 인벤토리 타입: {type(self.inventory)}, 슬롯: {len(self.inventory.slots)}")
+        else:
+            logger.error(f"[INIT] ⚠️ 인벤토리가 None입니다!")
+
         # 적 배치
         self._spawn_enemies()
 
