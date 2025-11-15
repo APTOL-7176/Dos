@@ -359,6 +359,7 @@ UNIQUE_ITEMS = {
 
 # 소비 아이템
 CONSUMABLE_TEMPLATES = {
+    # HP 회복
     "health_potion": {
         "name": "체력 물약",
         "description": "HP 50 회복",
@@ -375,6 +376,16 @@ CONSUMABLE_TEMPLATES = {
         "effect_value": 200,
         "sell_price": 80
     },
+    "super_health_potion": {
+        "name": "최상급 체력 물약",
+        "description": "HP 500 회복",
+        "rarity": ItemRarity.RARE,
+        "effect_type": "heal_hp",
+        "effect_value": 500,
+        "sell_price": 200
+    },
+
+    # MP 회복
     "mana_potion": {
         "name": "마나 물약",
         "description": "MP 30 회복",
@@ -383,6 +394,24 @@ CONSUMABLE_TEMPLATES = {
         "effect_value": 30,
         "sell_price": 25
     },
+    "mega_mana_potion": {
+        "name": "대형 마나 물약",
+        "description": "MP 80 회복",
+        "rarity": ItemRarity.UNCOMMON,
+        "effect_type": "heal_mp",
+        "effect_value": 80,
+        "sell_price": 90
+    },
+    "super_mana_potion": {
+        "name": "최상급 마나 물약",
+        "description": "MP 150 회복",
+        "rarity": ItemRarity.RARE,
+        "effect_type": "heal_mp",
+        "effect_value": 150,
+        "sell_price": 180
+    },
+
+    # 완전 회복
     "elixir": {
         "name": "엘릭서",
         "description": "HP와 MP를 완전히 회복",
@@ -390,6 +419,92 @@ CONSUMABLE_TEMPLATES = {
         "effect_type": "full_restore",
         "effect_value": 0,
         "sell_price": 500
+    },
+
+    # 특수 아이템
+    "phoenix_down": {
+        "name": "불사조의 깃털",
+        "description": "전투 불능 상태를 회복 (HP 50%)",
+        "rarity": ItemRarity.RARE,
+        "effect_type": "revive",
+        "effect_value": 0.5,
+        "sell_price": 300
+    },
+    "town_portal": {
+        "name": "마을 귀환 두루마리",
+        "description": "던전에서 즉시 탈출 (보상 유지)",
+        "rarity": ItemRarity.UNCOMMON,
+        "effect_type": "escape",
+        "effect_value": 0,
+        "sell_price": 100
+    },
+    "dungeon_key": {
+        "name": "던전 열쇠",
+        "description": "잠긴 문 1개를 열 수 있음",
+        "rarity": ItemRarity.COMMON,
+        "effect_type": "key",
+        "effect_value": 1,
+        "sell_price": 75
+    },
+
+    # 버프 아이템
+    "strength_tonic": {
+        "name": "힘의 강장제",
+        "description": "3턴 동안 물리 공격력 +20%",
+        "rarity": ItemRarity.UNCOMMON,
+        "effect_type": "buff_attack",
+        "effect_value": 0.2,
+        "sell_price": 150
+    },
+    "magic_tonic": {
+        "name": "마법의 강장제",
+        "description": "3턴 동안 마법 공격력 +20%",
+        "rarity": ItemRarity.UNCOMMON,
+        "effect_type": "buff_magic",
+        "effect_value": 0.2,
+        "sell_price": 150
+    },
+    "speed_tonic": {
+        "name": "민첩의 강장제",
+        "description": "3턴 동안 속도 +30%",
+        "rarity": ItemRarity.UNCOMMON,
+        "effect_type": "buff_speed",
+        "effect_value": 0.3,
+        "sell_price": 180
+    },
+    "defense_tonic": {
+        "name": "방어의 강장제",
+        "description": "3턴 동안 방어력 +25%",
+        "rarity": ItemRarity.UNCOMMON,
+        "effect_type": "buff_defense",
+        "effect_value": 0.25,
+        "sell_price": 160
+    },
+
+    # 공격 아이템
+    "fire_bomb": {
+        "name": "화염 폭탄",
+        "description": "적 전체에 화염 데미지",
+        "rarity": ItemRarity.UNCOMMON,
+        "effect_type": "aoe_fire",
+        "effect_value": 150,
+        "sell_price": 120
+    },
+    "ice_bomb": {
+        "name": "냉기 폭탄",
+        "description": "적 전체에 냉기 데미지 (20% 확률 빙결)",
+        "rarity": ItemRarity.UNCOMMON,
+        "effect_type": "aoe_ice",
+        "effect_value": 130,
+        "sell_price": 140
+    },
+    "lightning_bolt": {
+        "name": "번개 구슬",
+        "description": "적 1명에게 강력한 번개 데미지",
+        "rarity": ItemRarity.RARE,
+        "effect_type": "single_lightning",
+        "effect_value": 300,
+        "sell_price": 200
     },
 }
 

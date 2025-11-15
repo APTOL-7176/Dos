@@ -19,6 +19,7 @@ class MenuOption(Enum):
     """메뉴 옵션"""
     PARTY_STATUS = "party_status"
     INVENTORY = "inventory"
+    SHOP = "shop"  # 골드 상점
     SAVE_GAME = "save"
     LOAD_GAME = "load"
     OPTIONS = "options"
@@ -36,6 +37,7 @@ class GameMenu:
         self.menu_options = [
             ("파티 상태", MenuOption.PARTY_STATUS),
             ("인벤토리", MenuOption.INVENTORY),
+            ("상점", MenuOption.SHOP),
             ("게임 저장", MenuOption.SAVE_GAME),
             ("게임 불러오기", MenuOption.LOAD_GAME),
             ("설정", MenuOption.OPTIONS),
@@ -185,6 +187,17 @@ def open_game_menu(
                         open_party_status_menu(console, context, party)
                         # 파티 상태에서 돌아온 후 메뉴 계속
                         continue
+
+                    elif result == MenuOption.SHOP:
+                        if inventory is not None and exploration is not None:
+                            from src.ui.gold_shop_ui import open_gold_shop
+                            floor_level = exploration.floor_number if hasattr(exploration, 'floor_number') else 1
+                            open_gold_shop(console, context, inventory, floor_level)
+                            # 상점에서 돌아온 후 메뉴 계속
+                            continue
+                        else:
+                            show_message(console, context, "상점을 열 수 없습니다.")
+                            continue
 
                     elif result == MenuOption.SAVE_GAME:
                         if exploration is None:
