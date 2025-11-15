@@ -9,6 +9,11 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any
 import random
 
+# Equipment effects 임포트 (순환 참조 방지를 위해 lazy import 사용)
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from src.equipment.equipment_effects import EquipmentEffect
+
 
 class ItemRarity(Enum):
     """아이템 등급"""
@@ -126,6 +131,7 @@ class Item:
 class Equipment(Item):
     """장비 아이템"""
     equip_slot: EquipSlot = EquipSlot.WEAPON
+    special_effects: List[Any] = field(default_factory=list)  # EquipmentEffect 리스트
 
     def __post_init__(self):
         if self.item_type not in [ItemType.WEAPON, ItemType.ARMOR, ItemType.ACCESSORY]:
@@ -334,6 +340,399 @@ WEAPON_TEMPLATES = {
         "base_stats": {"magic_attack": 130, "mp": 80, "spirit": 20},
         "sell_price": 7500
     },
+
+    # === 생명력 흡수 무기 ===
+    "vampiric_blade": {
+        "name": "흡혈검",
+        "description": "적의 생명력을 흡수하는 검",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 12,
+        "base_stats": {"physical_attack": 55, "speed": -2},
+        "unique_effect": "lifesteal:0.15",  # 15% 생명력 흡수
+        "sell_price": 800
+    },
+    "soul_drinker": {
+        "name": "영혼 포식자",
+        "description": "영혼까지 삼키는 마검",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 20,
+        "base_stats": {"physical_attack": 95, "magic_attack": 30, "hp": -50},
+        "unique_effect": "lifesteal:0.25",  # 25% 생명력 흡수
+        "sell_price": 2500
+    },
+    "crimson_reaver": {
+        "name": "진홍의 수확자",
+        "description": "피를 갈구하는 낫. 처치 시 HP 회복",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 18,
+        "base_stats": {"physical_attack": 80, "critical": 15},
+        "unique_effect": "lifesteal:0.12|on_kill_heal:50",
+        "sell_price": 1800
+    },
+
+    # === BRV 특화 무기 ===
+    "brave_enhancer": {
+        "name": "브레이브 인챈서",
+        "description": "BRV 공격력을 크게 증폭시키는 검",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 10,
+        "base_stats": {"physical_attack": 45, "speed": 3},
+        "unique_effect": "brv_bonus:0.30",  # BRV +30%
+        "sell_price": 600
+    },
+    "breaker": {
+        "name": "브레이커",
+        "description": "BREAK 특화 무기. BREAK 데미지 증가",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 16,
+        "base_stats": {"physical_attack": 70, "luck": 10},
+        "unique_effect": "brv_break_bonus:0.50",  # BREAK 데미지 +50%
+        "sell_price": 1500
+    },
+    "soul_stealer": {
+        "name": "영혼 강탈자",
+        "description": "적의 BRV를 훔쳐온다",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 14,
+        "base_stats": {"physical_attack": 60, "accuracy": 10},
+        "unique_effect": "brv_steal:0.20",  # BRV 흡수 +20%
+        "sell_price": 1000
+    },
+
+    # === 크리티컬 특화 ===
+    "assassins_edge": {
+        "name": "암살자의 칼날",
+        "description": "치명타 확률과 데미지 증가",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 11,
+        "base_stats": {"physical_attack": 50, "critical": 20, "speed": 5},
+        "unique_effect": "critical_damage:0.50",  # 크리티컬 데미지 +50%
+        "sell_price": 700
+    },
+    "fatal_strike": {
+        "name": "필살검",
+        "description": "극한의 치명타 특화 무기",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 22,
+        "base_stats": {"physical_attack": 85, "critical": 35, "luck": 15},
+        "unique_effect": "critical_damage:0.75|critical_chance:0.15",
+        "sell_price": 3000
+    },
+    "backstabber": {
+        "name": "배신자의 단검",
+        "description": "적 HP 30% 이하 시 추가 데미지",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 13,
+        "base_stats": {"physical_attack": 55, "critical": 15, "speed": 8},
+        "unique_effect": "execute:0.30",  # 적 HP 30% 이하 시 +30% 데미지
+        "sell_price": 900
+    },
+
+    # === 속성 무기 ===
+    "flametongue": {
+        "name": "화염검",
+        "description": "불꽃을 두르는 검. 화상 부여",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 8,
+        "base_stats": {"physical_attack": 40, "magic_attack": 15},
+        "unique_effect": "element:fire|status_burn:0.25",  # 25% 화상
+        "sell_price": 350
+    },
+    "frostbite": {
+        "name": "동상의 검",
+        "description": "얼음 속성. 적 속도 감소",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 8,
+        "base_stats": {"physical_attack": 38, "magic_attack": 18},
+        "unique_effect": "element:ice|debuff_slow:0.30",
+        "sell_price": 350
+    },
+    "thunderstrike": {
+        "name": "뇌전검",
+        "description": "번개 속성. 감전 부여",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 12,
+        "base_stats": {"physical_attack": 52, "magic_attack": 25, "speed": 4},
+        "unique_effect": "element:lightning|status_shock:0.30|chain_lightning:0.20",
+        "sell_price": 750
+    },
+    "earthshaker": {
+        "name": "대지 파괴자",
+        "description": "대지 속성. 방어력 무시 20%",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 15,
+        "base_stats": {"physical_attack": 75, "strength": 12},
+        "unique_effect": "element:earth|armor_penetration:0.20",
+        "sell_price": 1200
+    },
+    "windcutter": {
+        "name": "바람 절단자",
+        "description": "바람 속성. 공격 속도 증가",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 9,
+        "base_stats": {"physical_attack": 42, "speed": 8, "accuracy": 10},
+        "unique_effect": "element:wind|multi_strike:0.15",  # 15% 2회 공격
+        "sell_price": 400
+    },
+    "voidreaver": {
+        "name": "공허의 수확자",
+        "description": "어둠 속성. MP 흡수",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 19,
+        "base_stats": {"physical_attack": 88, "magic_attack": 40, "mp": 50},
+        "unique_effect": "element:void|mp_steal:0.30|debuff_silence:0.20",
+        "sell_price": 2200
+    },
+    "holy_avenger": {
+        "name": "성스러운 복수자",
+        "description": "신성 속성. 언데드에게 추가 데미지",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 20,
+        "base_stats": {"physical_attack": 90, "magic_attack": 35, "spirit": 15},
+        "unique_effect": "element:holy|bonus_vs_undead:0.50|heal_on_hit:5",
+        "sell_price": 2500
+    },
+
+    # === 방어 관통 무기 ===
+    "armor_piercer": {
+        "name": "갑옷 관통자",
+        "description": "방어력을 무시하는 창",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 12,
+        "base_stats": {"physical_attack": 58, "accuracy": 15},
+        "unique_effect": "armor_penetration:0.25",
+        "sell_price": 800
+    },
+    "true_strike_spear": {
+        "name": "필중의 창",
+        "description": "절대 빗나가지 않는 창. 명중률 대폭 증가",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 17,
+        "base_stats": {"physical_attack": 82, "accuracy": 50},
+        "unique_effect": "never_miss|armor_penetration:0.15",
+        "sell_price": 1800
+    },
+
+    # === 속도/연타 무기 ===
+    "rapier": {
+        "name": "레이피어",
+        "description": "빠른 연속 공격",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 7,
+        "base_stats": {"physical_attack": 32, "speed": 12, "accuracy": 8},
+        "unique_effect": "multi_strike:0.25|dodge_chance:0.10",
+        "sell_price": 300
+    },
+    "twin_daggers": {
+        "name": "쌍검",
+        "description": "2회 연속 공격",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 10,
+        "base_stats": {"physical_attack": 40, "speed": 10, "critical": 10},
+        "unique_effect": "double_strike|critical_chance:0.10",
+        "sell_price": 650
+    },
+    "flurry_blade": {
+        "name": "난무의 검",
+        "description": "3~5회 연속 공격 (랜덤)",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 18,
+        "base_stats": {"physical_attack": 50, "speed": 15, "critical": 15},
+        "unique_effect": "multi_strike:1.0|strike_count:3-5",  # 100% 확률로 3~5회
+        "sell_price": 2000
+    },
+
+    # === 방어/탱커 무기 ===
+    "shield_bash_mace": {
+        "name": "방패격 메이스",
+        "description": "공격 시 일정 확률로 적 스턴",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 9,
+        "base_stats": {"physical_attack": 42, "defense": 8},
+        "unique_effect": "stun_chance:0.20|block_chance:0.10",
+        "sell_price": 400
+    },
+    "defenders_hammer": {
+        "name": "수호자의 망치",
+        "description": "방어력에 비례한 추가 데미지",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 14,
+        "base_stats": {"physical_attack": 60, "defense": 20, "hp": 100},
+        "unique_effect": "damage_from_defense:0.50|thorns:0.15",
+        "sell_price": 1100
+    },
+    "aegis_blade": {
+        "name": "이지스 검",
+        "description": "공격과 방어를 겸비한 검",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 19,
+        "base_stats": {"physical_attack": 78, "defense": 30, "hp": 150},
+        "unique_effect": "block_chance:0.25|counter_attack:0.30",
+        "sell_price": 2300
+    },
+
+    # === 마법 무기 (특수 효과) ===
+    "mana_blade": {
+        "name": "마나 블레이드",
+        "description": "MP를 소모해 추가 데미지",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 13,
+        "base_stats": {"physical_attack": 55, "magic_attack": 30, "mp": 50},
+        "unique_effect": "mp_to_damage:2.0|mp_cost_per_hit:10",  # MP 10당 20 추가 데미지
+        "sell_price": 950
+    },
+    "arcane_staff": {
+        "name": "비전 지팡이",
+        "description": "MP 재생 증가. 스킬 쿨다운 감소",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 11,
+        "base_stats": {"magic_attack": 60, "mp": 60, "spirit": 10},
+        "unique_effect": "mp_regen:5|cooldown_reduction:0.15",  # 턴당 MP+5, 쿨다운 -15%
+        "sell_price": 750
+    },
+    "chaos_orb_staff": {
+        "name": "혼돈의 오브 지팡이",
+        "description": "랜덤 속성 공격. 모든 속성 친화력",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 21,
+        "base_stats": {"magic_attack": 100, "mp": 100, "luck": 20},
+        "unique_effect": "random_element|all_element_affinity:0.20|wild_magic:0.30",
+        "sell_price": 2800
+    },
+
+    # === 원거리 무기 ===
+    "hunters_bow": {
+        "name": "사냥꾼의 활",
+        "description": "야생 동물에게 추가 데미지",
+        "rarity": ItemRarity.COMMON,
+        "level_requirement": 5,
+        "base_stats": {"physical_attack": 28, "accuracy": 12, "critical": 5},
+        "unique_effect": "bonus_vs_beast:0.30|first_strike",
+        "sell_price": 180
+    },
+    "sniper_rifle": {
+        "name": "저격 활",
+        "description": "극한의 명중률과 크리티컬",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 15,
+        "base_stats": {"physical_attack": 72, "accuracy": 40, "critical": 25},
+        "unique_effect": "critical_damage:1.0|headshot:0.20",  # 20% 확률로 즉사
+        "sell_price": 1400
+    },
+    "repeating_crossbow": {
+        "name": "연발 석궁",
+        "description": "3회 연속 공격",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 10,
+        "base_stats": {"physical_attack": 35, "accuracy": 10, "speed": 5},
+        "unique_effect": "triple_shot|ammo_efficiency:0.20",
+        "sell_price": 550
+    },
+
+    # === 디버프 무기 ===
+    "poison_dagger": {
+        "name": "독침 단검",
+        "description": "공격 시 독 부여",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 7,
+        "base_stats": {"physical_attack": 35, "speed": 6},
+        "unique_effect": "status_poison:0.40|poison_damage:10",  # 40% 독, 턴당 10 데미지
+        "sell_price": 320
+    },
+    "cursed_blade": {
+        "name": "저주받은 검",
+        "description": "모든 디버프 확률 증가. 사용자도 HP -10%",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 16,
+        "base_stats": {"physical_attack": 85, "magic_attack": 40, "hp": -100},
+        "unique_effect": "debuff_master:0.30|curse_self:hp_max_reduction:0.10",
+        "sell_price": 1300
+    },
+    "weakening_mace": {
+        "name": "약화의 메이스",
+        "description": "적 방어력 감소",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 9,
+        "base_stats": {"physical_attack": 44, "accuracy": 5},
+        "unique_effect": "debuff_defense_down:0.25|armor_break:0.30",
+        "sell_price": 420
+    },
+    "terror_scythe": {
+        "name": "공포의 낫",
+        "description": "공격 시 공포 부여. 적 회피율 감소",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 14,
+        "base_stats": {"physical_attack": 68, "magic_attack": 25, "critical": 15},
+        "unique_effect": "status_fear:0.35|accuracy_debuff:0.20|harvest_soul:0.10",
+        "sell_price": 1100
+    },
+
+    # === 특수 기믹 무기 ===
+    "combo_master": {
+        "name": "콤보 마스터",
+        "description": "연속 공격 시 데미지 증가 (최대 5회)",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 18,
+        "base_stats": {"physical_attack": 70, "speed": 12, "critical": 10},
+        "unique_effect": "combo_bonus:0.15|max_combo:5",  # 콤보당 +15%, 최대 75%
+        "sell_price": 1900
+    },
+    "momentum_blade": {
+        "name": "역전의 검",
+        "description": "HP가 낮을수록 강해짐",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 13,
+        "base_stats": {"physical_attack": 60, "speed": 8},
+        "unique_effect": "berserk|low_hp_bonus:1.0",  # HP 낮을수록 최대 +100%
+        "sell_price": 900
+    },
+    "overload_staff": {
+        "name": "과부하 지팡이",
+        "description": "MP 소모 2배, 위력 2.5배",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 20,
+        "base_stats": {"magic_attack": 110, "mp": 100, "spirit": 15},
+        "unique_effect": "overload:mp_cost:2.0|damage:2.5",
+        "sell_price": 2600
+    },
+    "gambler_dice": {
+        "name": "도박사의 주사위",
+        "description": "데미지가 50%~200% 사이로 랜덤",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 12,
+        "base_stats": {"physical_attack": 80, "luck": 30},
+        "unique_effect": "random_damage:0.5-2.0|lucky_crit:0.20",
+        "sell_price": 800
+    },
+
+    # === 레전더리 무기 ===
+    "infinity_edge": {
+        "name": "무한의 칼날",
+        "description": "크리티컬 확률 2배. 크리티컬 데미지 극대화",
+        "rarity": ItemRarity.LEGENDARY,
+        "level_requirement": 25,
+        "base_stats": {"physical_attack": 120, "critical": 50, "speed": 10},
+        "unique_effect": "critical_chance:1.0|critical_damage:1.5|ignore_armor:0.30",
+        "sell_price": 8000
+    },
+    "ultima_weapon": {
+        "name": "얼티마 웨폰",
+        "description": "HP가 만땅일 때 모든 능력치 +50%",
+        "rarity": ItemRarity.LEGENDARY,
+        "level_requirement": 30,
+        "base_stats": {"physical_attack": 140, "magic_attack": 80, "hp": 200, "mp": 100},
+        "unique_effect": "full_hp_bonus:all_stats:0.50|invincible_at_full_hp",
+        "sell_price": 15000
+    },
+    "apocalypse": {
+        "name": "아포칼립스",
+        "description": "적 처치 시 모든 자원 회복. 영구 버프 누적",
+        "rarity": ItemRarity.LEGENDARY,
+        "level_requirement": 28,
+        "base_stats": {"physical_attack": 135, "magic_attack": 70, "all_stats": 15},
+        "unique_effect": "on_kill:restore_all|stack_buff:permanent|reaper:0.30",
+        "sell_price": 12000
+    },
 }
 
 ARMOR_TEMPLATES = {
@@ -447,6 +846,323 @@ ARMOR_TEMPLATES = {
         "level_requirement": 24,
         "base_stats": {"physical_defense": 95, "magic_defense": 75, "hp": 180, "strength": 12},
         "sell_price": 9000
+    },
+
+    # === 상처 시스템 연동 방어구 ===
+    "healers_robe": {
+        "name": "치유사의 로브",
+        "description": "받는 상처 30% 감소. 회복량 +20%",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 10,
+        "base_stats": {"magic_defense": 35, "spirit": 12, "hp": 80},
+        "unique_effect": "wound_reduction:0.30|heal_boost:0.20",
+        "sell_price": 650
+    },
+    "regenerative_armor": {
+        "name": "재생의 갑옷",
+        "description": "턴마다 상처 회복. HP 재생",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 16,
+        "base_stats": {"physical_defense": 60, "hp": 150, "defense": 15},
+        "unique_effect": "wound_regen:5|hp_regen:0.03",  # 턴당 상처 5, HP 3%
+        "sell_price": 1800
+    },
+    "scarless_plate": {
+        "name": "무흔의 판금",
+        "description": "상처 면역. 받는 데미지 +10%",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 18,
+        "base_stats": {"physical_defense": 70, "magic_defense": 40, "hp": 120},
+        "unique_effect": "wound_immunity|damage_taken:0.10",
+        "sell_price": 2200
+    },
+    "trauma_ward": {
+        "name": "외상 보호복",
+        "description": "받는 상처 50% 감소",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 12,
+        "base_stats": {"physical_defense": 45, "magic_defense": 30, "hp": 100},
+        "unique_effect": "wound_reduction:0.50",
+        "sell_price": 850
+    },
+
+    # === BRV 시스템 연동 방어구 ===
+    "brave_guard": {
+        "name": "브레이브 가드",
+        "description": "BRV 데미지 30% 감소. BREAK 저항",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 11,
+        "base_stats": {"physical_defense": 40, "magic_defense": 35, "hp": 90},
+        "unique_effect": "brv_shield:0.30|brv_protect",  # BREAK 1회 방지
+        "sell_price": 700
+    },
+    "fortress_plate": {
+        "name": "요새 판금",
+        "description": "BRV 데미지 50% 감소. 이동 속도 -5",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 17,
+        "base_stats": {"physical_defense": 85, "hp": 200, "speed": -5},
+        "unique_effect": "brv_shield:0.50|block_chance:0.20",
+        "sell_price": 2000
+    },
+    "breaker_armor": {
+        "name": "파괴자의 갑옷",
+        "description": "BRV 축적량 +25%. 방어력 -20%",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 13,
+        "base_stats": {"physical_defense": 35, "hp": 80},
+        "unique_effect": "brv_bonus:0.25|defense_reduction:0.20",
+        "sell_price": 800
+    },
+
+    # === HP/MP 재생 방어구 ===
+    "troll_hide": {
+        "name": "트롤 가죽",
+        "description": "턴당 HP 5% 재생. 화염 약점",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 10,
+        "base_stats": {"physical_defense": 38, "hp": 120},
+        "unique_effect": "hp_regen:0.05|weakness_fire",
+        "sell_price": 600
+    },
+    "phoenix_mail": {
+        "name": "불사조 갑옷",
+        "description": "HP 재생 +3%. 사망 시 50% HP로 부활 (1회)",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 20,
+        "base_stats": {"physical_defense": 75, "magic_defense": 60, "hp": 150},
+        "unique_effect": "hp_regen:0.03|phoenix_rebirth",
+        "sell_price": 2800
+    },
+    "mana_silk_robe": {
+        "name": "마나 실크 로브",
+        "description": "턴당 MP 8 재생. MP 소비 -10%",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 12,
+        "base_stats": {"magic_defense": 45, "mp": 80, "magic_attack": 15},
+        "unique_effect": "mp_regen:8|mp_cost_reduction:0.10",
+        "sell_price": 750
+    },
+    "archmage_vestments": {
+        "name": "대마법사의 예복",
+        "description": "MP 재생 +12. 스킬 쿨다운 -20%",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 19,
+        "base_stats": {"magic_defense": 70, "mp": 150, "magic_attack": 35, "spirit": 18},
+        "unique_effect": "mp_regen:12|cooldown_reduction:0.20|spell_power:0.15",
+        "sell_price": 2500
+    },
+
+    # === 가시/반사 방어구 ===
+    "thorned_armor": {
+        "name": "가시 갑옷",
+        "description": "피격 시 데미지의 25% 반사",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 8,
+        "base_stats": {"physical_defense": 32, "hp": 60},
+        "unique_effect": "thorns:0.25",
+        "sell_price": 350
+    },
+    "reflecting_plate": {
+        "name": "반사 판금",
+        "description": "피격 시 40% 반사. 마법 공격 50% 반사",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 18,
+        "base_stats": {"physical_defense": 72, "magic_defense": 55, "hp": 140},
+        "unique_effect": "thorns:0.40|spell_reflect:0.50",
+        "sell_price": 2200
+    },
+    "vengeful_mail": {
+        "name": "복수의 갑옷",
+        "description": "피격 시 반격 30% 확률",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 14,
+        "base_stats": {"physical_defense": 55, "hp": 110, "strength": 8},
+        "unique_effect": "counter_attack:0.30|vengeance_damage:0.20",
+        "sell_price": 1100
+    },
+
+    # === 방어/블록 방어구 ===
+    "tower_shield_armor": {
+        "name": "탑 방패 갑옷",
+        "description": "블록 확률 30%. 블록 시 데미지 무효",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 13,
+        "base_stats": {"physical_defense": 65, "hp": 150, "speed": -3},
+        "unique_effect": "block_chance:0.30|block_perfect",
+        "sell_price": 950
+    },
+    "adamantine_armor": {
+        "name": "아다만타이트 갑옷",
+        "description": "모든 데미지 15 감소. 크리티컬 무효",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 22,
+        "base_stats": {"physical_defense": 90, "magic_defense": 70, "hp": 200},
+        "unique_effect": "flat_damage_reduction:15|crit_immunity",
+        "sell_price": 3200
+    },
+    "guardian_plate": {
+        "name": "수호자의 판금",
+        "description": "아군 보호. 아군이 받는 데미지 10% 대신 받음",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 19,
+        "base_stats": {"physical_defense": 80, "magic_defense": 60, "hp": 180},
+        "unique_effect": "ally_protect:0.10|damage_redirect",
+        "sell_price": 2400
+    },
+
+    # === 회피 방어구 ===
+    "shadow_cloak": {
+        "name": "그림자 망토",
+        "description": "회피율 +25%. 어둠 속성 저항",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 11,
+        "base_stats": {"magic_defense": 30, "evasion": 25, "speed": 8},
+        "unique_effect": "dodge_chance:0.25|shadow_resistance:0.50",
+        "sell_price": 700
+    },
+    "mirage_vestments": {
+        "name": "신기루 예복",
+        "description": "회피율 +35%. 회피 시 반격",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 17,
+        "base_stats": {"magic_defense": 55, "evasion": 35, "speed": 12, "luck": 10},
+        "unique_effect": "dodge_chance:0.35|dodge_counter",
+        "sell_price": 2000
+    },
+    "windwalker_armor": {
+        "name": "바람걸음 갑옷",
+        "description": "회피 +20%. 속도 +15",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 12,
+        "base_stats": {"physical_defense": 35, "evasion": 20, "speed": 15},
+        "unique_effect": "dodge_chance:0.20|move_speed:0.30",
+        "sell_price": 800
+    },
+
+    # === 속성 저항 방어구 ===
+    "fire_dragon_scale": {
+        "name": "화염 드래곤 비늘",
+        "description": "화염 면역. 화염 흡수로 HP 회복",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 18,
+        "base_stats": {"physical_defense": 70, "magic_defense": 65, "hp": 140},
+        "unique_effect": "fire_immunity|fire_absorb",
+        "sell_price": 2300
+    },
+    "frost_plate": {
+        "name": "서리 판금",
+        "description": "냉기 면역. 공격받을 시 적 속도 감소",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 14,
+        "base_stats": {"physical_defense": 58, "magic_defense": 50, "hp": 110},
+        "unique_effect": "ice_immunity|on_hit_slow:0.30",
+        "sell_price": 1200
+    },
+    "storm_mail": {
+        "name": "폭풍 갑옷",
+        "description": "번개 면역. 전기 데미지 반사",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 16,
+        "base_stats": {"physical_defense": 65, "magic_defense": 60, "hp": 120, "speed": 8},
+        "unique_effect": "lightning_immunity|lightning_reflect",
+        "sell_price": 1900
+    },
+    "rainbow_robe": {
+        "name": "무지개 로브",
+        "description": "모든 속성 저항 +30%",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 20,
+        "base_stats": {"magic_defense": 75, "spirit": 20, "hp": 130, "mp": 80},
+        "unique_effect": "all_element_resist:0.30",
+        "sell_price": 2700
+    },
+
+    # === 상태 이상 관련 방어구 ===
+    "immunity_cloak": {
+        "name": "면역 망토",
+        "description": "독, 화상, 출혈 면역",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 13,
+        "base_stats": {"magic_defense": 48, "hp": 100, "spirit": 10},
+        "unique_effect": "status_immunity:poison,burn,bleed",
+        "sell_price": 950
+    },
+    "cleansing_armor": {
+        "name": "정화의 갑옷",
+        "description": "모든 디버프 지속시간 -50%",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 18,
+        "base_stats": {"physical_defense": 72, "magic_defense": 65, "hp": 150, "spirit": 15},
+        "unique_effect": "debuff_duration:-0.50|cleanse_on_turn:0.30",  # 30% 확률로 디버프 제거
+        "sell_price": 2300
+    },
+    "stalwart_plate": {
+        "name": "불굴의 판금",
+        "description": "스턴, 수면, 혼란 면역",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 19,
+        "base_stats": {"physical_defense": 80, "hp": 180, "spirit": 12},
+        "unique_effect": "cc_immunity:stun,sleep,confusion",
+        "sell_price": 2500
+    },
+
+    # === 특수 기믹 방어구 ===
+    "berserker_hide": {
+        "name": "광전사의 가죽",
+        "description": "HP 50% 이하 시 공격력 +40%, 방어력 -20%",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 14,
+        "base_stats": {"physical_defense": 45, "hp": 130, "strength": 12},
+        "unique_effect": "berserk_mode:hp_below_50|attack:0.40|defense:-0.20",
+        "sell_price": 1100
+    },
+    "glass_armor": {
+        "name": "유리 갑옷",
+        "description": "모든 데미지 +30%. 받는 데미지 +50%",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 15,
+        "base_stats": {"physical_defense": 20, "magic_defense": 15},
+        "unique_effect": "glass_cannon:damage:0.30|taken:0.50",
+        "sell_price": 1200
+    },
+    "bloodthirst_armor": {
+        "name": "피의 갈증 갑옷",
+        "description": "적 처치 시 최대 HP +10 (영구, 최대 10회)",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 20,
+        "base_stats": {"physical_defense": 70, "hp": 150, "strength": 10},
+        "unique_effect": "on_kill:max_hp:10|stack_max:10",
+        "sell_price": 2600
+    },
+    "adaptive_mail": {
+        "name": "적응형 갑옷",
+        "description": "받은 데미지 타입에 저항 획득 (3턴)",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 21,
+        "base_stats": {"physical_defense": 75, "magic_defense": 75, "hp": 160},
+        "unique_effect": "adaptive_resistance:0.20|duration:3",
+        "sell_price": 2900
+    },
+
+    # === 레전더리 방어구 ===
+    "aegis_of_eternity": {
+        "name": "영원의 이지스",
+        "description": "모든 방어 +100. 블록 확률 50%. 불사 (HP 1로 생존 1회)",
+        "rarity": ItemRarity.LEGENDARY,
+        "level_requirement": 28,
+        "base_stats": {"physical_defense": 120, "magic_defense": 110, "hp": 300, "all_stats": 15},
+        "unique_effect": "block_chance:0.50|immortality:once|all_resist:0.30",
+        "sell_price": 15000
+    },
+    "celestial_raiment": {
+        "name": "천상의 예복",
+        "description": "모든 속성 저항 50%. 상처 면역. MP 재생 +15",
+        "rarity": ItemRarity.LEGENDARY,
+        "level_requirement": 26,
+        "base_stats": {"magic_defense": 110, "mp": 200, "spirit": 25, "magic_attack": 50},
+        "unique_effect": "all_element_resist:0.50|wound_immunity|mp_regen:15|spell_power:0.30",
+        "sell_price": 13000
     },
 }
 
@@ -613,6 +1329,500 @@ ACCESSORY_TEMPLATES = {
         "level_requirement": 7,
         "base_stats": {"magic_attack": 12, "mp": 40, "magic_defense": 10},
         "sell_price": 300
+    },
+
+    # === 시야 시스템 연동 장신구 ===
+    "eagle_eye_amulet": {
+        "name": "매의 눈 목걸이",
+        "description": "시야 +2. 명중률 +15",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 5,
+        "base_stats": {"accuracy": 15, "critical": 5},
+        "unique_effect": "vision:2",
+        "sell_price": 200
+    },
+    "far_sight_lens": {
+        "name": "원시의 렌즈",
+        "description": "시야 +3. 적 탐지",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 10,
+        "base_stats": {"accuracy": 20, "luck": 8},
+        "unique_effect": "vision:3|detect_enemy",
+        "sell_price": 600
+    },
+    "owls_pendant": {
+        "name": "부엉이의 펜던트",
+        "description": "시야 +4. 야간 시야 (어둠 무시)",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 15,
+        "base_stats": {"accuracy": 30, "spirit": 12, "luck": 10},
+        "unique_effect": "vision:4|night_vision",
+        "sell_price": 1500
+    },
+    "all_seeing_eye": {
+        "name": "전지의 눈",
+        "description": "시야 +6. 투시 (벽 너머 보기). 숨겨진 적 탐지",
+        "rarity": ItemRarity.LEGENDARY,
+        "level_requirement": 22,
+        "base_stats": {"accuracy": 50, "luck": 20, "all_stats": 8},
+        "unique_effect": "vision:6|true_sight|detect_hidden",
+        "sell_price": 5000
+    },
+    "explorers_compass": {
+        "name": "탐험가의 나침반",
+        "description": "시야 +2. 지도에 보물 위치 표시",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 8,
+        "base_stats": {"luck": 15},
+        "unique_effect": "vision:2|treasure_finder",
+        "sell_price": 450
+    },
+
+    # === 상처 관련 장신구 ===
+    "wound_ward_ring": {
+        "name": "상처 보호 반지",
+        "description": "받는 상처 40% 감소",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 9,
+        "base_stats": {"hp": 60, "spirit": 8},
+        "unique_effect": "wound_reduction:0.40",
+        "sell_price": 550
+    },
+    "scar_healer_amulet": {
+        "name": "흉터 치유 목걸이",
+        "description": "턴당 상처 8 회복. 회복량 +15%",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 14,
+        "base_stats": {"hp": 100, "spirit": 15},
+        "unique_effect": "wound_regen:8|heal_boost:0.15",
+        "sell_price": 1400
+    },
+    "flawless_gem": {
+        "name": "무결점의 보석",
+        "description": "상처 면역. 최대 HP -10%",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 18,
+        "base_stats": {"hp": -50, "all_stats": 5},
+        "unique_effect": "wound_immunity",
+        "sell_price": 1800
+    },
+
+    # === BRV 관련 장신구 ===
+    "brave_ring": {
+        "name": "브레이브 링",
+        "description": "BRV 공격력 +20%",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 6,
+        "base_stats": {"strength": 5, "magic_attack": 5},
+        "unique_effect": "brv_bonus:0.20",
+        "sell_price": 250
+    },
+    "break_master_badge": {
+        "name": "브레이크 마스터 배지",
+        "description": "BREAK 데미지 +40%. BRV 흡수 +15%",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 12,
+        "base_stats": {"strength": 10, "luck": 12},
+        "unique_effect": "brv_break_bonus:0.40|brv_steal:0.15",
+        "sell_price": 800
+    },
+    "shield_earring": {
+        "name": "실드 귀걸이",
+        "description": "BRV 데미지 40% 감소. BREAK 1회 방지",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 11,
+        "base_stats": {"defense": 12, "spirit": 10},
+        "unique_effect": "brv_shield:0.40|brv_protect",
+        "sell_price": 700
+    },
+    "brave_surge_belt": {
+        "name": "브레이브 서지 벨트",
+        "description": "턴당 BRV +15. BRV 공격력 +15%",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 16,
+        "base_stats": {"strength": 12, "speed": 8},
+        "unique_effect": "brv_regen:15|brv_bonus:0.15",
+        "sell_price": 1600
+    },
+
+    # === 생명력 흡수 장신구 ===
+    "vampire_fang": {
+        "name": "흡혈귀의 송곳니",
+        "description": "생명력 흡수 10%. HP 재생 +2%",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 10,
+        "base_stats": {"hp": 70, "strength": 8},
+        "unique_effect": "lifesteal:0.10|hp_regen:0.02",
+        "sell_price": 600
+    },
+    "blood_ruby": {
+        "name": "피의 루비",
+        "description": "생명력 흡수 20%. 최대 HP +50",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 17,
+        "base_stats": {"hp": 150, "strength": 15},
+        "unique_effect": "lifesteal:0.20",
+        "sell_price": 1900
+    },
+    "leech_ring": {
+        "name": "흡혈 반지",
+        "description": "생명력 흡수 8%. MP 흡수 8%",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 13,
+        "base_stats": {"hp": 80, "mp": 40},
+        "unique_effect": "lifesteal:0.08|mp_steal:0.08",
+        "sell_price": 900
+    },
+
+    # === 크리티컬 장신구 ===
+    "lucky_coin": {
+        "name": "행운의 동전",
+        "description": "크리티컬 확률 +15%. 행운 +20",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 7,
+        "base_stats": {"luck": 20, "critical": 10},
+        "unique_effect": "critical_chance:0.15",
+        "sell_price": 300
+    },
+    "executioners_token": {
+        "name": "처형인의 징표",
+        "description": "크리티컬 데미지 +60%. 적 HP 30% 이하 시 추가 +30%",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 14,
+        "base_stats": {"critical": 15, "luck": 15, "strength": 10},
+        "unique_effect": "critical_damage:0.60|execute:0.30",
+        "sell_price": 1100
+    },
+    "precision_monocle": {
+        "name": "정밀 단안경",
+        "description": "크리티컬 확률 +25%. 명중률 +30",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 18,
+        "base_stats": {"critical": 20, "accuracy": 30, "luck": 18},
+        "unique_effect": "critical_chance:0.25|never_miss_crit",  # 크리티컬은 절대 빗나가지 않음
+        "sell_price": 2100
+    },
+
+    # === 회피/속도 장신구 ===
+    "rabbit_foot": {
+        "name": "토끼발",
+        "description": "회피율 +15%. 속도 +8",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 6,
+        "base_stats": {"evasion": 15, "speed": 8, "luck": 10},
+        "unique_effect": "dodge_chance:0.15",
+        "sell_price": 250
+    },
+    "phantom_boots": {
+        "name": "유령 장화",
+        "description": "회피율 +30%. 공격 회피 시 반격",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 13,
+        "base_stats": {"evasion": 30, "speed": 12, "luck": 12},
+        "unique_effect": "dodge_chance:0.30|dodge_counter",
+        "sell_price": 950
+    },
+    "wind_walker_anklet": {
+        "name": "바람걸이 발찌",
+        "description": "속도 +20. 선제공격 보너스",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 11,
+        "base_stats": {"speed": 20, "evasion": 15},
+        "unique_effect": "first_strike|move_speed:0.40",
+        "sell_price": 750
+    },
+    "time_stop_watch": {
+        "name": "시간 정지 회중시계",
+        "description": "속도 +25. 스킬 쿨다운 -25%",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 19,
+        "base_stats": {"speed": 25, "all_stats": 8},
+        "unique_effect": "cooldown_reduction:0.25|double_turn:0.10",  # 10% 확률로 2회 행동
+        "sell_price": 2400
+    },
+
+    # === 방어 장신구 ===
+    "iron_skin_ring": {
+        "name": "강철 피부 반지",
+        "description": "모든 데미지 10 감소",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 12,
+        "base_stats": {"defense": 15, "hp": 80},
+        "unique_effect": "flat_damage_reduction:10",
+        "sell_price": 800
+    },
+    "titan_heart": {
+        "name": "타이탄의 심장",
+        "description": "최대 HP +200. HP 재생 +3%",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 20,
+        "base_stats": {"hp": 250, "defense": 20},
+        "unique_effect": "hp_regen:0.03|overheal_shield",  # 과다 회복 → 실드 전환
+        "sell_price": 2600
+    },
+    "barrier_crystal": {
+        "name": "배리어 크리스탈",
+        "description": "턴 시작 시 최대 HP 20% 보호막 생성",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 17,
+        "base_stats": {"hp": 120, "magic_defense": 25, "spirit": 15},
+        "unique_effect": "barrier_on_turn:0.20",
+        "sell_price": 1900
+    },
+
+    # === MP/마법 장신구 ===
+    "arcane_focus": {
+        "name": "비전 초점",
+        "description": "MP 재생 +6. MP 소비 -15%",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 10,
+        "base_stats": {"mp": 60, "magic_attack": 18},
+        "unique_effect": "mp_regen:6|mp_cost_reduction:0.15",
+        "sell_price": 650
+    },
+    "mana_crystal": {
+        "name": "마나 크리스탈",
+        "description": "최대 MP +100. 마법 공격력 +20",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 8,
+        "base_stats": {"mp": 120, "magic_attack": 25},
+        "unique_effect": "spell_power:0.10",
+        "sell_price": 400
+    },
+    "sorcerers_pendant": {
+        "name": "마법사의 펜던트",
+        "description": "스킬 쿨다운 -20%. MP 재생 +8",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 18,
+        "base_stats": {"mp": 100, "magic_attack": 30, "spirit": 15},
+        "unique_effect": "cooldown_reduction:0.20|mp_regen:8|spell_power:0.15",
+        "sell_price": 2200
+    },
+    "infinite_mana_orb": {
+        "name": "무한 마나 오브",
+        "description": "MP 소비 -50%. 마법 공격력 +40",
+        "rarity": ItemRarity.LEGENDARY,
+        "level_requirement": 24,
+        "base_stats": {"mp": 200, "magic_attack": 60, "spirit": 25},
+        "unique_effect": "mp_cost_reduction:0.50|spell_power:0.30|mana_overflow",
+        "sell_price": 8000
+    },
+
+    # === 상태 이상 관련 장신구 ===
+    "antidote_charm": {
+        "name": "해독 부적",
+        "description": "독, 질병 면역",
+        "rarity": ItemRarity.COMMON,
+        "level_requirement": 4,
+        "base_stats": {"hp": 40, "spirit": 5},
+        "unique_effect": "status_immunity:poison,disease",
+        "sell_price": 150
+    },
+    "freedom_amulet": {
+        "name": "자유의 목걸이",
+        "description": "스턴, 수면, 혼란, 공포 면역",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 14,
+        "base_stats": {"spirit": 18, "hp": 90},
+        "unique_effect": "cc_immunity:stun,sleep,confusion,fear",
+        "sell_price": 1200
+    },
+    "purity_ring": {
+        "name": "순수의 반지",
+        "description": "모든 상태 이상 면역. 최대 HP -50",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 20,
+        "base_stats": {"spirit": 25, "hp": -50, "magic_defense": 30},
+        "unique_effect": "status_immunity:all",
+        "sell_price": 2800
+    },
+    "cleansing_bell": {
+        "name": "정화의 종",
+        "description": "턴 시작 시 디버프 1개 제거",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 12,
+        "base_stats": {"spirit": 15, "mp": 50},
+        "unique_effect": "cleanse_on_turn:1|debuff_resist:0.30",
+        "sell_price": 850
+    },
+
+    # === 골드/경험치/드롭 장신구 ===
+    "golden_scarab": {
+        "name": "황금 스카라베",
+        "description": "골드 획득 +50%",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 5,
+        "base_stats": {"luck": 12},
+        "unique_effect": "gold_find:0.50",
+        "sell_price": 300
+    },
+    "merchants_signet": {
+        "name": "상인의 인장",
+        "description": "골드 획득 +100%. 아이템 가격 -10%",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 10,
+        "base_stats": {"luck": 18},
+        "unique_effect": "gold_find:1.00|shop_discount:0.10",
+        "sell_price": 700
+    },
+    "dragons_hoard_ring": {
+        "name": "용의 보물 반지",
+        "description": "골드 획득 +150%. 레어 아이템 드롭률 +30%",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 18,
+        "base_stats": {"luck": 25, "all_stats": 5},
+        "unique_effect": "gold_find:1.50|item_rarity:0.30",
+        "sell_price": 2500
+    },
+    "scholars_tome": {
+        "name": "학자의 서",
+        "description": "경험치 +30%",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 3,
+        "base_stats": {"spirit": 8},
+        "unique_effect": "exp_bonus:0.30",
+        "sell_price": 250
+    },
+    "mentor_medallion": {
+        "name": "스승의 메달",
+        "description": "경험치 +50%. 스킬 숙련도 +25%",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 10,
+        "base_stats": {"spirit": 15, "all_stats": 3},
+        "unique_effect": "exp_bonus:0.50|skill_mastery:0.25",
+        "sell_price": 800
+    },
+    "item_magnet": {
+        "name": "아이템 자석",
+        "description": "아이템 드롭률 +40%. 행운 +20",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 12,
+        "base_stats": {"luck": 25},
+        "unique_effect": "item_find:0.40|auto_pickup",
+        "sell_price": 900
+    },
+
+    # === 특수 기믹 장신구 ===
+    "phoenix_down_pendant": {
+        "name": "불사조 깃털 펜던트",
+        "description": "사망 시 HP 100% 부활 (1회)",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 22,
+        "base_stats": {"hp": 150, "mp": 80, "all_stats": 8},
+        "unique_effect": "phoenix_rebirth:full",
+        "sell_price": 3500
+    },
+    "second_chance_coin": {
+        "name": "두 번째 기회 동전",
+        "description": "사망 시 50% HP 부활 (2회)",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 16,
+        "base_stats": {"hp": 100, "luck": 15},
+        "unique_effect": "phoenix_rebirth:half|charges:2",
+        "sell_price": 1600
+    },
+    "rage_gem": {
+        "name": "분노의 보석",
+        "description": "HP 낮을수록 공격력 증가 (최대 +80%)",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 13,
+        "base_stats": {"strength": 15, "hp": 80},
+        "unique_effect": "berserk|low_hp_bonus:0.80",
+        "sell_price": 950
+    },
+    "glass_cannon_gem": {
+        "name": "유리 대포 보석",
+        "description": "공격력 +50%. 방어력 -30%",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 14,
+        "base_stats": {"strength": 20, "magic_attack": 20},
+        "unique_effect": "glass_cannon:damage:0.50|defense:-0.30",
+        "sell_price": 1100
+    },
+    "balanced_core": {
+        "name": "균형의 핵",
+        "description": "모든 스탯 +10. 모든 능력 균형 잡힘",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 20,
+        "base_stats": {"all_stats": 12},
+        "unique_effect": "balanced_stats:0.15",  # 모든 스탯에 15% 보너스
+        "sell_price": 2700
+    },
+    "combo_chain_badge": {
+        "name": "콤보 체인 배지",
+        "description": "연속 공격 시 데미지 증가 (콤보당 +20%, 최대 5회)",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 17,
+        "base_stats": {"speed": 15, "strength": 12, "critical": 10},
+        "unique_effect": "combo_bonus:0.20|max_combo:5",
+        "sell_price": 2000
+    },
+    "overload_core": {
+        "name": "과부하 코어",
+        "description": "모든 자원 소비 2배. 모든 효과 2.5배",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 21,
+        "base_stats": {"all_stats": 15},
+        "unique_effect": "overload:cost:2.0|effect:2.5",
+        "sell_price": 2900
+    },
+
+    # === 기믹 강화 장신구 ===
+    "gimmick_booster": {
+        "name": "기믹 부스터",
+        "description": "기믹 효율 +30%",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 11,
+        "base_stats": {"all_stats": 5},
+        "unique_effect": "gimmick_boost:0.30",
+        "sell_price": 750
+    },
+    "max_stack_amplifier": {
+        "name": "최대 스택 증폭기",
+        "description": "최대 기믹 스택 +2",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 16,
+        "base_stats": {"all_stats": 8},
+        "unique_effect": "max_gimmick_increase:2",
+        "sell_price": 1800
+    },
+    "resource_saver": {
+        "name": "자원 절약가",
+        "description": "기믹 소모 -30%. MP 소비 -20%",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 13,
+        "base_stats": {"mp": 60, "spirit": 12},
+        "unique_effect": "gimmick_cost_reduction:0.30|mp_cost_reduction:0.20",
+        "sell_price": 1000
+    },
+
+    # === 레전더리 장신구 ===
+    "ring_of_gods": {
+        "name": "신들의 반지",
+        "description": "모든 스탯 +25. 모든 효과 +20%",
+        "rarity": ItemRarity.LEGENDARY,
+        "level_requirement": 28,
+        "base_stats": {"all_stats": 30},
+        "unique_effect": "omnipotent:0.20",  # 모든 효과 20% 증폭
+        "sell_price": 15000
+    },
+    "infinity_stone": {
+        "name": "무한석",
+        "description": "자원 무한. MP 소비 없음. HP 재생 +5%",
+        "rarity": ItemRarity.LEGENDARY,
+        "level_requirement": 30,
+        "base_stats": {"hp": 200, "mp": 300, "all_stats": 20},
+        "unique_effect": "infinite_resources|hp_regen:0.05|mp_cost:0",
+        "sell_price": 20000
+    },
+    "omniscient_eye": {
+        "name": "전지의 눈동자",
+        "description": "시야 +10. 모든 것을 볼 수 있음. 크리티컬 +50%",
+        "rarity": ItemRarity.LEGENDARY,
+        "level_requirement": 26,
+        "base_stats": {"critical": 50, "accuracy": 100, "luck": 30},
+        "unique_effect": "vision:10|true_sight|omniscient|critical_chance:0.50",
+        "sell_price": 12000
     },
 }
 
@@ -808,6 +2018,126 @@ CONSUMABLE_TEMPLATES = {
         "effect_type": "single_lightning",
         "effect_value": 300,
         "sell_price": 200
+    },
+
+    # === 상처 치료 아이템 ===
+    "wound_salve": {
+        "name": "상처 연고",
+        "description": "상처 30 회복",
+        "rarity": ItemRarity.UNCOMMON,
+        "effect_type": "heal_wound",
+        "effect_value": 30,
+        "sell_price": 60
+    },
+    "scar_remover": {
+        "name": "흉터 제거제",
+        "description": "상처 100 회복",
+        "rarity": ItemRarity.RARE,
+        "effect_type": "heal_wound",
+        "effect_value": 100,
+        "sell_price": 180
+    },
+    "perfect_heal": {
+        "name": "완전 치유",
+        "description": "모든 상처 제거 + HP 완전 회복",
+        "rarity": ItemRarity.EPIC,
+        "effect_type": "heal_wound_full",
+        "effect_value": 0,
+        "sell_price": 600
+    },
+    "regeneration_potion": {
+        "name": "재생 물약",
+        "description": "3턴 동안 턴당 상처 15 회복",
+        "rarity": ItemRarity.RARE,
+        "effect_type": "wound_regen_buff",
+        "effect_value": 15,
+        "sell_price": 250
+    },
+
+    # === BRV 관련 아이템 ===
+    "brave_shard": {
+        "name": "브레이브 파편",
+        "description": "BRV 100 즉시 획득",
+        "rarity": ItemRarity.UNCOMMON,
+        "effect_type": "brv_restore",
+        "effect_value": 100,
+        "sell_price": 50
+    },
+    "brave_crystal": {
+        "name": "브레이브 크리스탈",
+        "description": "BRV 300 즉시 획득",
+        "rarity": ItemRarity.RARE,
+        "effect_type": "brv_restore",
+        "effect_value": 300,
+        "sell_price": 150
+    },
+    "break_guard": {
+        "name": "브레이크 가드",
+        "description": "3턴 동안 BREAK 무효 (1회)",
+        "rarity": ItemRarity.RARE,
+        "effect_type": "brv_protect_buff",
+        "effect_value": 3,
+        "sell_price": 200
+    },
+    "brave_boost": {
+        "name": "브레이브 부스트",
+        "description": "5턴 동안 BRV 공격력 +50%",
+        "rarity": ItemRarity.EPIC,
+        "effect_type": "brv_bonus_buff",
+        "effect_value": 0.50,
+        "sell_price": 400
+    },
+
+    # === 복합 회복 아이템 ===
+    "panacea": {
+        "name": "만병통치약",
+        "description": "HP, MP 완전 회복 + 상처 50 회복",
+        "rarity": ItemRarity.EPIC,
+        "effect_type": "panacea",
+        "effect_value": 50,
+        "sell_price": 800
+    },
+    "megalixir": {
+        "name": "메가엘릭서",
+        "description": "파티 전체 HP/MP 완전 회복",
+        "rarity": ItemRarity.LEGENDARY,
+        "effect_type": "party_full_restore",
+        "effect_value": 0,
+        "sell_price": 2000
+    },
+    "heroes_drink": {
+        "name": "영웅의 음료",
+        "description": "HP 200 회복 + 5턴 동안 모든 스탯 +20%",
+        "rarity": ItemRarity.EPIC,
+        "effect_type": "hero_buff",
+        "effect_value": 200,
+        "sell_price": 500
+    },
+
+    # === 특수 상태 아이템 ===
+    "invincibility_potion": {
+        "name": "무적 물약",
+        "description": "2턴 동안 무적",
+        "rarity": ItemRarity.LEGENDARY,
+        "effect_type": "invincible",
+        "effect_value": 2,
+        "sell_price": 3000
+    },
+    "haste_potion": {
+        "name": "가속 물약",
+        "description": "5턴 동안 속도 +50%",
+        "rarity": ItemRarity.RARE,
+        "effect_type": "haste",
+        "effect_value": 5,
+        "sell_price": 300
+    },
+    "berserk_potion": {
+        "name": "광폭화 물약",
+        "description": "5턴 동안 공격력 +80%, 방어력 -30%",
+        "rarity": ItemRarity.RARE,
+        "effect_type": "berserk",
+        "effect_value": 5,
+        "sell_price": 280
     },
 }
 
