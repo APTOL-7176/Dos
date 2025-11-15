@@ -13,7 +13,7 @@ def create_engineer_skills():
     assemble_parts = Skill("engineer_assemble_parts", "기계 부품 조립", "기계 부품 획득")
     assemble_parts.effects = [
         DamageEffect(DamageType.BRV, 1.3),
-        GimmickEffect(GimmickOperation.ADD, "machine_parts", 1, max_value=8)
+        GimmickEffect(GimmickOperation.ADD, "machine_parts", 1, max_value=5)
     ]
     assemble_parts.costs = []  # 기본 공격은 MP 소모 없음
 
@@ -57,7 +57,7 @@ def create_engineer_skills():
     # 6. 기계 전개
     machine_deploy = Skill("engineer_machine_deploy", "기계 전개", "부품 최대 회복")
     machine_deploy.effects = [
-        GimmickEffect(GimmickOperation.SET, "machine_parts", 8),
+        GimmickEffect(GimmickOperation.SET, "machine_parts", 5),
         BuffEffect(BuffType.ACCURACY_UP, 0.3, duration=3)
     ]
     machine_deploy.costs = [MPCost(10)]
@@ -75,13 +75,13 @@ def create_engineer_skills():
     explosive_drone.is_aoe = True
 
     # 8. 거대 로봇
-    giant_robot = Skill("engineer_giant_robot", "거대 로봇", "부품 6개 소비, 로봇 소환")
+    giant_robot = Skill("engineer_giant_robot", "거대 로봇", "부품 5개 소비, 로봇 소환")
     giant_robot.effects = [
         DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "machine_parts", "multiplier": 0.4}),
         DamageEffect(DamageType.HP, 1.8),
-        GimmickEffect(GimmickOperation.CONSUME, "machine_parts", 6)
+        GimmickEffect(GimmickOperation.CONSUME, "machine_parts", 5)
     ]
-    giant_robot.costs = [MPCost(15), StackCost("machine_parts", 6)]
+    giant_robot.costs = [MPCost(15), StackCost("machine_parts", 5)]
     giant_robot.cooldown = 6
 
     # 9. 궁극기: 기계군단
