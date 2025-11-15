@@ -498,7 +498,8 @@ class ExplorationSystem:
                 "num_enemies": num_enemies,
                 "floor": self.floor_number,
                 "enemy_level": enemy.level,  # 조우한 적의 레벨 전달
-                "is_boss": has_boss
+                "is_boss": has_boss,
+                "enemies": [enemy]  # 전투 승리 후 제거할 적 엔티티 전달
             }
         )
 

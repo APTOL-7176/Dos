@@ -151,7 +151,7 @@ class DamageCalculator:
         Returns:
             (DamageResult, wound_damage)
         """
-        # 기본 HP 데미지 계산
+        # BRV가 주요 데미지원
         base_damage = int(brv_points * hp_multiplier * self.hp_damage_multiplier)
 
         # 스탯 기반 보정 (공격자 스탯 vs 방어자 스탯)
@@ -162,9 +162,18 @@ class DamageCalculator:
             attacker_stat = self._get_attack_stat(attacker)
             defender_stat = self._get_defense_stat(defender)
 
-        # 스탯 보정 계산: 공격자 스탯 / (방어자 스탯 + 1)
-        # +1은 기본값으로 0으로 나누는 것 방지
-        stat_modifier = attacker_stat / (defender_stat + 1.0)
+        # 스탯 보정 계산: BRV가 주력, 스탯은 보조 (0.8 ~ 1.2배 범위)
+        # 공식: 1.0 + (공격력 - 방어력) / (공격력 + 방어력) * 0.4
+        # 이렇게 하면 스탯이 같으면 1.0배, 공격력이 높으면 최대 1.2배, 낮으면 최소 0.8배
+        stat_sum = attacker_stat + defender_stat
+        if stat_sum > 0:
+            stat_diff_ratio = (attacker_stat - defender_stat) / stat_sum
+            stat_modifier = 1.0 + stat_diff_ratio * 0.4
+        else:
+            stat_modifier = 1.0
+
+        # 0.5 ~ 1.5 범위로 제한 (극단적 케이스 방지)
+        stat_modifier = max(0.5, min(1.5, stat_modifier))
 
         damage = int(base_damage * stat_modifier)
 
