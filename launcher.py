@@ -23,6 +23,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.ui.cursor_menu import CursorMenu, MenuItem
 from src.audio import get_audio_manager, play_bgm, play_sfx
+from src.core.config import initialize_config
 
 
 # 런처용 색상 정의
@@ -69,6 +70,9 @@ class GameLauncher:
         self.screen_height = 50
         self.title = "Dawn of Stellar - Game Launcher"
 
+        # 한글 폰트 로드 (실제 게임과 동일한 로직)
+        tileset = self._load_korean_font()
+
         # TCOD 초기화
         self.console = tcod.console.Console(self.screen_width, self.screen_height, order="F")
 
@@ -77,6 +81,7 @@ class GameLauncher:
             rows=self.screen_height,
             title=self.title,
             vsync=True,
+            tileset=tileset
         )
 
         # 상태
@@ -90,12 +95,96 @@ class GameLauncher:
         self.current_menu: Optional[CursorMenu] = None
         self.submenu_data: Optional[List] = None
 
+        # 컨피그 초기화 (오디오 매니저가 필요로 함)
+        try:
+            initialize_config(self.config_file)
+        except Exception:
+            pass
+
         # 오디오 초기화
         try:
             get_audio_manager()  # 오디오 매니저 초기화
             play_bgm("menu", loop=True)
         except Exception:
             pass
+
+    def _load_korean_font(self) -> Optional[tcod.tileset.Tileset]:
+        """한글 폰트 로드 (실제 게임과 동일한 로직)"""
+        import platform
+        import os
+
+        # 폰트 크기 설정 (실제 게임과 동일)
+        font_size = 32
+        char_spacing_adjust = 2
+        char_height = font_size // 2  # 16
+        char_width = char_height + char_spacing_adjust  # 18
+
+        # OS별 시스템 폰트 경로 (한글 지원)
+        font_paths = []
+
+        if platform.system() == "Windows":
+            # Windows 시스템 폰트 (고정폭 우선)
+            windows_fonts = os.path.join(os.environ.get("WINDIR", "C:\\Windows"), "Fonts")
+            font_paths = [
+                str(self.root_dir / "GalmuriMono9.bdf"),          # 갈무리모노 비트맵 (1순위!)
+                str(self.root_dir / "dalmoori.ttf"),              # 달무리 (특수문자 완벽 지원!)
+                str(self.root_dir / "DOSMyungjo.ttf"),            # DOS명조
+                str(self.root_dir / "GalmuriMono9.ttf"),          # 갈무리모노
+                str(self.root_dir / "GalmuriMono9.ttc"),          # 갈무리모노 TTC
+                os.path.join(windows_fonts, "dalmoori.ttf"),     # 시스템 달무리
+                os.path.join(windows_fonts, "GalmuriMono9.ttf"), # 시스템 갈무리모노
+                os.path.join(windows_fonts, "HTSMGOT.TTF"),      # 함초롬돋움 (고정폭)
+                os.path.join(windows_fonts, "gulim.ttf"),        # 굴림 (TTF 버전)
+                os.path.join(windows_fonts, "batang.ttf"),       # 바탕 (TTF 버전)
+                os.path.join(windows_fonts, "malgunbd.ttf"),     # 맑은 고딕 Bold
+                os.path.join(windows_fonts, "malgun.ttf"),       # 맑은 고딕
+                os.path.join(windows_fonts, "msyh.ttf"),         # Microsoft YaHei
+            ]
+        else:
+            # Linux/Mac 시스템 폰트
+            font_paths = [
+                str(self.root_dir / "GalmuriMono9.bdf"),          # 갈무리모노 비트맵 (1순위!)
+                str(self.root_dir / "dalmoori.ttf"),              # 달무리 (특수문자 완벽 지원!)
+                str(self.root_dir / "DOSMyungjo.ttf"),            # DOS명조
+                str(self.root_dir / "GalmuriMono9.ttf"),          # 갈무리모노
+                "/usr/share/fonts/opentype/unifont/unifont.otf",  # Unifont (유니코드 전체)
+                "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",  # WenQuanYi (CJK)
+                "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",  # Noto Sans CJK
+                "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",  # 폴백
+                "/System/Library/Fonts/AppleSDGothicNeo.ttc",  # Mac 애플 고딕
+            ]
+
+        tileset = None
+
+        for font_path in font_paths:
+            try:
+                if not Path(font_path).exists():
+                    continue
+
+                # BDF 비트맵 폰트 vs TrueType 폰트 구분
+                if font_path.lower().endswith('.bdf'):
+                    # BDF 비트맵 폰트 (크기 고정)
+                    tileset = tcod.tileset.load_bdf(font_path)
+                else:
+                    # TrueType/OpenType 폰트
+                    tileset = tcod.tileset.load_truetype_font(
+                        font_path,
+                        char_width,
+                        char_height,
+                    )
+
+                # 로드 성공
+                print(f"폰트 로드 성공: {font_path}")
+                break
+
+            except Exception as e:
+                continue
+
+        # 폴백: 기본 폰트
+        if not tileset:
+            print("한글 시스템 폰트를 찾을 수 없습니다. 기본 터미널 폰트를 사용합니다.")
+
+        return tileset
 
     def show_message(self, text: str, color: Tuple[int, int, int] = LauncherColors.WHITE, duration: int = 180):
         """메시지 표시"""
