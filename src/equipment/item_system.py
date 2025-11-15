@@ -599,6 +599,96 @@ WEAPON_TEMPLATES = {
         "unique_effect": "random_element|all_element_affinity:0.20|wild_magic:0.30",
         "sell_price": 2800
     },
+    "wisdom_tome": {
+        "name": "지혜의 서",
+        "description": "마법 공격력 증가. 스킬 성공률 +20%",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 10,
+        "base_stats": {"magic_attack": 55, "mp": 70, "spirit": 15},
+        "unique_effect": "spell_power:0.15|skill_success:0.20",
+        "sell_price": 700
+    },
+    "elemental_scepter": {
+        "name": "원소 홀",
+        "description": "모든 원소 마법 위력 +25%",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 18,
+        "base_stats": {"magic_attack": 85, "mp": 90, "all_element_power": 25},
+        "unique_effect": "elemental_mastery:0.25",
+        "sell_price": 2100
+    },
+    "spell_amplifier": {
+        "name": "주문 증폭기",
+        "description": "마법 위력 +30%. MP 소비 +20%",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 14,
+        "base_stats": {"magic_attack": 70, "mp": 60, "spirit": 12},
+        "unique_effect": "spell_power:0.30|mp_cost_mult:1.20",
+        "sell_price": 1000
+    },
+    "mana_channeler": {
+        "name": "마나 전도체",
+        "description": "MP 재생 +10. 마법 위력 +20%",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 19,
+        "base_stats": {"magic_attack": 90, "mp": 120, "spirit": 18},
+        "unique_effect": "mp_regen:10|spell_power:0.20",
+        "sell_price": 2400
+    },
+    "mind_staff": {
+        "name": "정신력 지팡이",
+        "description": "Spirit에 비례한 마법 공격력 증가",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 15,
+        "base_stats": {"magic_attack": 65, "mp": 80, "spirit": 25},
+        "unique_effect": "magic_from_spirit:0.50",  # Spirit의 50%를 마법 공격력에 추가
+        "sell_price": 1300
+    },
+    "spell_echo_staff": {
+        "name": "메아리 지팡이",
+        "description": "15% 확률로 스킬 2회 발동",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 20,
+        "base_stats": {"magic_attack": 95, "mp": 100, "spirit": 20},
+        "unique_effect": "spell_echo:0.15",
+        "sell_price": 2600
+    },
+    "void_wand": {
+        "name": "공허의 지팡이",
+        "description": "적의 MP를 흡수. MP 재생 +8",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 16,
+        "base_stats": {"magic_attack": 75, "mp": 90, "spirit": 15},
+        "unique_effect": "mp_steal:0.20|mp_regen:8",
+        "sell_price": 1500
+    },
+    "meteor_staff": {
+        "name": "유성 지팡이",
+        "description": "화염 마법 위력 +40%. 화염 저항 -20%",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 13,
+        "base_stats": {"magic_attack": 68, "mp": 70, "fire_power": 40},
+        "unique_effect": "fire_mastery:0.40|fire_weakness:0.20",
+        "sell_price": 950
+    },
+    "blizzard_wand": {
+        "name": "눈보라 마법봉",
+        "description": "냉기 마법 위력 +40%. 냉기 저항 -20%",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 13,
+        "base_stats": {"magic_attack": 68, "mp": 70, "ice_power": 40},
+        "unique_effect": "ice_mastery:0.40|ice_weakness:0.20",
+        "sell_price": 950
+    },
+    "thunderlord_rod": {
+        "name": "천둥군주의 봉",
+        "description": "번개 마법 위력 +40%. 번개 저항 -20%",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 13,
+        "base_stats": {"magic_attack": 68, "mp": 70, "lightning_power": 40},
+        "unique_effect": "lightning_mastery:0.40|lightning_weakness:0.20",
+        "sell_price": 950
+    },
 
     # === 원거리 무기 ===
     "hunters_bow": {
@@ -913,6 +1003,71 @@ ARMOR_TEMPLATES = {
         "base_stats": {"physical_defense": 35, "hp": 80},
         "unique_effect": "brv_bonus:0.25|defense_reduction:0.20",
         "sell_price": 800
+    },
+
+    # === 마법사 전용 로브 ===
+    "apprentice_robe": {
+        "name": "견습 마법사의 로브",
+        "description": "MP 재생 +3. 마법 공격력 +10",
+        "rarity": ItemRarity.COMMON,
+        "level_requirement": 3,
+        "base_stats": {"magic_defense": 12, "mp": 40, "magic_attack": 12},
+        "unique_effect": "mp_regen:3",
+        "sell_price": 150
+    },
+    "battle_mage_robe": {
+        "name": "전투 마법사의 로브",
+        "description": "마법 위력 +15%. MP 소비 -10%",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 11,
+        "base_stats": {"magic_defense": 40, "mp": 80, "magic_attack": 25, "spirit": 12},
+        "unique_effect": "spell_power:0.15|mp_cost_reduction:0.10",
+        "sell_price": 750
+    },
+    "sorcerer_vestments": {
+        "name": "마도사의 예복",
+        "description": "MP 재생 +10. 스킬 쿨다운 -15%",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 17,
+        "base_stats": {"magic_defense": 65, "mp": 120, "magic_attack": 35, "spirit": 18},
+        "unique_effect": "mp_regen:10|cooldown_reduction:0.15|spell_power:0.10",
+        "sell_price": 2000
+    },
+    "wisdom_robes": {
+        "name": "지혜의 로브",
+        "description": "Spirit +25. MP 최대치 +100",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 13,
+        "base_stats": {"magic_defense": 48, "mp": 120, "spirit": 28, "magic_attack": 20},
+        "unique_effect": "spell_success:0.20",  # 스킬 성공률 +20%
+        "sell_price": 950
+    },
+    "elemental_master_robe": {
+        "name": "원소 대가의 로브",
+        "description": "모든 원소 저항 +20%. 원소 마법 위력 +25%",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 19,
+        "base_stats": {"magic_defense": 72, "mp": 130, "magic_attack": 40, "spirit": 20},
+        "unique_effect": "all_element_resist:0.20|elemental_mastery:0.25",
+        "sell_price": 2400
+    },
+    "mana_weave_cloak": {
+        "name": "마나직 망토",
+        "description": "MP 소비 -25%. 마법 방어력 +30%",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 14,
+        "base_stats": {"magic_defense": 55, "mp": 100, "spirit": 15},
+        "unique_effect": "mp_cost_reduction:0.25|magic_defense_boost:0.30",
+        "sell_price": 1100
+    },
+    "spell_reflect_robe": {
+        "name": "주문 반사 로브",
+        "description": "마법 공격 30% 반사. 마법 방어력 +50",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 20,
+        "base_stats": {"magic_defense": 85, "mp": 110, "spirit": 22},
+        "unique_effect": "spell_reflect:0.30",
+        "sell_price": 2700
     },
 
     # === HP/MP 재생 방어구 ===
@@ -1334,47 +1489,47 @@ ACCESSORY_TEMPLATES = {
     # === 시야 시스템 연동 장신구 ===
     "eagle_eye_amulet": {
         "name": "매의 눈 목걸이",
-        "description": "시야 +2. 명중률 +15",
+        "description": "시야 +1. 명중률 +15",
         "rarity": ItemRarity.UNCOMMON,
         "level_requirement": 5,
         "base_stats": {"accuracy": 15, "critical": 5},
-        "unique_effect": "vision:2",
+        "unique_effect": "vision:1",
         "sell_price": 200
     },
     "far_sight_lens": {
         "name": "원시의 렌즈",
-        "description": "시야 +3. 적 탐지",
+        "description": "시야 +1. 적 탐지",
         "rarity": ItemRarity.RARE,
         "level_requirement": 10,
         "base_stats": {"accuracy": 20, "luck": 8},
-        "unique_effect": "vision:3|detect_enemy",
+        "unique_effect": "vision:1|detect_enemy",
         "sell_price": 600
     },
     "owls_pendant": {
         "name": "부엉이의 펜던트",
-        "description": "시야 +4. 야간 시야 (어둠 무시)",
+        "description": "시야 +2. 야간 시야 (어둠 무시)",
         "rarity": ItemRarity.EPIC,
         "level_requirement": 15,
         "base_stats": {"accuracy": 30, "spirit": 12, "luck": 10},
-        "unique_effect": "vision:4|night_vision",
+        "unique_effect": "vision:2|night_vision",
         "sell_price": 1500
     },
     "all_seeing_eye": {
         "name": "전지의 눈",
-        "description": "시야 +6. 투시 (벽 너머 보기). 숨겨진 적 탐지",
+        "description": "시야 +2. 투시 (벽 너머 보기). 숨겨진 적 탐지",
         "rarity": ItemRarity.LEGENDARY,
         "level_requirement": 22,
         "base_stats": {"accuracy": 50, "luck": 20, "all_stats": 8},
-        "unique_effect": "vision:6|true_sight|detect_hidden",
+        "unique_effect": "vision:2|true_sight|detect_hidden",
         "sell_price": 5000
     },
     "explorers_compass": {
         "name": "탐험가의 나침반",
-        "description": "시야 +2. 지도에 보물 위치 표시",
+        "description": "시야 +1. 지도에 보물 위치 표시",
         "rarity": ItemRarity.RARE,
         "level_requirement": 8,
         "base_stats": {"luck": 15},
-        "unique_effect": "vision:2|treasure_finder",
+        "unique_effect": "vision:1|treasure_finder",
         "sell_price": 450
     },
 
@@ -1817,11 +1972,11 @@ ACCESSORY_TEMPLATES = {
     },
     "omniscient_eye": {
         "name": "전지의 눈동자",
-        "description": "시야 +10. 모든 것을 볼 수 있음. 크리티컬 +50%",
+        "description": "시야 +2. 모든 것을 볼 수 있음. 크리티컬 +50%",
         "rarity": ItemRarity.LEGENDARY,
         "level_requirement": 26,
         "base_stats": {"critical": 50, "accuracy": 100, "luck": 30},
-        "unique_effect": "vision:10|true_sight|omniscient|critical_chance:0.50",
+        "unique_effect": "vision:2|true_sight|omniscient|critical_chance:0.50",
         "sell_price": 12000
     },
 }
