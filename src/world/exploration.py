@@ -482,37 +482,11 @@ class ExplorationSystem:
 
     def _trigger_combat_with_enemy(self, enemy: Enemy) -> ExplorationResult:
         """적 엔티티와의 전투"""
-        # 주변 3칸 이내의 다른 적들을 찾기
-        nearby_others = []  # 조우한 적 제외, 주변 적들만
-        search_radius = 3
-
-        for other_enemy in self.enemies:
-            if other_enemy != enemy:
-                # 거리 계산 (맨하탄 거리)
-                distance = abs(other_enemy.x - enemy.x) + abs(other_enemy.y - enemy.y)
-                if distance <= search_radius:
-                    nearby_others.append(other_enemy)
-
-        # 주변 적 수에 따라 최소 적 수 결정
-        # 주변 적 0명: 1~4마리, 1명: 2~4마리, 2명: 3~4마리, 3+명: 4마리
-        num_nearby = len(nearby_others)
-        min_enemies = min(1 + num_nearby, 4)
-        max_enemies = 4
-
-        # 최종 적 수 결정 (랜덤)
-        target_enemy_count = random.randint(min_enemies, max_enemies)
-
-        # 조우한 적 + 주변 적들 중에서 target_enemy_count만큼 선택
-        nearby_enemies = [enemy]  # 조우한 적은 반드시 포함
-        if nearby_others:
-            # 주변 적들 중에서 필요한 만큼 추가 (target_enemy_count - 1)
-            num_to_add = min(target_enemy_count - 1, len(nearby_others))
-            nearby_enemies.extend(random.sample(nearby_others, num_to_add))
-
-        num_enemies = len(nearby_enemies)
+        # 적 수를 1~4마리 랜덤으로 결정
+        num_enemies = random.randint(1, 4)
 
         # 보스 포함 여부 확인
-        has_boss = any(e.is_boss for e in nearby_enemies)
+        has_boss = enemy.is_boss
 
         logger.info(f"적과 조우! {num_enemies}마리 (레벨 {enemy.level})")
 
@@ -523,8 +497,8 @@ class ExplorationSystem:
             data={
                 "num_enemies": num_enemies,
                 "floor": self.floor_number,
-                "enemies": nearby_enemies,  # 전투에 참여하는 적들
-                "enemy_level": max(e.level for e in nearby_enemies)
+                "enemy_level": enemy.level,  # 조우한 적의 레벨 전달
+                "is_boss": has_boss
             }
         )
 
