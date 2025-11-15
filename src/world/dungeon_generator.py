@@ -518,8 +518,8 @@ class DungeonGenerator:
         try:
             from src.gathering.harvestable import HarvestableGenerator, HarvestableType, HarvestableObject
 
-            # 층별 개수 결정 (8~15개로 대폭 증가)
-            count = random.randint(8, 15)
+            # 층별 개수 결정 (12~20개로 대폭 증가) → 식재료 10개 이상 보장
+            count = random.randint(12, 20)
 
             # 채집 오브젝트 생성
             harvestables = HarvestableGenerator.generate_for_floor(floor_number, count)
@@ -537,19 +537,32 @@ class DungeonGenerator:
                     harvestable.x, harvestable.y = pos
                     dungeon.harvestables.append(harvestable)
 
-            # 요리솥 배치 (3층당 1번 = 약 33% 확률)
-            if random.random() < 0.33 or floor_number % 3 == 0:
-                room = random.choice(dungeon.rooms) if dungeon.rooms else None
-                if room:
-                    pos = self._get_random_floor_pos(dungeon, room, avoid_center=False)
-                    if pos:
-                        cooking_pot = HarvestableObject(
-                            object_type=HarvestableType.COOKING_POT,
-                            x=pos[0],
-                            y=pos[1]
-                        )
-                        dungeon.harvestables.append(cooking_pot)
-                        logger.info(f"요리솥 배치: {pos}")
+            # 요리솥 배치 (층마다 최소 1개 보장)
+            # 기본 1개는 무조건 배치
+            room = random.choice(dungeon.rooms) if dungeon.rooms else None
+            if room:
+                pos = self._get_random_floor_pos(dungeon, room, avoid_center=False)
+                if pos:
+                    cooking_pot = HarvestableObject(
+                        object_type=HarvestableType.COOKING_POT,
+                        x=pos[0],
+                        y=pos[1]
+                    )
+                    dungeon.harvestables.append(cooking_pot)
+                    logger.info(f"요리솥 배치 (기본): {pos}")
+
+            # 20% 확률로 추가 요리솥 1개 더 배치
+            if random.random() < 0.2 and len(dungeon.rooms) > 1:
+                room = random.choice(dungeon.rooms)
+                pos = self._get_random_floor_pos(dungeon, room, avoid_center=False)
+                if pos:
+                    cooking_pot = HarvestableObject(
+                        object_type=HarvestableType.COOKING_POT,
+                        x=pos[0],
+                        y=pos[1]
+                    )
+                    dungeon.harvestables.append(cooking_pot)
+                    logger.info(f"요리솥 배치 (추가): {pos}")
 
             logger.info(f"채집 오브젝트 {len(dungeon.harvestables)}개 배치")
 
