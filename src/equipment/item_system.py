@@ -222,6 +222,118 @@ WEAPON_TEMPLATES = {
         "base_stats": {"physical_attack": 35, "accuracy": 15, "evasion": 3},
         "sell_price": 200
     },
+    "composite_bow": {
+        "name": "복합궁",
+        "description": "강력한 복합 소재 활",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 12,
+        "base_stats": {"physical_attack": 55, "accuracy": 20, "critical_rate": 10},
+        "sell_price": 550
+    },
+
+    # 단검
+    "bronze_dagger": {
+        "name": "청동 단검",
+        "description": "기본적인 단검",
+        "rarity": ItemRarity.COMMON,
+        "level_requirement": 1,
+        "base_stats": {"physical_attack": 10, "speed": 5, "evasion": 5},
+        "sell_price": 35
+    },
+    "assassin_dagger": {
+        "name": "암살자의 단검",
+        "description": "치명타에 특화된 단검",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 10,
+        "base_stats": {"physical_attack": 40, "speed": 10, "critical_rate": 20},
+        "sell_price": 450
+    },
+    "venom_fang": {
+        "name": "독니",
+        "description": "독을 품은 단검",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 18,
+        "base_stats": {"physical_attack": 65, "speed": 15, "critical_rate": 25},
+        "sell_price": 1800
+    },
+
+    # 둔기
+    "iron_mace": {
+        "name": "철 메이스",
+        "description": "무거운 둔기",
+        "rarity": ItemRarity.COMMON,
+        "level_requirement": 1,
+        "base_stats": {"physical_attack": 18, "strength": 3},
+        "sell_price": 55
+    },
+    "war_hammer": {
+        "name": "전쟁 망치",
+        "description": "강력한 전쟁용 망치",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 8,
+        "base_stats": {"physical_attack": 45, "strength": 8, "physical_defense": 5},
+        "sell_price": 280
+    },
+    "titan_hammer": {
+        "name": "티탄의 망치",
+        "description": "거인의 힘이 깃든 망치",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 20,
+        "base_stats": {"physical_attack": 95, "strength": 15, "hp": 50},
+        "sell_price": 2200
+    },
+
+    # 창
+    "short_spear": {
+        "name": "짧은 창",
+        "description": "기본적인 창",
+        "rarity": ItemRarity.COMMON,
+        "level_requirement": 1,
+        "base_stats": {"physical_attack": 14, "accuracy": 8},
+        "sell_price": 48
+    },
+    "halberd": {
+        "name": "할버드",
+        "description": "긴 리치를 가진 창",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 9,
+        "base_stats": {"physical_attack": 48, "accuracy": 12, "physical_defense": 8},
+        "sell_price": 320
+    },
+    "dragon_lance": {
+        "name": "용의 창",
+        "description": "용을 베는 전설의 창",
+        "rarity": ItemRarity.LEGENDARY,
+        "level_requirement": 25,
+        "base_stats": {"physical_attack": 110, "accuracy": 20, "critical_rate": 15},
+        "sell_price": 6000
+    },
+
+    # 마법 지팡이 추가
+    "fire_staff": {
+        "name": "화염의 지팡이",
+        "description": "화염 마법 강화",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 7,
+        "base_stats": {"magic_attack": 40, "mp": 20},
+        "sell_price": 250
+    },
+    "ice_staff": {
+        "name": "빙결의 지팡이",
+        "description": "냉기 마법 강화",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 7,
+        "base_stats": {"magic_attack": 40, "mp": 20},
+        "sell_price": 250
+    },
+    "staff_of_cosmos": {
+        "name": "우주의 지팡이",
+        "description": "모든 원소를 다루는 지팡이",
+        "rarity": ItemRarity.LEGENDARY,
+        "level_requirement": 28,
+        "base_stats": {"magic_attack": 130, "mp": 80, "spirit": 20},
+        "sell_price": 7500
+    },
 }
 
 ARMOR_TEMPLATES = {
@@ -276,15 +388,92 @@ ARMOR_TEMPLATES = {
         "base_stats": {"magic_defense": 40, "mp": 50, "magic_attack": 10},
         "sell_price": 500
     },
+    "archmage_robe": {
+        "name": "대마법사 로브",
+        "description": "강력한 마력의 로브",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 18,
+        "base_stats": {"magic_defense": 70, "mp": 100, "magic_attack": 25},
+        "sell_price": 2000
+    },
+    "celestial_robes": {
+        "name": "천상의 로브",
+        "description": "별들의 힘이 담긴 로브",
+        "rarity": ItemRarity.LEGENDARY,
+        "level_requirement": 26,
+        "base_stats": {"magic_defense": 100, "mp": 150, "magic_attack": 40, "spirit": 15},
+        "sell_price": 7000
+    },
+
+    # 경갑
+    "padded_armor": {
+        "name": "누빔 갑옷",
+        "description": "가벼운 갑옷",
+        "rarity": ItemRarity.COMMON,
+        "level_requirement": 1,
+        "base_stats": {"physical_defense": 8, "evasion": 5},
+        "sell_price": 38
+    },
+    "studded_leather": {
+        "name": "징박이 가죽",
+        "description": "가죽에 징을 박은 갑옷",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 6,
+        "base_stats": {"physical_defense": 22, "evasion": 8, "hp": 30},
+        "sell_price": 180
+    },
+    "scale_mail": {
+        "name": "비늘 갑옷",
+        "description": "비늘 모양으로 만든 갑옷",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 13,
+        "base_stats": {"physical_defense": 45, "magic_defense": 25, "hp": 70},
+        "sell_price": 800
+    },
+
+    # 중갑 추가
+    "knight_armor": {
+        "name": "기사 갑옷",
+        "description": "기사단의 갑옷",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 8,
+        "base_stats": {"physical_defense": 35, "hp": 50, "strength": 5},
+        "sell_price": 350
+    },
+    "dragon_armor": {
+        "name": "드래곤 아머",
+        "description": "용의 힘이 깃든 갑옷",
+        "rarity": ItemRarity.LEGENDARY,
+        "level_requirement": 24,
+        "base_stats": {"physical_defense": 95, "magic_defense": 75, "hp": 180, "strength": 12},
+        "sell_price": 9000
+    },
 }
 
 ACCESSORY_TEMPLATES = {
+    # 반지
+    "health_ring": {
+        "name": "생명의 반지",
+        "description": "HP를 증가시키는 반지",
+        "rarity": ItemRarity.COMMON,
+        "level_requirement": 1,
+        "base_stats": {"hp": 30},
+        "sell_price": 60
+    },
+    "mana_ring": {
+        "name": "마나의 반지",
+        "description": "MP를 증가시키는 반지",
+        "rarity": ItemRarity.COMMON,
+        "level_requirement": 1,
+        "base_stats": {"mp": 20},
+        "sell_price": 60
+    },
     "ring_of_strength": {
         "name": "힘의 반지",
         "description": "착용자의 힘을 증가시키는 반지",
         "rarity": ItemRarity.UNCOMMON,
         "level_requirement": 3,
-        "base_stats": {"strength": 5},
+        "base_stats": {"strength": 5, "physical_attack": 8},
         "sell_price": 100
     },
     "ring_of_wisdom": {
@@ -295,21 +484,135 @@ ACCESSORY_TEMPLATES = {
         "base_stats": {"magic_attack": 8, "mp": 20},
         "sell_price": 100
     },
+    "ring_of_agility": {
+        "name": "민첩의 반지",
+        "description": "착용자의 속도와 회피를 증가",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 4,
+        "base_stats": {"speed": 8, "evasion": 10},
+        "sell_price": 120
+    },
+    "ring_of_protection": {
+        "name": "수호의 반지",
+        "description": "모든 방어력을 증가시키는 반지",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 10,
+        "base_stats": {"physical_defense": 15, "magic_defense": 15, "hp": 50},
+        "sell_price": 450
+    },
+    "phoenix_ring": {
+        "name": "불사조의 반지",
+        "description": "부활의 힘이 깃든 반지",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 16,
+        "base_stats": {"hp": 120, "magic_defense": 20},
+        "sell_price": 1800
+    },
+    "ring_of_gods": {
+        "name": "신의 반지",
+        "description": "모든 능력치를 증가시키는 반지",
+        "rarity": ItemRarity.LEGENDARY,
+        "level_requirement": 22,
+        "base_stats": {
+            "physical_attack": 20, "magic_attack": 20,
+            "physical_defense": 15, "magic_defense": 15,
+            "hp": 100, "mp": 50, "speed": 10
+        },
+        "sell_price": 5000
+    },
+
+    # 목걸이/부적
     "amulet_of_life": {
         "name": "생명의 부적",
         "description": "생명력을 대폭 증가시키는 부적",
         "rarity": ItemRarity.RARE,
         "level_requirement": 8,
-        "base_stats": {"hp": 100},
+        "base_stats": {"hp": 100, "physical_defense": 10},
         "sell_price": 400
+    },
+    "amulet_of_mana": {
+        "name": "마나의 부적",
+        "description": "마력을 대폭 증가시키는 부적",
+        "rarity": ItemRarity.RARE,
+        "level_requirement": 8,
+        "base_stats": {"mp": 80, "magic_defense": 10},
+        "sell_price": 400
+    },
+    "dragon_pendant": {
+        "name": "용의 펜던트",
+        "description": "드래곤의 힘이 깃든 펜던트",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 14,
+        "base_stats": {"physical_attack": 18, "magic_attack": 18, "hp": 70},
+        "sell_price": 1500
+    },
+    "phoenix_pendant": {
+        "name": "불사조 펜던트",
+        "description": "부활의 불꽃이 담긴 펜던트",
+        "rarity": ItemRarity.EPIC,
+        "level_requirement": 15,
+        "base_stats": {"hp": 150, "mp": 60, "magic_defense": 25},
+        "sell_price": 1600
     },
     "lucky_charm": {
         "name": "행운의 부적",
         "description": "행운을 가져다주는 신비한 부적",
         "rarity": ItemRarity.EPIC,
         "level_requirement": 15,
-        "base_stats": {"luck": 10, "accuracy": 10, "evasion": 10},
+        "base_stats": {"luck": 10, "accuracy": 10, "evasion": 10, "critical_rate": 15},
         "sell_price": 1500
+    },
+
+    # 귀걸이
+    "ruby_earring": {
+        "name": "루비 귀걸이",
+        "description": "힘을 증가시키는 귀걸이",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 5,
+        "base_stats": {"strength": 7, "physical_attack": 10},
+        "sell_price": 180
+    },
+    "sapphire_earring": {
+        "name": "사파이어 귀걸이",
+        "description": "지성을 증가시키는 귀걸이",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 5,
+        "base_stats": {"magic_attack": 12, "mp": 25},
+        "sell_price": 180
+    },
+    "emerald_earring": {
+        "name": "에메랄드 귀걸이",
+        "description": "회복력을 증가시키는 귀걸이",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 5,
+        "base_stats": {"hp": 60, "magic_defense": 8},
+        "sell_price": 170
+    },
+
+    # 벨트
+    "leather_belt": {
+        "name": "가죽 벨트",
+        "description": "기본적인 가죽 벨트",
+        "rarity": ItemRarity.COMMON,
+        "level_requirement": 1,
+        "base_stats": {"hp": 20, "physical_defense": 5},
+        "sell_price": 50
+    },
+    "warriors_belt": {
+        "name": "전사의 벨트",
+        "description": "전사를 위한 튼튼한 벨트",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 7,
+        "base_stats": {"strength": 8, "hp": 50, "physical_defense": 10},
+        "sell_price": 280
+    },
+    "mages_sash": {
+        "name": "마법사의 띠",
+        "description": "마력을 강화하는 띠",
+        "rarity": ItemRarity.UNCOMMON,
+        "level_requirement": 7,
+        "base_stats": {"magic_attack": 12, "mp": 40, "magic_defense": 10},
+        "sell_price": 300
     },
 }
 
