@@ -376,19 +376,26 @@ class ExplorationSystem:
             logger.warning(f"[ITEM] 현재 무게: {self.inventory.current_weight}kg / {self.inventory.max_weight}kg")
 
         # 인벤토리에 추가
-        if self.inventory:
-            success = self.inventory.add_item(item)
-            logger.warning(f"[ITEM] add_item 결과: {success}")
-            if not success:
-                logger.warning(f"인벤토리 가득 참! {item.name} 버려짐")
-                return ExplorationResult(
-                    success=False,
-                    event=ExplorationEvent.NONE,
-                    message=f"✨ 아이템 발견! 하지만 인벤토리가 가득 차서 {item.name}을(를) 버렸다..."
-                )
-        else:
+        if not self.inventory:
             logger.error(f"[ITEM] 인벤토리가 None입니다!")
+            return ExplorationResult(
+                success=False,
+                event=ExplorationEvent.NONE,
+                message=f"✨ 아이템 발견! 하지만 인벤토리가 없어서 {item.name}을(를) 가져갈 수 없다..."
+            )
 
+        success = self.inventory.add_item(item)
+        logger.warning(f"[ITEM] add_item 결과: {success}")
+
+        if not success:
+            logger.warning(f"인벤토리 가득 참! {item.name} 버려짐")
+            return ExplorationResult(
+                success=False,
+                event=ExplorationEvent.NONE,
+                message=f"✨ 아이템 발견! 하지만 인벤토리가 가득 차서 {item.name}을(를) 버렸다..."
+            )
+
+        # 성공: 아이템 획득
         logger.info(f"아이템 획득: {item.name}")
 
         # 아이템 제거
