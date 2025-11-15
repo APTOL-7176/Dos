@@ -57,6 +57,9 @@ class Character:
         self.current_hp = self.max_hp
         self.current_mp = self.max_mp
 
+        # 상처 시스템 (HP 데미지의 일부가 상처로 전환)
+        self.wound = 0  # 누적된 상처 (최대 HP 감소)
+
         # 전투 관련
         self.current_brv = 0  # 현재 BRV (전투 중에만 사용)
         self.is_alive = True
@@ -917,6 +920,7 @@ class Character:
             "level": self.level,
             "current_hp": self.current_hp,
             "current_mp": self.current_mp,
+            "wound": getattr(self, "wound", 0),  # 상처 값 저장
             "stats": self.stat_manager.to_dict(),
             "equipment": {
                 slot: item.to_dict() if hasattr(item, "to_dict") else None
@@ -933,6 +937,7 @@ class Character:
         character.level = data["level"]
         character.current_hp = data["current_hp"]
         character.current_mp = data["current_mp"]
+        character.wound = data.get("wound", 0)  # 상처 값 복원
 
         # StatManager 복원
         character.stat_manager = StatManager.from_dict(data["stats"])

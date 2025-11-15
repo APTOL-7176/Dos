@@ -242,7 +242,9 @@ class WorldUI:
             console,
             self.exploration.dungeon,
             minimap_x=self.screen_width - 22,
-            minimap_y=self.screen_height - 17
+            minimap_y=self.screen_height - 19,  # 범례 공간 확보 (+2줄)
+            player_pos=(self.exploration.player.x, self.exploration.player.y),
+            enemies=self.exploration.enemies
         )
 
         # 조작법 (하단)
