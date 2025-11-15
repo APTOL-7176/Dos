@@ -920,6 +920,7 @@ class Character:
             "level": self.level,
             "current_hp": self.current_hp,
             "current_mp": self.current_mp,
+            "wound": getattr(self, "wound", 0),  # 상처 값 저장
             "stats": self.stat_manager.to_dict(),
             "equipment": {
                 slot: item.to_dict() if hasattr(item, "to_dict") else None
@@ -936,6 +937,7 @@ class Character:
         character.level = data["level"]
         character.current_hp = data["current_hp"]
         character.current_mp = data["current_mp"]
+        character.wound = data.get("wound", 0)  # 상처 값 복원
 
         # StatManager 복원
         character.stat_manager = StatManager.from_dict(data["stats"])
