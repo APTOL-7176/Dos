@@ -81,17 +81,13 @@ class DamageCalculator:
         attacker_atk = self._get_attack_stat(attacker)
         defender_def = self._get_defense_stat(defender)
 
-        # 기본 데미지 계산 (비율 방식: 공격력 / (방어력 + 1))
-        # 방어력이 0일 때를 방지하기 위해 +1
+        # 기본 데미지 계산: 공격력 / 방어력 비율
         stat_modifier = attacker_atk / (defender_def + 1.0)
-        base_damage = max(1, int(attacker_atk * stat_modifier))
-
-        # 스킬 배율 적용
-        damage = base_damage * skill_multiplier * self.brv_damage_multiplier
+        base_damage = max(1, int(stat_modifier * skill_multiplier * self.brv_damage_multiplier))
 
         # 랜덤 변수 (90% ~ 110%)
         variance = random.uniform(0.9, 1.1)
-        damage *= variance
+        damage = base_damage * variance
 
         # 크리티컬 판정
         is_critical = self._check_critical(attacker)
@@ -264,9 +260,8 @@ class DamageCalculator:
         attacker_mag = self._get_magic_stat(attacker)
         defender_spr = self._get_spirit_stat(defender)
 
-        # 기본 데미지 계산 (비율 방식: 마법력 / (정신력 + 1))
+        # 기본 데미지 계산: 마법력 / 정신력 비율
         stat_modifier = attacker_mag / (defender_spr + 1.0)
-        base_damage = max(1, int(attacker_mag * stat_modifier))
 
         # 속성 보너스 (TODO: 속성 시스템 연동)
         element_bonus = 1.0
@@ -274,11 +269,11 @@ class DamageCalculator:
             element_bonus = self._get_element_bonus(defender, element)
 
         # 스킬 배율 적용
-        damage = base_damage * skill_multiplier * self.brv_damage_multiplier * element_bonus
+        base_damage = max(1, int(stat_modifier * skill_multiplier * self.brv_damage_multiplier * element_bonus))
 
         # 랜덤 변수
         variance = random.uniform(0.9, 1.1)
-        damage *= variance
+        damage = base_damage * variance
 
         # 크리티컬 판정
         is_critical = self._check_critical(attacker)
