@@ -343,6 +343,52 @@ class TraitEffectManager:
                     target_stat="all_stats_in_stance"
                 )
             ],
+
+            # 저격수 특성
+            "focus_power": [
+                TraitEffect(
+                    trait_id="focus_power",
+                    effect_type=TraitEffectType.DAMAGE_MULTIPLIER,
+                    value=1.50,  # 50% 증가
+                    condition="defend_stack",
+                    metadata={"max_stacks": 3, "per_stack": 0.50}  # 최대 3스택, 스택당 50%
+                )
+            ],
+            "steady_hands": [
+                TraitEffect(
+                    trait_id="steady_hands",
+                    effect_type=TraitEffectType.STAT_MULTIPLIER,
+                    value=100.0,  # 100% 명중률
+                    target_stat="accuracy"
+                ),
+                TraitEffect(
+                    trait_id="steady_hands",
+                    effect_type=TraitEffectType.STAT_MULTIPLIER,
+                    value=0.50,  # 회피율 -50%
+                    target_stat="evasion"
+                )
+            ],
+
+            # 마검사 특성
+            "combat_casting": [
+                TraitEffect(
+                    trait_id="combat_casting",
+                    effect_type=TraitEffectType.STAT_MULTIPLIER,
+                    value=0.50,  # 시전 시간 -50%
+                    target_stat="cast_time"
+                )
+            ],
+
+            # 기계공학자 특성
+            "emergency_repair": [
+                TraitEffect(
+                    trait_id="emergency_repair",
+                    effect_type=TraitEffectType.STAT_MULTIPLIER,
+                    value=2.0,  # 장비 효과 2배
+                    condition="hp_below_50",
+                    target_stat="equipment_bonus"
+                )
+            ],
         }
 
         # 통합
@@ -614,9 +660,19 @@ class TraitEffectManager:
             if hasattr(character, 'current_hp') and hasattr(character, 'max_hp'):
                 return character.current_hp / character.max_hp < 0.30
 
+        elif condition == "hp_below_50":
+            if hasattr(character, 'current_hp') and hasattr(character, 'max_hp'):
+                return character.current_hp / character.max_hp < 0.50
+
         elif condition == "hp_above_50":
             if hasattr(character, 'current_hp') and hasattr(character, 'max_hp'):
                 return character.current_hp / character.max_hp >= 0.50
+
+        # 방어 스택 조건 (저격수 특성)
+        elif condition == "defend_stack":
+            if hasattr(character, 'defend_stack_count'):
+                return character.defend_stack_count > 0
+            return False
 
         # 스탠스 변경
         elif condition == "stance_changed":

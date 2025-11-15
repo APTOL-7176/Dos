@@ -84,6 +84,9 @@ class Character:
         self.available_traits = get_traits(character_class)
         self.active_traits: List[Any] = []
 
+        # 특성별 스택 카운터
+        self.defend_stack_count = 0  # 저격수 특성: 방어 시 증가, 공격 시 소비
+
         # 스킬 - 직업별로 등록된 스킬 가져오기
         self.skill_ids = self._get_class_skills(character_class)
         self._cached_skills = None  # 스킬 객체 캐시
