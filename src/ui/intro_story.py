@@ -383,7 +383,7 @@ class IntroStorySystem:
             # 배경 채우기
             for y in range(self.screen_height):
                 for x in range(self.screen_width):
-                    self.console.tiles_rgb["bg"][y, x] = bg_color
+                    self.console.rgb["bg"][y, x] = bg_color
 
             self.context.present(self.console)
             time.sleep(0.05)
@@ -401,9 +401,9 @@ class IntroStorySystem:
             # 모든 텍스트를 어둡게
             for y in range(self.screen_height):
                 for x in range(self.screen_width):
-                    current_fg = self.console.tiles_rgb["fg"][y, x]
+                    current_fg = self.console.rgb["fg"][y, x]
                     faded_fg = tuple(int(c * brightness) for c in current_fg)
-                    self.console.tiles_rgb["fg"][y, x] = faded_fg
+                    self.console.rgb["fg"][y, x] = faded_fg
 
             self.context.present(self.console)
             time.sleep(0.05)
