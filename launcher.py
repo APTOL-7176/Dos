@@ -22,8 +22,20 @@ PROJECT_ROOT = Path(__file__).parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.ui.cursor_menu import CursorMenu, MenuItem
-from src.ui.tcod_display import Colors
-from src.audio import initialize_audio, play_bgm, play_sfx
+from src.audio import get_audio_manager, play_bgm, play_sfx
+
+
+# 런처용 색상 정의
+class LauncherColors:
+    """런처 색상"""
+    WHITE = (255, 255, 255)
+    BLACK = (0, 0, 0)
+    GRAY = (128, 128, 128)
+    YELLOW = (255, 255, 100)
+    CYAN = (100, 255, 255)
+    GREEN = (100, 255, 100)
+    RED = (255, 100, 100)
+    BLUE = (100, 100, 255)
 
 
 class LauncherState:
@@ -57,35 +69,21 @@ class GameLauncher:
         self.screen_height = 50
         self.title = "Dawn of Stellar - Game Launcher"
 
-        # 폰트 로드
-        font_path = self.root_dir / "D2Coding.ttc"
-        if not font_path.exists():
-            font_path = None
-
         # TCOD 초기화
-        if font_path and font_path.exists():
-            tcod.console.set_custom_font(
-                str(font_path),
-                tcod.FONT_LAYOUT_TCOD | tcod.FONT_TYPE_GREYSCALE,
-                nb_char_horizontal=32,
-                nb_char_vertical=64
-            )
+        self.console = tcod.console.Console(self.screen_width, self.screen_height, order="F")
 
         self.context = tcod.context.new(
-            width=self.screen_width,
-            height=self.screen_height,
+            columns=self.screen_width,
+            rows=self.screen_height,
             title=self.title,
             vsync=True,
-            sdl_window_flags=tcod.context.SDL_WINDOW_RESIZABLE
         )
-
-        self.console = tcod.console.Console(self.screen_width, self.screen_height, order="F")
 
         # 상태
         self.state = LauncherState.MAIN_MENU
         self.running = True
         self.message = ""
-        self.message_color = Colors.WHITE
+        self.message_color = LauncherColors.WHITE
         self.message_timer = 0
 
         # 메뉴
@@ -94,12 +92,12 @@ class GameLauncher:
 
         # 오디오 초기화
         try:
-            initialize_audio()
+            get_audio_manager()  # 오디오 매니저 초기화
             play_bgm("menu", loop=True)
         except Exception:
             pass
 
-    def show_message(self, text: str, color: Tuple[int, int, int] = Colors.WHITE, duration: int = 180):
+    def show_message(self, text: str, color: Tuple[int, int, int] = LauncherColors.WHITE, duration: int = 180):
         """메시지 표시"""
         self.message = text
         self.message_color = color
@@ -301,12 +299,12 @@ class GameLauncher:
 
         if mode == "dev":
             cmd.append("--dev")
-            self.show_message("개발 모드로 게임을 시작합니다...", Colors.CYAN)
+            self.show_message("개발 모드로 게임을 시작합니다...", LauncherColors.CYAN)
         elif mode == "debug":
             cmd.extend(["--debug", "--log=DEBUG"])
-            self.show_message("디버그 모드로 게임을 시작합니다...", Colors.CYAN)
+            self.show_message("디버그 모드로 게임을 시작합니다...", LauncherColors.CYAN)
         else:
-            self.show_message("게임을 시작합니다...", Colors.GREEN)
+            self.show_message("게임을 시작합니다...", LauncherColors.GREEN)
 
         # 화면 업데이트
         self.render()
@@ -316,11 +314,11 @@ class GameLauncher:
         try:
             result = subprocess.run(cmd, cwd=self.root_dir)
             if result.returncode == 0:
-                self.show_message("게임이 정상 종료되었습니다.", Colors.GREEN)
+                self.show_message("게임이 정상 종료되었습니다.", LauncherColors.GREEN)
             else:
-                self.show_message(f"게임이 오류로 종료되었습니다. (코드: {result.returncode})", Colors.RED)
+                self.show_message(f"게임이 오류로 종료되었습니다. (코드: {result.returncode})", LauncherColors.RED)
         except Exception as e:
-            self.show_message(f"게임 실행 중 오류 발생: {e}", Colors.RED)
+            self.show_message(f"게임 실행 중 오류 발생: {e}", LauncherColors.RED)
 
     def backup_all_saves(self):
         """모든 세이브 백업"""
@@ -335,10 +333,10 @@ class GameLauncher:
                 shutil.copy2(save_file, backup_path / save_file.name)
                 count += 1
 
-            self.show_message(f"✓ {count}개의 세이브 파일을 백업했습니다.", Colors.GREEN)
+            self.show_message(f"✓ {count}개의 세이브 파일을 백업했습니다.", LauncherColors.GREEN)
             self.current_menu = self.create_save_menu()
         except Exception as e:
-            self.show_message(f"✗ 백업 중 오류 발생: {e}", Colors.RED)
+            self.show_message(f"✗ 백업 중 오류 발생: {e}", LauncherColors.RED)
 
     def delete_selected_save(self):
         """선택한 세이브 삭제"""
@@ -347,16 +345,16 @@ class GameLauncher:
 
         selected = self.current_menu.get_selected_item()
         if not selected or not isinstance(selected.value, int):
-            self.show_message("삭제할 파일을 선택하세요", Colors.YELLOW)
+            self.show_message("삭제할 파일을 선택하세요", LauncherColors.YELLOW)
             return
 
         try:
             save_file = self.submenu_data[selected.value]
             save_file.unlink()
-            self.show_message(f"✓ '{save_file.name}' 파일이 삭제되었습니다.", Colors.GREEN)
+            self.show_message(f"✓ '{save_file.name}' 파일이 삭제되었습니다.", LauncherColors.GREEN)
             self.current_menu = self.create_save_menu()
         except Exception as e:
-            self.show_message(f"✗ 삭제 중 오류 발생: {e}", Colors.RED)
+            self.show_message(f"✗ 삭제 중 오류 발생: {e}", LauncherColors.RED)
 
     def show_save_info(self, index: int):
         """세이브 정보 표시"""
@@ -375,9 +373,9 @@ class GameLauncher:
                 party_count = len(data['party'])
                 info += f" | 파티: {party_count}명"
 
-            self.show_message(info, Colors.CYAN, duration=300)
+            self.show_message(info, LauncherColors.CYAN, duration=300)
         except Exception as e:
-            self.show_message(f"✗ 정보 읽기 오류: {e}", Colors.RED)
+            self.show_message(f"✗ 정보 읽기 오류: {e}", LauncherColors.RED)
 
     def delete_selected_log(self):
         """선택한 로그 삭제"""
@@ -386,16 +384,16 @@ class GameLauncher:
 
         selected = self.current_menu.get_selected_item()
         if not selected or not isinstance(selected.value, int):
-            self.show_message("삭제할 로그를 선택하세요", Colors.YELLOW)
+            self.show_message("삭제할 로그를 선택하세요", LauncherColors.YELLOW)
             return
 
         try:
             log_file = self.submenu_data[selected.value]
             log_file.unlink()
-            self.show_message(f"✓ '{log_file.name}' 로그가 삭제되었습니다.", Colors.GREEN)
+            self.show_message(f"✓ '{log_file.name}' 로그가 삭제되었습니다.", LauncherColors.GREEN)
             self.current_menu = self.create_log_menu()
         except Exception as e:
-            self.show_message(f"✗ 삭제 중 오류 발생: {e}", Colors.RED)
+            self.show_message(f"✗ 삭제 중 오류 발생: {e}", LauncherColors.RED)
 
     def delete_all_logs(self):
         """모든 로그 삭제"""
@@ -404,10 +402,10 @@ class GameLauncher:
             for log_file in self.logs_dir.glob("*.log"):
                 log_file.unlink()
                 count += 1
-            self.show_message(f"✓ {count}개의 로그 파일이 삭제되었습니다.", Colors.GREEN)
+            self.show_message(f"✓ {count}개의 로그 파일이 삭제되었습니다.", LauncherColors.GREEN)
             self.current_menu = self.create_log_menu()
         except Exception as e:
-            self.show_message(f"✗ 삭제 중 오류 발생: {e}", Colors.RED)
+            self.show_message(f"✗ 삭제 중 오류 발생: {e}", LauncherColors.RED)
 
     def show_log_info(self, index: int):
         """로그 정보 표시"""
@@ -416,7 +414,7 @@ class GameLauncher:
 
         log_file = self.submenu_data[index]
         size = log_file.stat().st_size
-        self.show_message(f"{log_file.name} | 크기: {size:,} bytes", Colors.CYAN, duration=300)
+        self.show_message(f"{log_file.name} | 크기: {size:,} bytes", LauncherColors.CYAN, duration=300)
 
     def render(self):
         """화면 렌더링"""
@@ -457,7 +455,7 @@ class GameLauncher:
             self.screen_width // 2 - len(help_text) // 2,
             self.screen_height - 1,
             help_text,
-            fg=Colors.GRAY
+            fg=LauncherColors.GRAY
         )
 
     def render_header(self):
@@ -470,7 +468,7 @@ class GameLauncher:
             self.screen_width // 2 - len(title) // 2,
             2,
             title,
-            fg=Colors.YELLOW
+            fg=LauncherColors.YELLOW
         )
 
         # 서브타이틀
@@ -478,28 +476,28 @@ class GameLauncher:
             self.screen_width // 2 - len(subtitle) // 2,
             3,
             subtitle,
-            fg=Colors.CYAN
+            fg=LauncherColors.CYAN
         )
 
         # 구분선
         line = "─" * (self.screen_width - 4)
-        self.console.print(2, 5, line, fg=Colors.GRAY)
+        self.console.print(2, 5, line, fg=LauncherColors.GRAY)
 
     def render_settings(self):
         """설정 화면"""
         y = 10
-        self.console.print(10, y, "⚙️  설정", fg=Colors.YELLOW)
+        self.console.print(10, y, "⚙️  설정", fg=LauncherColors.YELLOW)
         y += 2
 
         if self.config_file.exists():
-            self.console.print(10, y, f"설정 파일: {self.config_file}", fg=Colors.CYAN)
+            self.console.print(10, y, f"설정 파일: {self.config_file}", fg=LauncherColors.CYAN)
             y += 2
-            self.console.print(10, y, "설정 파일을 직접 편집하세요.", fg=Colors.WHITE)
+            self.console.print(10, y, "설정 파일을 직접 편집하세요.", fg=LauncherColors.WHITE)
         else:
-            self.console.print(10, y, "설정 파일이 없습니다.", fg=Colors.RED)
+            self.console.print(10, y, "설정 파일이 없습니다.", fg=LauncherColors.RED)
 
         y += 3
-        self.console.print(10, y, "ESC: 뒤로 가기", fg=Colors.GRAY)
+        self.console.print(10, y, "ESC: 뒤로 가기", fg=LauncherColors.GRAY)
 
     def render_game_info(self):
         """게임 정보 화면"""
@@ -517,34 +515,34 @@ class GameLauncher:
             ("", "• 절차적 던전 생성"),
         ]
 
-        self.console.print(10, y, "ℹ️  게임 정보", fg=Colors.YELLOW)
+        self.console.print(10, y, "ℹ️  게임 정보", fg=LauncherColors.YELLOW)
         y += 2
 
         for label, value in info_lines:
             if label:
-                self.console.print(12, y, label, fg=Colors.CYAN)
-                self.console.print(12 + len(label) + 1, y, value, fg=Colors.WHITE)
+                self.console.print(12, y, label, fg=LauncherColors.CYAN)
+                self.console.print(12 + len(label) + 1, y, value, fg=LauncherColors.WHITE)
             else:
-                self.console.print(12, y, value, fg=Colors.WHITE)
+                self.console.print(12, y, value, fg=LauncherColors.WHITE)
             y += 1
 
         y += 2
-        self.console.print(10, y, "ESC: 뒤로 가기", fg=Colors.GRAY)
+        self.console.print(10, y, "ESC: 뒤로 가기", fg=LauncherColors.GRAY)
 
     def render_system_check(self):
         """시스템 체크 화면"""
         y = 10
-        self.console.print(10, y, "🔍 시스템 체크", fg=Colors.YELLOW)
+        self.console.print(10, y, "🔍 시스템 체크", fg=LauncherColors.YELLOW)
         y += 2
 
         # Python 버전
         python_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
-        self.console.print(12, y, "Python 버전:", fg=Colors.CYAN)
-        self.console.print(30, y, python_version, fg=Colors.GREEN if sys.version_info >= (3, 10) else Colors.RED)
+        self.console.print(12, y, "Python 버전:", fg=LauncherColors.CYAN)
+        self.console.print(30, y, python_version, fg=LauncherColors.GREEN if sys.version_info >= (3, 10) else LauncherColors.RED)
         y += 2
 
         # 필수 파일
-        self.console.print(12, y, "필수 파일:", fg=Colors.CYAN)
+        self.console.print(12, y, "필수 파일:", fg=LauncherColors.CYAN)
         y += 1
 
         essential_files = [
@@ -556,12 +554,12 @@ class GameLauncher:
         for name, path in essential_files:
             exists = path.exists()
             status = "✓" if exists else "✗"
-            color = Colors.GREEN if exists else Colors.RED
+            color = LauncherColors.GREEN if exists else LauncherColors.RED
             self.console.print(14, y, f"{name:20} {status}", fg=color)
             y += 1
 
         y += 2
-        self.console.print(10, y, "ESC: 뒤로 가기", fg=Colors.GRAY)
+        self.console.print(10, y, "ESC: 뒤로 가기", fg=LauncherColors.GRAY)
 
     def run(self):
         """메인 루프"""
