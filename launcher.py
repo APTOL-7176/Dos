@@ -383,7 +383,7 @@ class GameLauncher:
                 self.show_log_info(value)
 
     def run_game(self, mode: str):
-        """게임 실행 (백그라운드)"""
+        """게임 실행 후 런처 종료"""
         cmd = [sys.executable, str(self.main_script)]
 
         if mode == "dev":
@@ -395,6 +395,10 @@ class GameLauncher:
         else:
             self.show_message("게임을 시작합니다...", LauncherColors.GREEN)
 
+        # 화면 업데이트
+        self.render()
+        self.context.present(self.console)
+
         # 게임 실행 (백그라운드)
         try:
             # Popen으로 백그라운드 실행
@@ -403,7 +407,8 @@ class GameLauncher:
                 cwd=self.root_dir,
                 creationflags=subprocess.CREATE_NEW_CONSOLE if sys.platform == "win32" else 0
             )
-            self.show_message("게임이 시작되었습니다.", LauncherColors.GREEN)
+            # 게임 시작 후 런처 종료
+            self.running = False
         except Exception as e:
             self.show_message(f"게임 실행 중 오류 발생: {e}", LauncherColors.RED)
 
