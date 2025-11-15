@@ -177,6 +177,11 @@ world:
     item_spawn_chance: 0.2
     treasure_spawn_chance: 0.1
 
+    # 적 생성 수량
+    enemy_count:
+      min_enemies: 1  # 최소 적 수 (조정 가능)
+      max_enemies: 4  # 최대 적 수
+
 # 캐릭터 설정
 character:
   max_level: 99

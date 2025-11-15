@@ -351,8 +351,14 @@ class EnemyGenerator:
             적 리스트
         """
         if num_enemies is None:
-            # 층수에 따라 적 수 결정 (1~4)
-            num_enemies = min(4, 1 + floor_number // 5)
+            # config에서 적 수 범위 가져오기
+            from src.core.config import get_config
+            config = get_config()
+            min_enemies = config.get("world.dungeon.enemy_count.min_enemies", 1)
+            max_enemies = config.get("world.dungeon.enemy_count.max_enemies", 4)
+
+            # 랜덤하게 1~4마리 생성
+            num_enemies = random.randint(min_enemies, max_enemies)
 
         # 층수에 맞는 적 ID 가져오기
         suitable_enemy_ids = EnemyGenerator.get_suitable_enemies_for_floor(floor_number)
