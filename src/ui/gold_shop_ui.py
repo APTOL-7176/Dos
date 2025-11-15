@@ -11,7 +11,6 @@ import tcod
 
 from src.ui.input_handler import InputHandler, GameAction
 from src.core.logger import get_logger, Loggers
-from src.equipment.item_generator import ItemGenerator
 
 
 logger = get_logger(Loggers.UI)
