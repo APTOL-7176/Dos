@@ -1,0 +1,31 @@
+name: Web Playable Demo
+
+on:
+  workflow_dispatch:  # 수동 실행
+  push:
+    branches: [ master, main ]
+
+jobs:
+  info:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 게임 플레이 안내
+        run: |
+          echo "🎮 Dawn of Stellar를 브라우저에서 플레이하는 방법:"
+          echo ""
+          echo "1️⃣ GitHub Codespaces (추천)"
+          echo "   - 저장소 페이지에서 'Code' 버튼 클릭"
+          echo "   - 'Codespaces' 탭 선택"
+          echo "   - 'Create codespace on main' 클릭"
+          echo "   - 터미널에서: python main.py"
+          echo ""
+          echo "2️⃣ Gitpod"
+          echo "   - https://gitpod.io/#https://github.com/${{ github.repository }}"
+          echo "   - 터미널에서: python main.py"
+          echo ""
+          echo "3️⃣ 로컬 클론"
+          echo "   - git clone ${{ github.server_url }}/${{ github.repository }}"
+          echo "   - cd Dos && pip install -r requirements.txt"
+          echo "   - python main.py"
+          echo ""
+          echo "즐거운 게임 되세요! 🌟"
