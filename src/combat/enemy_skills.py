@@ -137,8 +137,9 @@ class EnemySkillDatabase:
                 name="독침 찌르기",
                 description="독이 묻은 단검으로 공격하여 중독을 일으킨다.",
                 target_type=SkillTargetType.SINGLE_ENEMY,
-                damage=15,
-                damage_multiplier=1.2,
+                damage=0,  # BRV 시스템 사용
+                damage_multiplier=1.5,  # BRV 배율
+                brv_damage=1,  # BRV 공격 활성화
                 status_effects=["poison"],
                 status_duration=3,
                 use_probability=0.35,
@@ -164,8 +165,10 @@ class EnemySkillDatabase:
                 name="강력한 일격",
                 description="묵직한 공격으로 큰 피해를 입힌다.",
                 target_type=SkillTargetType.SINGLE_ENEMY,
-                damage=30,
-                damage_multiplier=2.0,
+                damage=0,  # BRV 시스템 사용
+                damage_multiplier=2.2,  # 강력한 BRV 배율
+                brv_damage=1,  # BRV 공격
+                hp_attack=True,  # HP 공격도 가능
                 use_probability=0.25,
                 cooldown=3
             ),
@@ -200,8 +203,11 @@ class EnemySkillDatabase:
                 name="생명력 흡수",
                 description="적의 생명력을 빨아들여 자신을 회복한다.",
                 target_type=SkillTargetType.SINGLE_ENEMY,
-                damage=20,
-                heal_amount=20,  # 데미지만큼 회복
+                damage=0,  # BRV 시스템 사용
+                damage_multiplier=1.5,  # BRV+HP 배율
+                brv_damage=1,
+                hp_attack=True,  # BRV+HP 공격
+                heal_amount=30,  # 회복량 (별도 처리)
                 is_magical=True,
                 use_probability=0.3,
                 cooldown=2
@@ -215,7 +221,10 @@ class EnemySkillDatabase:
                 name="화염구",
                 description="불타는 구체를 발사한다.",
                 target_type=SkillTargetType.SINGLE_ENEMY,
-                damage=40,
+                damage=0,  # BRV 시스템 사용
+                damage_multiplier=1.8,  # 마법 BRV 배율
+                brv_damage=1,  # BRV 공격
+                hp_attack=True,  # HP 공격도 가능
                 is_magical=True,
                 mp_cost=15,
                 status_effects=["burn"],
@@ -230,7 +239,9 @@ class EnemySkillDatabase:
                 name="얼음 폭풍",
                 description="적 전체를 얼음으로 공격한다.",
                 target_type=SkillTargetType.ALL_ENEMIES,
-                damage=25,
+                damage=0,  # BRV 시스템 사용
+                damage_multiplier=1.5,  # 전체 공격은 낮은 배율
+                brv_damage=1,  # BRV 공격
                 is_magical=True,
                 mp_cost=25,
                 status_effects=["slow"],
@@ -245,7 +256,10 @@ class EnemySkillDatabase:
                 name="마나 폭발",
                 description="모든 MP를 소모하여 강력한 마법 공격.",
                 target_type=SkillTargetType.ALL_ENEMIES,
-                damage=60,
+                damage=0,  # BRV 시스템 사용
+                damage_multiplier=2.5,  # 필살기 배율
+                brv_damage=1,
+                hp_attack=True,  # BRV+HP 공격
                 is_magical=True,
                 mp_cost=999,  # 모든 MP (실제로는 current_mp만큼 사용)
                 use_probability=0.15,
@@ -262,8 +276,10 @@ class EnemySkillDatabase:
                 name="드래곤 브레스",
                 description="불길을 뿜어 적 전체에게 막대한 피해를 입힌다.",
                 target_type=SkillTargetType.ALL_ENEMIES,
-                damage=80,
-                damage_multiplier=1.5,
+                damage=0,  # BRV 시스템 사용
+                damage_multiplier=2.0,  # 강력한 전체 공격
+                brv_damage=1,
+                hp_attack=True,  # BRV+HP 공격
                 is_magical=True,
                 mp_cost=30,
                 status_effects=["burn"],
@@ -300,7 +316,10 @@ class EnemySkillDatabase:
                 name="지옥의 불꽃",
                 description="지옥에서 솟아오른 불꽃이 적들을 태운다.",
                 target_type=SkillTargetType.ALL_ENEMIES,
-                damage=70,
+                damage=0,  # BRV 시스템 사용
+                damage_multiplier=2.2,  # 강력한 악마 마법
+                brv_damage=1,
+                hp_attack=True,  # BRV+HP 공격
                 is_magical=True,
                 mp_cost=40,
                 status_effects=["burn", "curse"],
@@ -329,8 +348,10 @@ class EnemySkillDatabase:
                 name="슈퍼노바",
                 description="초신성 폭발로 모든 것을 집어삼킨다.",
                 target_type=SkillTargetType.ALL_ENEMIES,
-                damage=150,
-                damage_multiplier=2.0,
+                damage=0,  # BRV 시스템 사용
+                damage_multiplier=3.0,  # 궁극기 최대 배율
+                brv_damage=1,
+                hp_attack=True,  # BRV+HP 공격
                 is_magical=True,
                 mp_cost=50,
                 status_effects=["stun"],
@@ -346,6 +367,7 @@ class EnemySkillDatabase:
                 description="대상의 HP를 1로 만든다.",
                 target_type=SkillTargetType.SINGLE_ENEMY,
                 damage=99999,  # 특수 처리: HP를 1로 만듦
+                damage_multiplier=1.0,
                 is_magical=True,
                 mp_cost=40,
                 use_probability=0.15,
@@ -358,8 +380,10 @@ class EnemySkillDatabase:
                 name="옥토 슬래시",
                 description="8번의 연속 베기로 적을 갈기갈기 찢는다.",
                 target_type=SkillTargetType.SINGLE_ENEMY,
-                damage=200,
-                damage_multiplier=1.2,
+                damage=0,  # BRV 시스템 사용
+                damage_multiplier=2.8,  # 8연타 궁극기
+                brv_damage=1,
+                hp_attack=True,  # BRV+HP 공격
                 use_probability=0.25,
                 cooldown=4
             ),
@@ -370,7 +394,10 @@ class EnemySkillDatabase:
                 name="섀도우 플레어",
                 description="어둠의 불꽃이 적 전체를 집어삼킨다.",
                 target_type=SkillTargetType.ALL_ENEMIES,
-                damage=100,
+                damage=0,  # BRV 시스템 사용
+                damage_multiplier=2.5,  # 강력한 전체 마법
+                brv_damage=1,
+                hp_attack=True,  # BRV+HP 공격
                 is_magical=True,
                 mp_cost=35,
                 status_effects=["darkness", "silence"],
