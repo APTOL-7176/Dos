@@ -50,6 +50,10 @@ class WorldUI:
         self.combat_enemies = None  # 전투에 참여할 적들
         self.floor_change_requested = None  # "up" or "down"
 
+        # 종료 확인
+        self.quit_confirm_mode = False
+        self.quit_confirm_yes = False  # True: 예, False: 아니오
+
     def add_message(self, text: str):
         """메시지 추가"""
         self.messages.append(text)
@@ -66,9 +70,30 @@ class WorldUI:
         """
         logger.warning(f"[DEBUG] handle_input 호출됨: action={action}")
 
+        # 종료 확인 모드
+        if self.quit_confirm_mode:
+            if action == GameAction.MOVE_LEFT:
+                self.quit_confirm_yes = True
+            elif action == GameAction.MOVE_RIGHT:
+                self.quit_confirm_yes = False
+            elif action == GameAction.CONFIRM:
+                if self.quit_confirm_yes:
+                    # 종료 확인
+                    self.quit_requested = True
+                    return True
+                else:
+                    # 취소
+                    self.quit_confirm_mode = False
+            elif action == GameAction.CANCEL or action == GameAction.ESCAPE:
+                # 취소
+                self.quit_confirm_mode = False
+            return False
+
         if action == GameAction.QUIT or action == GameAction.ESCAPE:
-            self.quit_requested = True
-            return True
+            # 종료 확인 대화상자 표시
+            self.quit_confirm_mode = True
+            self.quit_confirm_yes = False
+            return False
 
         # 메뉴 열기 (M키)
         if action == GameAction.MENU:
@@ -228,6 +253,10 @@ class WorldUI:
             fg=(180, 180, 180)
         )
 
+        # 종료 확인 대화상자
+        if self.quit_confirm_mode:
+            self._render_quit_confirm(console)
+
     def _render_party_status(self, console: tcod.console.Console):
         """파티 상태 렌더링 (간단)"""
         x = self.screen_width - 30
@@ -263,6 +292,63 @@ class WorldUI:
 
         for i, msg in enumerate(self.messages[-self.max_messages:]):
             console.print(2, msg_y + 1 + i, msg, fg=(200, 200, 200))
+
+    def _render_quit_confirm(self, console: tcod.console.Console):
+        """종료 확인 대화상자"""
+        box_width = 50
+        box_height = 10
+        box_x = (self.screen_width - box_width) // 2
+        box_y = (self.screen_height - box_height) // 2
+
+        # 배경 박스
+        console.draw_frame(
+            box_x, box_y, box_width, box_height,
+            "게임 종료",
+            fg=(255, 100, 100),
+            bg=(0, 0, 0)
+        )
+
+        # 메시지
+        msg = "정말로 게임을 종료하시겠습니까?"
+        console.print(
+            box_x + (box_width - len(msg)) // 2,
+            box_y + 3,
+            msg,
+            fg=(255, 255, 255)
+        )
+
+        msg2 = "저장하지 않은 진행 상황은 잃게 됩니다!"
+        console.print(
+            box_x + (box_width - len(msg2)) // 2,
+            box_y + 5,
+            msg2,
+            fg=(255, 200, 100)
+        )
+
+        # 버튼
+        y = box_y + 7
+        yes_color = (255, 255, 100) if self.quit_confirm_yes else (180, 180, 180)
+        no_color = (255, 255, 100) if not self.quit_confirm_yes else (180, 180, 180)
+
+        console.print(
+            box_x + 12, y,
+            "[ 예 ]" if self.quit_confirm_yes else "  예  ",
+            fg=yes_color
+        )
+
+        console.print(
+            box_x + 28, y,
+            "[아니오]" if not self.quit_confirm_yes else " 아니오 ",
+            fg=no_color
+        )
+
+        # 도움말
+        console.print(
+            box_x + (box_width - 30) // 2,
+            box_y + box_height - 1,
+            "← →: 선택  Z: 확인  X: 취소",
+            fg=(150, 150, 150)
+        )
 
 
 def run_exploration(
