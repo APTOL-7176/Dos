@@ -264,8 +264,9 @@ def show_game_result(
     try:
         from src.audio import stop_bgm
         stop_bgm()
-    except:
-        pass
+    except Exception as e:
+        # 오디오 시스템 없으면 무시
+        logger.debug(f"BGM 정지 실패 (오디오 시스템 없음): {e}")
 
     # 결과 화면 표시
     while True:

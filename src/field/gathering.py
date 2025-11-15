@@ -48,7 +48,7 @@ class GatheringSystem:
 
     def _load_resources(self) -> None:
         """자원 데이터 로드"""
-        # TODO: YAML에서 로드
+        # 기본 자원 데이터 (향후 YAML로 확장 가능)
         default_resources = [
             # === 기본 식재료 (평야, 초원) - 난이도 1 ===
             Resource("herb", "약초", 0.9, 1),

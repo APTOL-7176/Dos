@@ -680,7 +680,23 @@ class TraitEffectManager:
 
         elif condition == "same_stance_per_turn":
             # 전사 특성: 같은 스탠스 유지 시 누적
-            return True  # TODO: 스탠스 카운터 추가 필요
+            # 스탠스 카운터: character.stance_counter (같은 스탠스 유지 턴 수)
+            if hasattr(character, 'stance_counter'):
+                # 스탠스가 변경되지 않았으면 카운터 증가
+                current_stance = getattr(character, 'current_stance', None)
+                previous_stance = getattr(character, 'previous_stance', None)
+
+                if current_stance and current_stance == previous_stance:
+                    character.stance_counter = getattr(character, 'stance_counter', 0) + 1
+                    return True
+                else:
+                    # 스탠스 변경 시 카운터 리셋
+                    character.stance_counter = 1
+                    character.previous_stance = current_stance
+                    return False
+            else:
+                # 스탠스 시스템이 없으면 기본 True
+                return True
 
         elif condition == "stance_change_skill":
             # 스탠스 변경 스킬인지 확인

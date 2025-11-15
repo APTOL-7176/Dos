@@ -133,8 +133,22 @@ def open_rest_menu(
                     cooked_food = open_cooking_pot(console, context, inventory)
                     if cooked_food:
                         logger.info(f"요리 완료: {cooked_food.name}")
-                        # 요리 결과를 인벤토리에 추가하거나 즉시 사용
-                        # TODO: 요리된 음식을 아이템으로 변환
+                        # 요리 결과를 인벤토리에 추가 (Consumable 아이템으로 변환)
+                        from src.equipment.item_system import Consumable, ItemRarity, ItemType
+                        food_item = Consumable(
+                            item_id=cooked_food.get('recipe_id', 'food'),
+                            name=cooked_food.get('name', '요리'),
+                            description=f"요리된 음식: {cooked_food.get('quality', 'normal')}",
+                            item_type=ItemType.CONSUMABLE,
+                            rarity=ItemRarity.COMMON,
+                            effect_type="heal_hp",
+                            effect_value=cooked_food.get('effects', {}).get('hp_heal', 50)
+                        )
+                        try:
+                            inventory.add_item(food_item)
+                            logger.info(f"인벤토리에 추가: {food_item.name}")
+                        except Exception as e:
+                            logger.warning(f"인벤토리 추가 실패: {e}")
                     return "cook"
                 elif cursor == 2:
                     # 취소

@@ -428,7 +428,23 @@ def deserialize_party_member(member_data: Dict[str, Any]) -> Any:
     if member_data.get("active_traits"):
         char.active_traits = member_data["active_traits"]
 
-    # TODO: 장비 복원
+    # 장비 복원
+    if member_data.get("equipment"):
+        # equipment 속성이 없으면 생성
+        if not hasattr(char, 'equipment'):
+            char.equipment = {}
+
+        for slot, item_data in member_data["equipment"].items():
+            if item_data:
+                try:
+                    item = deserialize_item(item_data)
+                    char.equipment[slot] = item
+                    logger.debug(f"장비 복원: {char.name} - {slot} = {getattr(item, 'name', 'Unknown')}")
+                except Exception as e:
+                    logger.warning(f"장비 복원 실패: {char.name} - {slot}: {e}")
+                    char.equipment[slot] = None
+            else:
+                char.equipment[slot] = None
 
     return char
 

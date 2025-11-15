@@ -138,8 +138,9 @@ class InputHandler(tcod.event.EventDispatch[Optional[GameAction]]):
             try:
                 char = chr(event.sym)
                 action = self.char_bindings.get(char.lower())
-            except (ValueError, OverflowError):
-                pass
+            except (ValueError, OverflowError) as e:
+                # 유효하지 않은 키 심볼 (무시)
+                self.logger.debug(f"유효하지 않은 키 심볼: {event.sym}")
 
         if action:
             self.logger.debug(f"키 입력: {event.sym} -> {action.value}")

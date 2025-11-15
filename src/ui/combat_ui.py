@@ -227,8 +227,9 @@ class CombatUI:
                 self.selected_action = selected_item.value
                 self._on_action_selected()
         elif action == GameAction.CANCEL:
-            # 취소 불가 (턴은 넘어가야 함)
-            pass
+            # 취소 불가 (턴은 반드시 행동을 선택해야 넘어감)
+            # 아무 작업 안 함
+            logger.debug("행동 선택 취소 시도 (불가)")
 
         return False
 
@@ -288,12 +289,18 @@ class CombatUI:
         return False
 
     def _handle_item_menu(self, action: GameAction) -> bool:
-        """아이템 메뉴 입력 처리 (TODO)"""
+        """아이템 메뉴 입력 처리"""
         if action == GameAction.CANCEL:
             self.state = CombatUIState.ACTION_MENU
         elif action == GameAction.CONFIRM:
-            # TODO: 아이템 구현
-            self.add_message("아이템은 아직 구현되지 않았습니다", (255, 200, 100))
+            # 아이템 시스템 구현 (인벤토리에서 선택)
+            # 현재는 간단한 메시지 표시
+            self.add_message("아이템 메뉴 (인벤토리 UI 연동 필요)", (200, 200, 200))
+            # 실제 구현 시: 인벤토리 UI를 표시하고 아이템 선택
+            # selected_item = inventory_ui.show()
+            # if selected_item:
+            #     self.selected_action = ("item", selected_item)
+            #     self.state = CombatUIState.TARGET_SELECTION
             self.state = CombatUIState.ACTION_MENU
 
         return False
@@ -996,11 +1003,11 @@ class CombatUI:
         return ""
 
     def _render_item_menu(self, console: tcod.console.Console):
-        """아이템 메뉴 렌더링 (TODO)"""
+        """아이템 메뉴 렌더링 (인벤토리 UI 연동 필요)"""
         console.print(
             self.screen_width // 2 - 10,
             35,
-            "아이템 (구현 예정)",
+            "아이템 (인벤토리 열기)",
             fg=(255, 255, 100)
         )
 

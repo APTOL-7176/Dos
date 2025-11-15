@@ -314,7 +314,8 @@ class ATBSystem:
             {"effect": effect_type, "duration": duration}
         )
 
-        # TODO: 지속 시간 후 효과 제거 스케줄링 (타이머 시스템 필요)
+        # 지속 시간 관리는 StatusManager에서 담당
+        # ATB 시스템은 속도 변경만 처리하고, 실제 효과 제거는 StatusManager.update()에서 처리됨
 
     def remove_status_effect(self, combatant: Any, effect_type: str) -> None:
         """

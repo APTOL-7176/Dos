@@ -379,8 +379,9 @@ class EnemyGenerator:
             try:
                 from src.combat.enemy_skills import EnemySkillDatabase
                 enemy.skills = EnemySkillDatabase.get_skills_for_enemy_type(template.enemy_id)
-            except ImportError:
-                pass
+            except ImportError as e:
+                # EnemySkillDatabase가 없을 경우 기본 스킬로 작동
+                logger.debug(f"적 스킬 로드 실패: {e} - 기본 스킬 사용")
 
             enemies.append(enemy)
 
@@ -410,7 +411,8 @@ class EnemyGenerator:
             try:
                 from src.combat.enemy_skills import EnemySkillDatabase
                 boss.skills = EnemySkillDatabase.get_skills_for_enemy_type("sephiroth")
-            except ImportError:
-                pass
+            except ImportError as e:
+                # EnemySkillDatabase가 없을 경우 기본 스킬로 작동
+                logger.warning(f"세피로스 스킬 로드 실패: {e} - 기본 스킬 사용")
 
         return boss

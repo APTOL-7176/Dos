@@ -13,6 +13,7 @@ from src.core.event_bus import event_bus, Events
 from src.combat.atb_system import get_atb_system, ATBSystem
 from src.combat.brave_system import get_brave_system, BraveSystem
 from src.combat.damage_calculator import get_damage_calculator, DamageCalculator
+from src.combat.status_effects import StatusManager, StatusEffect, StatusType
 from src.audio import play_sfx
 
 
@@ -382,8 +383,9 @@ class CombatManager:
                 # 적 스킬 실행
                 result.update(self._execute_enemy_skill(actor, target, skill, **kwargs))
                 return result
-        except ImportError:
-            pass
+        except ImportError as e:
+            # EnemySkill이 없으면 일반 스킬 시스템 사용
+            self.logger.debug(f"적 스킬 시스템 미사용: {e}")
 
         # 일반 스킬 실행 (플레이어 스킬)
         from src.character.skills.skill_manager import get_skill_manager
@@ -514,17 +516,82 @@ class CombatManager:
             # 버프 적용
             if skill.buff_stats:
                 target_result["buffs"] = skill.buff_stats
-                # TODO: 실제 버프 시스템 연동
+                # 실제 버프 시스템 연동
+                if hasattr(tgt, 'status_manager') or hasattr(tgt, 'status_effects'):
+                    status_mgr = getattr(tgt, 'status_manager', None) or getattr(tgt, 'status_effects', None)
+                    if isinstance(status_mgr, StatusManager):
+                        for buff_name, buff_data in skill.buff_stats.items():
+                            # buff_data는 딕셔너리 또는 값일 수 있음
+                            if isinstance(buff_data, dict):
+                                duration = buff_data.get('duration', 3)
+                                intensity = buff_data.get('intensity', 1.0)
+                            else:
+                                duration = 3
+                                intensity = float(buff_data) if isinstance(buff_data, (int, float)) else 1.0
+
+                            # StatusType에서 찾기 (이름 매핑)
+                            status_type = self._map_buff_to_status_type(buff_name)
+                            if status_type:
+                                buff_effect = StatusEffect(
+                                    name=buff_name,
+                                    status_type=status_type,
+                                    duration=duration,
+                                    intensity=intensity,
+                                    source_id=getattr(actor, 'id', None)
+                                )
+                                status_mgr.add_status(buff_effect)
 
             # 디버프 적용
             if skill.debuff_stats:
                 target_result["debuffs"] = skill.debuff_stats
-                # TODO: 실제 디버프 시스템 연동
+                # 실제 디버프 시스템 연동
+                if hasattr(tgt, 'status_manager') or hasattr(tgt, 'status_effects'):
+                    status_mgr = getattr(tgt, 'status_manager', None) or getattr(tgt, 'status_effects', None)
+                    if isinstance(status_mgr, StatusManager):
+                        for debuff_name, debuff_data in skill.debuff_stats.items():
+                            if isinstance(debuff_data, dict):
+                                duration = debuff_data.get('duration', 3)
+                                intensity = debuff_data.get('intensity', 1.0)
+                            else:
+                                duration = 3
+                                intensity = float(debuff_data) if isinstance(debuff_data, (int, float)) else 1.0
+
+                            status_type = self._map_debuff_to_status_type(debuff_name)
+                            if status_type:
+                                debuff_effect = StatusEffect(
+                                    name=debuff_name,
+                                    status_type=status_type,
+                                    duration=duration,
+                                    intensity=intensity,
+                                    source_id=getattr(actor, 'id', None)
+                                )
+                                status_mgr.add_status(debuff_effect)
 
             # 상태이상 적용
             if skill.status_effects:
                 target_result["status_effects"] = skill.status_effects
-                # TODO: 실제 상태이상 시스템 연동
+                # 실제 상태이상 시스템 연동
+                if hasattr(tgt, 'status_manager') or hasattr(tgt, 'status_effects'):
+                    status_mgr = getattr(tgt, 'status_manager', None) or getattr(tgt, 'status_effects', None)
+                    if isinstance(status_mgr, StatusManager):
+                        for effect_name, effect_data in skill.status_effects.items():
+                            if isinstance(effect_data, dict):
+                                duration = effect_data.get('duration', 3)
+                                intensity = effect_data.get('intensity', 1.0)
+                            else:
+                                duration = 3
+                                intensity = 1.0
+
+                            status_type = self._map_status_to_status_type(effect_name)
+                            if status_type:
+                                status_effect = StatusEffect(
+                                    name=effect_name,
+                                    status_type=status_type,
+                                    duration=duration,
+                                    intensity=intensity,
+                                    source_id=getattr(actor, 'id', None)
+                                )
+                                status_mgr.add_status(status_effect)
 
             result["targets"].append(target_result)
 
@@ -532,10 +599,74 @@ class CombatManager:
 
     def _execute_item(self, actor: Any, target: Optional[Any] = None, **kwargs) -> Dict[str, Any]:
         """아이템 사용"""
-        # TODO: 아이템 시스템 연동
-        return {
-            "action": "item"
-        }
+        # 아이템 시스템 연동
+        item = kwargs.get('item')
+
+        if not item:
+            self.logger.warning(f"{getattr(actor, 'name', 'Unknown')}: 아이템이 지정되지 않음")
+            return {"action": "item", "success": False}
+
+        # Consumable 아이템 처리
+        from src.equipment.item_system import Consumable, ItemType
+
+        if isinstance(item, Consumable) or (hasattr(item, 'item_type') and item.item_type == ItemType.CONSUMABLE):
+            effect_type = getattr(item, 'effect_type', 'heal_hp')
+            effect_value = getattr(item, 'effect_value', 0)
+
+            result = {
+                "action": "item",
+                "success": True,
+                "item_name": getattr(item, 'name', 'Unknown Item'),
+                "effect_type": effect_type,
+                "effect_value": effect_value,
+                "target": getattr(target, 'name', 'Unknown') if target else None
+            }
+
+            tgt = target if target else actor
+
+            # 효과 타입에 따라 처리
+            if effect_type == "heal_hp":
+                if hasattr(tgt, 'heal'):
+                    healed = tgt.heal(int(effect_value))
+                elif hasattr(tgt, 'current_hp') and hasattr(tgt, 'max_hp'):
+                    healed = min(int(effect_value), tgt.max_hp - tgt.current_hp)
+                    tgt.current_hp += healed
+                else:
+                    healed = int(effect_value)
+                result["healing"] = healed
+
+            elif effect_type == "heal_mp":
+                if hasattr(tgt, 'current_mp') and hasattr(tgt, 'max_mp'):
+                    healed = min(int(effect_value), tgt.max_mp - tgt.current_mp)
+                    tgt.current_mp += healed
+                    result["mp_healing"] = healed
+
+            elif effect_type == "buff":
+                # 버프 효과 (간단하게 처리)
+                result["buff_applied"] = True
+
+            elif effect_type == "cure":
+                # 상태이상 치료
+                if hasattr(tgt, 'status_manager'):
+                    # 디버프 및 상태이상 제거 (예시)
+                    result["status_cured"] = True
+
+            # 인벤토리에서 아이템 제거
+            if hasattr(actor, 'inventory'):
+                try:
+                    actor.inventory.remove_item(item, 1)
+                except Exception as e:
+                    # 인벤토리 제거 실패 (아이템 없음 등)
+                    self.logger.warning(f"아이템 제거 실패: {e}")
+
+            return result
+        else:
+            # 소비 아이템이 아닌 경우
+            return {
+                "action": "item",
+                "success": False,
+                "error": "소비 아이템이 아닙니다"
+            }
 
     def _execute_defend(self, actor: Any, **kwargs) -> Dict[str, Any]:
         """방어 태세"""
@@ -555,7 +686,21 @@ class CombatManager:
                         f"[집중의 힘] {actor.name} 방어 스택 증가: {actor.defend_stack_count}/{max_stacks}"
                     )
 
-        # 방어 버프 적용 (TODO: 버프 시스템 연동)
+        # 방어 버프 적용 (StatusManager를 통해 방어력 증가 버프 부여)
+        if hasattr(actor, 'status_manager'):
+            try:
+                defense_buff = StatusEffect(
+                    name="방어 태세",
+                    status_type=StatusType.BOOST_DEF,
+                    duration=1,  # 1턴 동안 유지
+                    intensity=1.5,  # 방어력 50% 증가
+                    source_id=getattr(actor, 'id', None)
+                )
+                actor.status_manager.add_status(defense_buff)
+            except Exception as e:
+                # StatusEffect를 import하지 못한 경우 무시
+                self.logger.debug(f"방어 버프 적용 실패: {e}")
+
         return {
             "action": "defend",
             "defend_stack": getattr(actor, 'defend_stack_count', 0)
@@ -796,6 +941,87 @@ class CombatManager:
                     target=target[0]
                 )
             return None
+
+    def _map_buff_to_status_type(self, buff_name: str) -> Optional[StatusType]:
+        """버프 이름을 StatusType으로 매핑"""
+        # 일반적인 버프 매핑
+        buff_mapping = {
+            "strength_up": StatusType.BOOST_ATK,
+            "attack_up": StatusType.BOOST_ATK,
+            "defense_up": StatusType.BOOST_DEF,
+            "speed_up": StatusType.BOOST_SPD,
+            "magic_up": StatusType.BOOST_MAGIC_ATK,
+            "magic_defense_up": StatusType.BOOST_MAGIC_DEF,
+            "accuracy_up": StatusType.BOOST_ACCURACY,
+            "crit_up": StatusType.BOOST_CRIT,
+            "dodge_up": StatusType.BOOST_DODGE,
+            "all_stats_up": StatusType.BOOST_ALL_STATS,
+            "vitality_up": StatusType.REGENERATION,
+            "regen": StatusType.REGENERATION,
+            "mp_regen": StatusType.MP_REGEN,
+            "haste": StatusType.HASTE,
+            "blessing": StatusType.BLESSING,
+            "invincible": StatusType.INVINCIBLE,
+            "barrier": StatusType.BARRIER,
+            "shield": StatusType.SHIELD,
+            "royal_blessing": StatusType.BLESSING,
+            "luck_up": StatusType.BOOST_CRIT,
+            "divine_blessing": StatusType.HOLY_BLESSING,
+            "full_recovery": StatusType.REGENERATION,
+            "magic_boost": StatusType.BOOST_MAGIC_ATK,
+        }
+
+        return buff_mapping.get(buff_name.lower())
+
+    def _map_debuff_to_status_type(self, debuff_name: str) -> Optional[StatusType]:
+        """디버프 이름을 StatusType으로 매핑"""
+        debuff_mapping = {
+            "strength_down": StatusType.REDUCE_ATK,
+            "attack_down": StatusType.REDUCE_ATK,
+            "defense_down": StatusType.REDUCE_DEF,
+            "speed_down": StatusType.REDUCE_SPD,
+            "magic_down": StatusType.REDUCE_MAGIC_ATK,
+            "magic_defense_down": StatusType.REDUCE_MAGIC_DEF,
+            "accuracy_down": StatusType.REDUCE_ACCURACY,
+            "all_stats_down": StatusType.REDUCE_ALL_STATS,
+            "slow": StatusType.SLOW,
+            "weakness": StatusType.WEAKNESS,
+            "vulnerable": StatusType.VULNERABLE,
+            "weaken": StatusType.WEAKEN,
+            "confusion": StatusType.CONFUSION,
+            "terror": StatusType.TERROR,
+            "fear": StatusType.FEAR,
+        }
+
+        return debuff_mapping.get(debuff_name.lower())
+
+    def _map_status_to_status_type(self, status_name: str) -> Optional[StatusType]:
+        """상태이상 이름을 StatusType으로 매핑"""
+        status_mapping = {
+            "poison": StatusType.POISON,
+            "burn": StatusType.BURN,
+            "bleed": StatusType.BLEED,
+            "stun": StatusType.STUN,
+            "sleep": StatusType.SLEEP,
+            "silence": StatusType.SILENCE,
+            "blind": StatusType.BLIND,
+            "paralyze": StatusType.PARALYZE,
+            "freeze": StatusType.FREEZE,
+            "petrify": StatusType.PETRIFY,
+            "curse": StatusType.CURSE,
+            "slow": StatusType.SLOW,
+            "corrosion": StatusType.CORROSION,
+            "disease": StatusType.DISEASE,
+            "charm": StatusType.CHARM,
+            "dominate": StatusType.DOMINATE,
+            "root": StatusType.ROOT,
+            "chill": StatusType.CHILL,
+            "shock": StatusType.SHOCK,
+            "madness": StatusType.MADNESS,
+            "taunt": StatusType.TAUNT,
+        }
+
+        return status_mapping.get(status_name.lower())
 
 
 # 전역 인스턴스

@@ -71,6 +71,10 @@ class PartySetup:
         # 첫 번째 슬롯의 직업 선택 메뉴 생성
         self._create_job_menu()
 
+        # 에러 메시지
+        self.error_message = ""
+        self.error_timer = 0  # 에러 메시지 표시 시간
+
     def _load_jobs(self) -> List[Dict[str, Any]]:
         """직업 데이터 로드"""
         jobs = []
@@ -278,7 +282,9 @@ class PartySetup:
                 # 이름 중복 확인
                 if any(m.character_name == name for m in self.party[:self.current_slot]):
                     self.logger.warning(f"중복된 이름: {name}")
-                    # TODO: 에러 메시지 표시
+                    # 에러 메시지 표시
+                    self.error_message = f"이름 중복: '{name}'은(는) 이미 사용 중입니다!"
+                    self.error_timer = 120  # 2초 표시 (60프레임 기준)
                     self.name_input.confirmed = False
                     self.name_input.text = ""
                     return False
@@ -384,6 +390,16 @@ class PartySetup:
                 confirm_help,
                 fg=Colors.GRAY
             )
+
+        # 에러 메시지 표시
+        if self.error_timer > 0:
+            console.print(
+                (self.screen_width - len(self.error_message)) // 2,
+                self.screen_height - 4,
+                self.error_message,
+                fg=(255, 100, 100)  # 빨간색
+            )
+            self.error_timer -= 1
 
     def _render_party_status(self, console: tcod.console.Console):
         """현재 파티 상태 표시"""

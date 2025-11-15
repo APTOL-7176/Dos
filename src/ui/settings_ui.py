@@ -11,6 +11,7 @@ import tcod
 from src.ui.input_handler import InputHandler, GameAction
 from src.core.logger import get_logger, Loggers
 from src.core.config import get_config
+from src.audio import get_audio_manager
 
 
 logger = get_logger(Loggers.UI)
@@ -49,13 +50,15 @@ class SettingsUI:
         self.options = [
             ("BGM 볼륨", SettingOption.VOLUME_BGM),
             ("효과음 볼륨", SettingOption.VOLUME_SFX),
-            ("언어", SettingOption.LANGUAGE),
             ("난이도", SettingOption.DIFFICULTY),
             ("자동 저장", SettingOption.AUTO_SAVE),
             ("데미지 숫자 표시", SettingOption.SHOW_DAMAGE_NUMBERS),
             ("전투 속도", SettingOption.COMBAT_SPEED),
             ("돌아가기", SettingOption.BACK),
         ]
+
+        # 언어는 한국어 고정
+        self.language = "ko"
 
     def handle_input(self, action: GameAction) -> Optional[str]:
         """
@@ -93,15 +96,22 @@ class SettingsUI:
 
         if option == SettingOption.VOLUME_BGM:
             self.bgm_volume = max(0, min(100, self.bgm_volume + direction * 10))
-            # TODO: 실제 BGM 볼륨 조정 적용
+            # 실제 BGM 볼륨 조정 적용
+            try:
+                audio_manager = get_audio_manager()
+                audio_manager.set_bgm_volume(self.bgm_volume / 100.0)
+                logger.debug(f"BGM 볼륨 조정: {self.bgm_volume}")
+            except Exception as e:
+                logger.warning(f"BGM 볼륨 조정 실패: {e}")
         elif option == SettingOption.VOLUME_SFX:
             self.sfx_volume = max(0, min(100, self.sfx_volume + direction * 10))
-            # TODO: 실제 SFX 볼륨 조정 적용
-        elif option == SettingOption.LANGUAGE:
-            languages = ["ko", "en", "ja"]
-            current_idx = languages.index(self.language) if self.language in languages else 0
-            new_idx = (current_idx + direction) % len(languages)
-            self.language = languages[new_idx]
+            # 실제 SFX 볼륨 조정 적용
+            try:
+                audio_manager = get_audio_manager()
+                audio_manager.set_sfx_volume(self.sfx_volume / 100.0)
+                logger.debug(f"SFX 볼륨 조정: {self.sfx_volume}")
+            except Exception as e:
+                logger.warning(f"SFX 볼륨 조정 실패: {e}")
         elif option == SettingOption.DIFFICULTY:
             difficulties = ["easy", "normal", "hard", "extreme"]
             current_idx = difficulties.index(self.difficulty) if self.difficulty in difficulties else 1
@@ -161,10 +171,6 @@ class SettingsUI:
                 value = f"{self.sfx_volume}%"
                 bar = self._render_volume_bar(self.sfx_volume)
                 console.print(value_x, y, f"{bar} {value}", fg=value_color)
-            elif option == SettingOption.LANGUAGE:
-                lang_names = {"ko": "한국어", "en": "English", "ja": "日本語"}
-                value = lang_names.get(self.language, self.language)
-                console.print(value_x, y, f"< {value} >", fg=value_color)
             elif option == SettingOption.DIFFICULTY:
                 diff_names = {"easy": "쉬움", "normal": "보통", "hard": "어려움", "extreme": "익스트림"}
                 value = diff_names.get(self.difficulty, self.difficulty)
@@ -180,7 +186,8 @@ class SettingsUI:
                 value = speed_names.get(self.combat_speed, self.combat_speed)
                 console.print(value_x, y, f"< {value} >", fg=value_color)
             elif option == SettingOption.BACK:
-                pass  # 돌아가기는 값 없음
+                # 돌아가기는 값 표시 없음
+                console.print(value_x, y, "", fg=value_color)
 
             y += 2
 
@@ -188,12 +195,11 @@ class SettingsUI:
         explanations = {
             0: "배경 음악의 볼륨을 조절합니다",
             1: "효과음의 볼륨을 조절합니다",
-            2: "게임 언어를 변경합니다 (재시작 필요)",
-            3: "게임 난이도를 조절합니다",
-            4: "자동 저장 기능을 켜거나 끕니다",
-            5: "전투 중 데미지 숫자 표시 여부",
-            6: "전투 애니메이션 속도를 조절합니다",
-            7: "메뉴로 돌아갑니다",
+            2: "게임 난이도를 조절합니다",
+            3: "자동 저장 기능을 켜거나 끕니다",
+            4: "전투 중 데미지 숫자 표시 여부",
+            5: "전투 애니메이션 속도를 조절합니다",
+            6: "메뉴로 돌아갑니다",
         }
 
         explanation = explanations.get(self.selected_index, "")

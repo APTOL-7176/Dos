@@ -186,12 +186,14 @@ class WorldUI:
                     logger.warning(f"[DEBUG] 맵 적 엔티티: {len(self.combat_enemies)}개")
 
         elif result.event == ExplorationEvent.TRAP_TRIGGERED:
-            # 함정 데미지는 이미 적용됨
-            pass
+            # 함정 데미지는 exploration 시스템에서 이미 적용됨
+            # 추가 UI 처리 없음
+            logger.debug("함정 발동 - 데미지 적용됨")
 
         elif result.event == ExplorationEvent.HEAL:
-            # 회복은 이미 적용됨
-            pass
+            # 회복은 exploration 시스템에서 이미 적용됨
+            # 추가 UI 처리 없음
+            logger.debug("회복 이벤트 - HP 회복됨")
 
         elif result.event == ExplorationEvent.TELEPORT:
             self.add_message(f"위치: ({self.exploration.player.x}, {self.exploration.player.y})")
@@ -416,8 +418,9 @@ def run_exploration(
                     logger.warning(f"[DEBUG] 루프 탈출 - done=True")
                     break
             else:
-                # action이 None인 경우는 로그하지 않음 (너무 많음)
-                pass
+                # action이 None인 경우 (키 입력 없음)
+                # 다음 이벤트 처리로 넘어감
+                continue
 
             # 윈도우 닫기
             if isinstance(event, tcod.event.Quit):

@@ -264,19 +264,53 @@ class TCODDisplay:
 
         self.map_console.clear()
 
-        # TODO: 실제 맵 렌더링 구현
-        # 예시:
-        for y in range(self.map_height):
-            for x in range(self.map_width):
-                self.map_console.print(x, y, ".", fg=Colors.FLOOR)
+        # 실제 맵 렌더링 구현
+        if hasattr(game_map, 'tiles') and hasattr(game_map, 'width') and hasattr(game_map, 'height'):
+            # 맵 타일 렌더링
+            for y in range(min(game_map.height, self.map_height)):
+                for x in range(min(game_map.width, self.map_width)):
+                    tile = game_map.tiles[y][x]
 
-        # 테스트용 플레이어 표시
-        self.map_console.print(
-            self.map_width // 2,
-            self.map_height // 2,
-            "@",
-            fg=Colors.PLAYER
-        )
+                    # 타일 타입에 따라 렌더링
+                    if hasattr(tile, 'type'):
+                        if tile.type == "floor" or tile.type == 1:
+                            self.map_console.print(x, y, ".", fg=Colors.FLOOR)
+                        elif tile.type == "wall" or tile.type == 0:
+                            self.map_console.print(x, y, "#", fg=Colors.WALL)
+                        elif tile.type == "door":
+                            self.map_console.print(x, y, "+", fg=Colors.UI_TEXT)
+                        elif tile.type == "stairs_up":
+                            self.map_console.print(x, y, "<", fg=Colors.WHITE)
+                        elif tile.type == "stairs_down":
+                            self.map_console.print(x, y, ">", fg=Colors.WHITE)
+                        else:
+                            self.map_console.print(x, y, ".", fg=Colors.FLOOR)
+                    else:
+                        # 숫자로 표현된 타일
+                        if tile == 1:
+                            self.map_console.print(x, y, ".", fg=Colors.FLOOR)
+                        else:
+                            self.map_console.print(x, y, "#", fg=Colors.WALL)
+
+            # 플레이어 위치 렌더링
+            if hasattr(game_map, 'player_x') and hasattr(game_map, 'player_y'):
+                self.map_console.print(game_map.player_x, game_map.player_y, "@", fg=Colors.PLAYER)
+            else:
+                # 기본 위치
+                self.map_console.print(self.map_width // 2, self.map_height // 2, "@", fg=Colors.PLAYER)
+        else:
+            # 맵 데이터가 없는 경우 기본 맵 표시
+            for y in range(self.map_height):
+                for x in range(self.map_width):
+                    self.map_console.print(x, y, ".", fg=Colors.FLOOR)
+
+            # 테스트용 플레이어 표시
+            self.map_console.print(
+                self.map_width // 2,
+                self.map_height // 2,
+                "@",
+                fg=Colors.PLAYER
+            )
 
     def render_sidebar(self, character: any) -> None:
         """
@@ -295,17 +329,62 @@ class TCODDisplay:
         self.sidebar_console.print(1, y, "캐릭터 정보", fg=Colors.UI_TEXT)
         y += 2
 
-        # TODO: 실제 캐릭터 정보 표시
-        self.sidebar_console.print(1, y, "이름: 전사", fg=Colors.WHITE)
-        y += 1
-        self.sidebar_console.print(1, y, "레벨: 1", fg=Colors.WHITE)
-        y += 2
+        # 실제 캐릭터 정보 표시
+        if character:
+            # 이름과 직업
+            char_name = getattr(character, 'name', '알 수 없음')
+            char_class = getattr(character, 'job_name', getattr(character, 'character_class', '모험가'))
+            self.sidebar_console.print(1, y, f"이름: {char_name}", fg=Colors.WHITE)
+            y += 1
+            self.sidebar_console.print(1, y, f"직업: {char_class}", fg=Colors.WHITE)
+            y += 1
 
-        # HP 바
-        self.sidebar_console.print(1, y, "HP:", fg=Colors.UI_TEXT)
-        y += 1
-        self._render_bar(self.sidebar_console, 1, y, 18, 100, 100, Colors.HP_FULL, Colors.HP_BG)
-        y += 2
+            # 레벨
+            level = getattr(character, 'level', 1)
+            self.sidebar_console.print(1, y, f"레벨: {level}", fg=Colors.WHITE)
+            y += 2
+
+            # HP 바
+            current_hp = getattr(character, 'current_hp', 100)
+            max_hp = getattr(character, 'max_hp', 100)
+            self.sidebar_console.print(1, y, "HP:", fg=Colors.UI_TEXT)
+            y += 1
+            self._render_bar(self.sidebar_console, 1, y, 18, current_hp, max_hp, Colors.HP_FULL, Colors.HP_BG)
+            y += 2
+
+            # MP 바
+            current_mp = getattr(character, 'current_mp', 50)
+            max_mp = getattr(character, 'max_mp', 50)
+            self.sidebar_console.print(1, y, "MP:", fg=Colors.UI_TEXT)
+            y += 1
+            self._render_bar(self.sidebar_console, 1, y, 18, current_mp, max_mp, Colors.MP_FULL, Colors.MP_BG)
+            y += 2
+
+            # 주요 스탯 표시
+            if hasattr(character, 'strength'):
+                self.sidebar_console.print(1, y, f"STR: {character.strength}", fg=Colors.WHITE)
+                y += 1
+            if hasattr(character, 'defense'):
+                self.sidebar_console.print(1, y, f"DEF: {character.defense}", fg=Colors.WHITE)
+                y += 1
+            if hasattr(character, 'magic'):
+                self.sidebar_console.print(1, y, f"MAG: {character.magic}", fg=Colors.WHITE)
+                y += 1
+            if hasattr(character, 'speed'):
+                self.sidebar_console.print(1, y, f"SPD: {character.speed}", fg=Colors.WHITE)
+                y += 1
+        else:
+            # 캐릭터 정보가 없는 경우
+            self.sidebar_console.print(1, y, "이름: 전사", fg=Colors.WHITE)
+            y += 1
+            self.sidebar_console.print(1, y, "레벨: 1", fg=Colors.WHITE)
+            y += 2
+
+            # HP 바
+            self.sidebar_console.print(1, y, "HP:", fg=Colors.UI_TEXT)
+            y += 1
+            self._render_bar(self.sidebar_console, 1, y, 18, 100, 100, Colors.HP_FULL, Colors.HP_BG)
+            y += 2
 
         # MP 바
         self.sidebar_console.print(1, y, "MP:", fg=Colors.UI_TEXT)

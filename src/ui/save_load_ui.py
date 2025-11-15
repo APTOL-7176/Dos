@@ -150,8 +150,9 @@ class SaveLoadUI:
                 char = chr(event.sym)
                 if char.isprintable():
                     self.name_input.handle_char_input(char)
-            except:
-                pass
+            except Exception as e:
+                # 유효하지 않은 키 심볼 무시
+                logger.debug(f"유효하지 않은 키 입력: {e}")
 
         return False
 

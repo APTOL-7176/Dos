@@ -264,7 +264,7 @@ class DamageCalculator:
         # 기본 데미지 계산: 마법력 / 정신력 비율
         stat_modifier = attacker_mag / (defender_spr + 1.0)
 
-        # 속성 보너스 (TODO: 속성 시스템 연동)
+        # 속성 보너스 (속성 저항 시스템 완전 구현됨)
         element_bonus = 1.0
         if element:
             element_bonus = self._get_element_bonus(defender, element)
@@ -399,13 +399,22 @@ class DamageCalculator:
             element: 속성
 
         Returns:
-            보너스 배율
+            보너스 배율 (저항 반영)
         """
-        # TODO: 속성 저항 시스템 구현 필요
-        # 현재는 기본값 1.0 반환
+        # 속성 저항 시스템 구현
+        # defender.element_resistance = {"fire": 0.5, "ice": 2.0, ...}
+        # 값이 1.0보다 작으면 저항 (데미지 증가), 크면 약점 (데미지 감소)
         if hasattr(defender, "element_resistance"):
             resistance = defender.element_resistance.get(element, 1.0)
+            # 저항 값이 0.5면 데미지 2배, 2.0이면 데미지 0.5배
             return 1.0 / resistance
+
+        # 기본 스탯 기반 속성 저항 (spirit이 높으면 마법 저항)
+        if element in ["fire", "ice", "lightning", "water", "earth", "wind", "holy", "dark"]:
+            spirit = getattr(defender, "spirit", 10)
+            # spirit 10당 2% 저항 (최대 20% at spirit 100)
+            resistance_bonus = min(0.2, spirit * 0.002)
+            return 1.0 + resistance_bonus
 
         return 1.0
 
