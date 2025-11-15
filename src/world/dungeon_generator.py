@@ -516,10 +516,10 @@ class DungeonGenerator:
             floor_number: 층 번호
         """
         try:
-            from src.gathering.harvestable import HarvestableGenerator
+            from src.gathering.harvestable import HarvestableGenerator, HarvestableType, HarvestableObject
 
-            # 층별 개수 결정 (3~8개)
-            count = random.randint(3, 8)
+            # 층별 개수 결정 (8~15개로 대폭 증가)
+            count = random.randint(8, 15)
 
             # 채집 오브젝트 생성
             harvestables = HarvestableGenerator.generate_for_floor(floor_number, count)
@@ -536,6 +536,20 @@ class DungeonGenerator:
                 if pos:
                     harvestable.x, harvestable.y = pos
                     dungeon.harvestables.append(harvestable)
+
+            # 요리솥 배치 (3층당 1번 = 약 33% 확률)
+            if random.random() < 0.33 or floor_number % 3 == 0:
+                room = random.choice(dungeon.rooms) if dungeon.rooms else None
+                if room:
+                    pos = self._get_random_floor_pos(dungeon, room, avoid_center=False)
+                    if pos:
+                        cooking_pot = HarvestableObject(
+                            object_type=HarvestableType.COOKING_POT,
+                            x=pos[0],
+                            y=pos[1]
+                        )
+                        dungeon.harvestables.append(cooking_pot)
+                        logger.info(f"요리솥 배치: {pos}")
 
             logger.info(f"채집 오브젝트 {len(dungeon.harvestables)}개 배치")
 

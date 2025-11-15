@@ -22,24 +22,30 @@ class GimmickEffect(SkillEffect):
     def execute(self, user, target, context) -> EffectResult:
         if not hasattr(user, self.field):
             return EffectResult(effect_type=EffectType.GIMMICK, success=False)
-        
+
         old_value = getattr(user, self.field, 0)
         new_value = old_value
-        
+
         if self.operation == GimmickOperation.ADD:
             new_value = old_value + self.value
         elif self.operation == GimmickOperation.SET:
             new_value = self.value
         elif self.operation == GimmickOperation.CONSUME:
             new_value = old_value - self.value
-        
-        # 제한
-        if self.max_value is not None:
+
+        # 제한 (캐릭터의 max_{field} 속성을 우선 참조)
+        max_field_name = f"max_{self.field}"
+        if hasattr(user, max_field_name):
+            # 캐릭터에 max_{field} 속성이 있으면 그걸 사용 (최우선)
+            actual_max = getattr(user, max_field_name)
+            new_value = min(new_value, actual_max)
+        elif self.max_value is not None:
+            # 스킬에서 지정한 max_value 사용 (fallback)
             new_value = min(new_value, self.max_value)
         new_value = max(new_value, 0)
-        
+
         setattr(user, self.field, new_value)
-        
+
         return EffectResult(
             effect_type=EffectType.GIMMICK,
             success=True,

@@ -21,6 +21,7 @@ class HarvestableType(Enum):
     ROCK = "rock"                   # 바위 (광물)
     WATER = "water"                 # 물 (물고기, 얼음)
     CARCASS = "carcass"             # 시체 (고기)
+    COOKING_POT = "cooking_pot"     # 요리솥
 
     @property
     def display_name(self) -> str:
@@ -32,7 +33,8 @@ class HarvestableType(Enum):
             HarvestableType.TREE: "나무",
             HarvestableType.ROCK: "바위",
             HarvestableType.WATER: "물가",
-            HarvestableType.CARCASS: "시체"
+            HarvestableType.CARCASS: "시체",
+            HarvestableType.COOKING_POT: "요리솥"
         }
         return names.get(self, "???")
 
@@ -46,7 +48,8 @@ class HarvestableType(Enum):
             HarvestableType.TREE: "♣",
             HarvestableType.ROCK: "◙",
             HarvestableType.WATER: "≈",
-            HarvestableType.CARCASS: "☠"
+            HarvestableType.CARCASS: "☠",
+            HarvestableType.COOKING_POT: "Ω"
         }
         return symbols.get(self, "?")
 
@@ -72,35 +75,39 @@ class HarvestableObject:
             self.loot_table = self._get_default_loot_table()
 
     def _get_default_loot_table(self) -> List[Tuple[str, int, int]]:
-        """타입별 기본 루트 테이블"""
+        """타입별 기본 루트 테이블 (드롭률 대폭 증가)"""
         loot_tables = {
             HarvestableType.BERRY_BUSH: [
-                ("berry", 2, 4),
+                ("berry", 3, 6),  # 2-4 → 3-6
             ],
             HarvestableType.MUSHROOM_PATCH: [
-                ("red_mushroom", 1, 2),
-                ("blue_mushroom", 0, 1),  # 확률적 드롭
+                ("red_mushroom", 2, 4),  # 1-2 → 2-4
+                ("blue_mushroom", 1, 2),  # 0-1 → 1-2 (확률적 → 확정)
             ],
             HarvestableType.HERB_PLANT: [
-                ("carrot", 1, 2),
-                ("potato", 0, 2),
-                ("magic_herb", 0, 1),
+                ("carrot", 2, 4),  # 1-2 → 2-4
+                ("potato", 1, 3),  # 0-2 → 1-3
+                ("magic_herb", 0, 2),  # 0-1 → 0-2
             ],
             HarvestableType.TREE: [
-                ("stick", 1, 3),
-                ("apple", 0, 2),
-                ("berry", 0, 1),
+                ("stick", 2, 5),  # 1-3 → 2-5
+                ("apple", 1, 3),  # 0-2 → 1-3
+                ("berry", 1, 2),  # 0-1 → 1-2
             ],
             HarvestableType.ROCK: [
-                ("ice", 1, 2),
+                ("ice", 2, 4),  # 1-2 → 2-4
             ],
             HarvestableType.WATER: [
-                ("fish", 1, 3),
-                ("ice", 0, 1),
+                ("fish", 2, 5),  # 1-3 → 2-5
+                ("ice", 1, 2),  # 0-1 → 1-2
             ],
             HarvestableType.CARCASS: [
-                ("monster_meat", 1, 2),
-                ("beast_meat", 0, 1),
+                ("monster_meat", 2, 4),  # 1-2 → 2-4
+                ("beast_meat", 1, 2),  # 0-1 → 1-2 (확정)
+                ("dragon_meat", 0, 1),  # 추가: 희귀 드롭
+            ],
+            HarvestableType.COOKING_POT: [
+                # 요리솥은 채집 대상이 아니라 상호작용 오브젝트
             ],
         }
         return loot_tables.get(self.object_type, [])
