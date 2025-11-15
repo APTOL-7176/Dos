@@ -65,6 +65,12 @@ def get_gold_shop_items(floor_level: int = 1) -> dict:
         ("mana_potion", 60),
         ("mega_mana_potion", 140),
         ("elixir", 500),
+        # BRV/상처 관련 소모품
+        ("wound_salve", 80),
+        ("greater_wound_salve", 180),
+        ("phoenix_tears", 450),
+        ("brave_crystal", 200),
+        ("mega_brave_crystal", 400),
     ]
 
     for item_id, price in consumable_items:
@@ -102,6 +108,9 @@ def get_gold_shop_items(floor_level: int = 1) -> dict:
             ("hunting_bow", 90),
             ("leather_armor", 80),
             ("health_ring", 100),
+            ("mana_ring", 100),
+            ("apprentice_robe", 110),
+            ("iron_greatsword", 150),
         ]
     elif floor_level <= 7:
         # 중반 (4~7층): 중급 장비
@@ -110,7 +119,11 @@ def get_gold_shop_items(floor_level: int = 1) -> dict:
             ("crystal_staff", 350),
             ("longbow", 280),
             ("chainmail", 250),
-            ("mana_ring", 300),
+            ("battle_mage_robe", 320),
+            ("regeneration_ring", 380),
+            ("wisdom_tome", 400),
+            ("vampire_dagger", 420),
+            ("eagle_eye_amulet", 350),  # +1 시야
         ]
     elif floor_level <= 12:
         # 후반 (8~12층): 고급 장비
@@ -120,6 +133,12 @@ def get_gold_shop_items(floor_level: int = 1) -> dict:
             ("assassin_dagger", 750),
             ("plate_armor", 700),
             ("phoenix_ring", 850),
+            ("sorcerer_vestments", 880),
+            ("elemental_scepter", 920),
+            ("lifesteal_blade", 1000),
+            ("berserker_axe", 950),
+            ("far_sight_lens", 700),  # +1 시야
+            ("wound_ward_armor", 850),  # 상처 감소
         ]
     else:
         # 최후반 (13층+): 최상급 장비
@@ -129,6 +148,11 @@ def get_gold_shop_items(floor_level: int = 1) -> dict:
             ("staff_of_cosmos", 3000),
             ("dragon_armor", 2000),
             ("ring_of_gods", 2500),
+            ("elemental_master_robe", 2800),
+            ("meteor_staff", 3500),
+            ("apocalypse_blade", 4500),
+            ("owls_pendant", 2000),  # +2 시야
+            ("immortal_ring", 3200),  # 상처 면역
         ]
 
     for item_id, price in equipment_items:
@@ -144,7 +168,8 @@ def get_gold_shop_items(floor_level: int = 1) -> dict:
                 level_requirement=template["level_requirement"],
                 base_stats=template["base_stats"],
                 sell_price=template["sell_price"],
-                equip_slot=EquipSlot.WEAPON
+                equip_slot=EquipSlot.WEAPON,
+                unique_effect=template.get("unique_effect")  # 특수 효과 추가
             )
             items[GoldShopTab.EQUIPMENT].append(
                 GoldShopItem(equipment.name, equipment.description, price, equipment, "equipment")
@@ -161,7 +186,8 @@ def get_gold_shop_items(floor_level: int = 1) -> dict:
                 level_requirement=template["level_requirement"],
                 base_stats=template["base_stats"],
                 sell_price=template["sell_price"],
-                equip_slot=EquipSlot.BODY
+                equip_slot=EquipSlot.BODY,
+                unique_effect=template.get("unique_effect")  # 특수 효과 추가
             )
             items[GoldShopTab.EQUIPMENT].append(
                 GoldShopItem(equipment.name, equipment.description, price, equipment, "equipment")
@@ -178,7 +204,8 @@ def get_gold_shop_items(floor_level: int = 1) -> dict:
                 level_requirement=template["level_requirement"],
                 base_stats=template["base_stats"],
                 sell_price=template["sell_price"],
-                equip_slot=EquipSlot.ACCESSORY1
+                equip_slot=EquipSlot.ACCESSORY1,
+                unique_effect=template.get("unique_effect")  # 특수 효과 추가
             )
             items[GoldShopTab.EQUIPMENT].append(
                 GoldShopItem(equipment.name, equipment.description, price, equipment, "equipment")
@@ -189,6 +216,9 @@ def get_gold_shop_items(floor_level: int = 1) -> dict:
         ("town_portal", 200),
         ("dungeon_key", 150),
         ("phoenix_down", 300),
+        ("revival_essence", 400),
+        ("wound_cure_essence", 350),
+        ("brv_shield_elixir", 280),
     ]
 
     for item_id, price in special_items:
