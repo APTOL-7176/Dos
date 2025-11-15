@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Dawn of Stellar 게임 런처
+Dawn of Stellar 게임 런처 (GUI)
 
-게임 실행, 세이브 관리, 로그 확인 등 다양한 기능 제공
+TCOD 기반 그래픽 런처
 """
 
 import os
@@ -12,24 +12,34 @@ import json
 import shutil
 from pathlib import Path
 from datetime import datetime
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Tuple
+
+import tcod
+import tcod.event
+
+# 프로젝트 루트를 Python 경로에 추가
+PROJECT_ROOT = Path(__file__).parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from src.ui.cursor_menu import CursorMenu, MenuItem
+from src.ui.tcod_display import Colors
+from src.audio import initialize_audio, play_bgm, play_sfx
 
 
-class Color:
-    """터미널 색상 코드"""
-    HEADER = '\033[95m'
-    BLUE = '\033[94m'
-    CYAN = '\033[96m'
-    GREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    RED = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+class LauncherState:
+    """런처 상태"""
+    MAIN_MENU = "main_menu"
+    SAVE_MANAGER = "save_manager"
+    LOG_VIEWER = "log_viewer"
+    SETTINGS = "settings"
+    GAME_INFO = "game_info"
+    SYSTEM_CHECK = "system_check"
+    RUNNING_GAME = "running_game"
+    EXIT = "exit"
 
 
 class GameLauncher:
-    """게임 런처 클래스"""
+    """게임 런처 GUI"""
 
     def __init__(self):
         self.root_dir = Path(__file__).parent
@@ -42,120 +52,278 @@ class GameLauncher:
         self.saves_dir.mkdir(exist_ok=True)
         self.logs_dir.mkdir(exist_ok=True)
 
-    def clear_screen(self):
-        """화면 지우기"""
-        os.system('cls' if os.name == 'nt' else 'clear')
+        # 화면 설정
+        self.screen_width = 100
+        self.screen_height = 50
+        self.title = "Dawn of Stellar - Game Launcher"
 
-    def print_header(self):
-        """헤더 출력"""
-        self.clear_screen()
-        print(f"{Color.CYAN}{Color.BOLD}")
-        print("╔════════════════════════════════════════════════════════════════╗")
-        print("║                                                                ║")
-        print("║              ⭐ Dawn of Stellar - 별빛의 여명 ⭐              ║")
-        print("║                                                                ║")
-        print("║                    게임 런처 v1.0.0                            ║")
-        print("║                                                                ║")
-        print("╚════════════════════════════════════════════════════════════════╝")
-        print(f"{Color.ENDC}")
+        # 폰트 로드
+        font_path = self.root_dir / "D2Coding.ttc"
+        if not font_path.exists():
+            font_path = None
 
-    def print_menu(self):
-        """메인 메뉴 출력"""
-        print(f"\n{Color.BOLD}[ 메인 메뉴 ]{Color.ENDC}\n")
-        print(f"{Color.GREEN}1.{Color.ENDC} 🎮 게임 시작")
-        print(f"{Color.GREEN}2.{Color.ENDC} 🔧 개발 모드로 시작 (모든 직업 해금)")
-        print(f"{Color.GREEN}3.{Color.ENDC} 🐛 디버그 모드로 시작")
-        print(f"{Color.GREEN}4.{Color.ENDC} 💾 세이브 파일 관리")
-        print(f"{Color.GREEN}5.{Color.ENDC} 📋 로그 확인")
-        print(f"{Color.GREEN}6.{Color.ENDC} 🧪 테스트 실행")
-        print(f"{Color.GREEN}7.{Color.ENDC} ⚙️  설정")
-        print(f"{Color.GREEN}8.{Color.ENDC} ℹ️  게임 정보")
-        print(f"{Color.GREEN}9.{Color.ENDC} 🔍 시스템 체크")
-        print(f"{Color.RED}0.{Color.ENDC} 🚪 종료")
-        print()
+        # TCOD 초기화
+        if font_path and font_path.exists():
+            tcod.console.set_custom_font(
+                str(font_path),
+                tcod.FONT_LAYOUT_TCOD | tcod.FONT_TYPE_GREYSCALE,
+                nb_char_horizontal=32,
+                nb_char_vertical=64
+            )
 
-    def run_game(self, mode: str = "normal"):
-        """게임 실행
+        self.context = tcod.context.new(
+            width=self.screen_width,
+            height=self.screen_height,
+            title=self.title,
+            vsync=True,
+            sdl_window_flags=tcod.context.SDL_WINDOW_RESIZABLE
+        )
 
-        Args:
-            mode: "normal", "dev", "debug"
-        """
-        print(f"\n{Color.YELLOW}게임을 시작합니다...{Color.ENDC}\n")
+        self.console = tcod.console.Console(self.screen_width, self.screen_height, order="F")
 
+        # 상태
+        self.state = LauncherState.MAIN_MENU
+        self.running = True
+        self.message = ""
+        self.message_color = Colors.WHITE
+        self.message_timer = 0
+
+        # 메뉴
+        self.current_menu: Optional[CursorMenu] = None
+        self.submenu_data: Optional[List] = None
+
+        # 오디오 초기화
+        try:
+            initialize_audio()
+            play_bgm("menu", loop=True)
+        except Exception:
+            pass
+
+    def show_message(self, text: str, color: Tuple[int, int, int] = Colors.WHITE, duration: int = 180):
+        """메시지 표시"""
+        self.message = text
+        self.message_color = color
+        self.message_timer = duration
+
+    def create_main_menu(self) -> CursorMenu:
+        """메인 메뉴 생성"""
+        items = [
+            MenuItem("🎮 게임 시작", value="game_normal", description="일반 모드로 게임을 시작합니다"),
+            MenuItem("🔧 개발 모드", value="game_dev", description="모든 직업 잠금 해제"),
+            MenuItem("🐛 디버그 모드", value="game_debug", description="상세 로그 출력 모드"),
+            MenuItem("💾 세이브 관리", value="save_manager", description="세이브 파일 백업/삭제/확인"),
+            MenuItem("📋 로그 확인", value="log_viewer", description="게임 로그 파일 확인"),
+            MenuItem("⚙️  설정", value="settings", description="게임 설정 확인"),
+            MenuItem("ℹ️  게임 정보", value="game_info", description="게임 정보 및 버전 확인"),
+            MenuItem("🔍 시스템 체크", value="system_check", description="시스템 요구사항 확인"),
+            MenuItem("🚪 종료", value="exit", description="런처 종료"),
+        ]
+
+        return CursorMenu(
+            title="Dawn of Stellar - 별빛의 여명",
+            items=items,
+            x=25,
+            y=10,
+            width=50,
+            show_description=True
+        )
+
+    def create_save_menu(self) -> CursorMenu:
+        """세이브 관리 메뉴 생성"""
+        save_files = sorted(self.saves_dir.glob("*.json"), key=os.path.getmtime, reverse=True)
+        self.submenu_data = list(save_files)
+
+        items = []
+
+        if not save_files:
+            items.append(MenuItem("세이브 파일이 없습니다", enabled=False))
+        else:
+            for i, save_file in enumerate(save_files[:15]):  # 최대 15개
+                size = save_file.stat().st_size
+                mtime = datetime.fromtimestamp(save_file.stat().st_mtime)
+
+                # 세이브 정보 미리보기
+                preview = ""
+                try:
+                    with open(save_file, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                        if 'floor' in data:
+                            preview = f" [{data['floor']}층]"
+                except Exception:
+                    pass
+
+                desc = f"크기: {size:,} bytes | {mtime.strftime('%Y-%m-%d %H:%M:%S')}{preview}"
+                items.append(MenuItem(save_file.name, value=i, description=desc))
+
+        items.append(MenuItem("", enabled=False))  # 구분선
+        items.append(MenuItem("💾 모든 세이브 백업", value="backup_all", description="모든 세이브 파일 백업"))
+        items.append(MenuItem("🗑️  선택 파일 삭제", value="delete_selected", description="선택한 세이브 삭제"))
+        items.append(MenuItem("← 뒤로 가기", value="back", description="메인 메뉴로 돌아가기"))
+
+        return CursorMenu(
+            title="세이브 파일 관리",
+            items=items,
+            x=10,
+            y=5,
+            width=80,
+            show_description=True
+        )
+
+    def create_log_menu(self) -> CursorMenu:
+        """로그 확인 메뉴 생성"""
+        log_files = sorted(self.logs_dir.glob("*.log"), key=os.path.getmtime, reverse=True)[:20]
+        self.submenu_data = list(log_files)
+
+        items = []
+
+        if not log_files:
+            items.append(MenuItem("로그 파일이 없습니다", enabled=False))
+        else:
+            for i, log_file in enumerate(log_files):
+                size = log_file.stat().st_size
+                mtime = datetime.fromtimestamp(log_file.stat().st_mtime)
+                desc = f"크기: {size:,} bytes | {mtime.strftime('%Y-%m-%d %H:%M:%S')}"
+                items.append(MenuItem(log_file.name, value=i, description=desc))
+
+        items.append(MenuItem("", enabled=False))  # 구분선
+        items.append(MenuItem("🗑️  선택 파일 삭제", value="delete_selected", description="선택한 로그 삭제"))
+        items.append(MenuItem("🧹 모든 로그 삭제", value="delete_all", description="모든 로그 파일 삭제"))
+        items.append(MenuItem("← 뒤로 가기", value="back", description="메인 메뉴로 돌아가기"))
+
+        return CursorMenu(
+            title="로그 파일 확인",
+            items=items,
+            x=10,
+            y=5,
+            width=80,
+            show_description=True
+        )
+
+    def handle_input(self, event: tcod.event.Event) -> None:
+        """입력 처리"""
+        if isinstance(event, tcod.event.Quit):
+            self.running = False
+            return
+
+        if not isinstance(event, tcod.event.KeyDown):
+            return
+
+        key = event.sym
+
+        # ESC - 뒤로가기 또는 종료
+        if key == tcod.event.KeySym.ESCAPE:
+            if self.state == LauncherState.MAIN_MENU:
+                self.running = False
+            else:
+                self.state = LauncherState.MAIN_MENU
+                self.current_menu = self.create_main_menu()
+                play_sfx("ui", "cancel")
+            return
+
+        if not self.current_menu:
+            return
+
+        # 메뉴 조작
+        if key == tcod.event.KeySym.UP or key == tcod.event.KeySym.k:
+            self.current_menu.move_cursor_up()
+        elif key == tcod.event.KeySym.DOWN or key == tcod.event.KeySym.j:
+            self.current_menu.move_cursor_down()
+        elif key == tcod.event.KeySym.RETURN or key == tcod.event.KeySym.z:
+            self.handle_menu_selection()
+        elif key == tcod.event.KeySym.x or key == tcod.event.KeySym.BACKSPACE:
+            if self.state != LauncherState.MAIN_MENU:
+                self.state = LauncherState.MAIN_MENU
+                self.current_menu = self.create_main_menu()
+                play_sfx("ui", "cancel")
+
+    def handle_menu_selection(self) -> None:
+        """메뉴 선택 처리"""
+        if not self.current_menu:
+            return
+
+        selected = self.current_menu.get_selected_item()
+        if not selected or not selected.enabled:
+            return
+
+        play_sfx("ui", "confirm")
+        value = selected.value
+
+        # 메인 메뉴
+        if self.state == LauncherState.MAIN_MENU:
+            if value == "game_normal":
+                self.run_game("normal")
+            elif value == "game_dev":
+                self.run_game("dev")
+            elif value == "game_debug":
+                self.run_game("debug")
+            elif value == "save_manager":
+                self.state = LauncherState.SAVE_MANAGER
+                self.current_menu = self.create_save_menu()
+            elif value == "log_viewer":
+                self.state = LauncherState.LOG_VIEWER
+                self.current_menu = self.create_log_menu()
+            elif value == "settings":
+                self.state = LauncherState.SETTINGS
+            elif value == "game_info":
+                self.state = LauncherState.GAME_INFO
+            elif value == "system_check":
+                self.state = LauncherState.SYSTEM_CHECK
+            elif value == "exit":
+                self.running = False
+
+        # 세이브 관리 메뉴
+        elif self.state == LauncherState.SAVE_MANAGER:
+            if value == "back":
+                self.state = LauncherState.MAIN_MENU
+                self.current_menu = self.create_main_menu()
+            elif value == "backup_all":
+                self.backup_all_saves()
+            elif value == "delete_selected":
+                self.delete_selected_save()
+            elif isinstance(value, int):
+                self.show_save_info(value)
+
+        # 로그 확인 메뉴
+        elif self.state == LauncherState.LOG_VIEWER:
+            if value == "back":
+                self.state = LauncherState.MAIN_MENU
+                self.current_menu = self.create_main_menu()
+            elif value == "delete_selected":
+                self.delete_selected_log()
+            elif value == "delete_all":
+                self.delete_all_logs()
+            elif isinstance(value, int):
+                self.show_log_info(value)
+
+    def run_game(self, mode: str):
+        """게임 실행"""
         cmd = [sys.executable, str(self.main_script)]
 
         if mode == "dev":
             cmd.append("--dev")
-            print(f"{Color.CYAN}📌 개발 모드: 모든 직업 잠금 해제{Color.ENDC}")
+            self.show_message("개발 모드로 게임을 시작합니다...", Colors.CYAN)
         elif mode == "debug":
             cmd.extend(["--debug", "--log=DEBUG"])
-            print(f"{Color.CYAN}📌 디버그 모드: 상세 로그 출력{Color.ENDC}")
+            self.show_message("디버그 모드로 게임을 시작합니다...", Colors.CYAN)
+        else:
+            self.show_message("게임을 시작합니다...", Colors.GREEN)
 
-        print(f"{Color.CYAN}명령어: {' '.join(cmd)}{Color.ENDC}\n")
-        print(f"{Color.GREEN}게임 창이 열립니다. 게임 종료 시 이 창으로 돌아옵니다.{Color.ENDC}\n")
+        # 화면 업데이트
+        self.render()
+        self.context.present(self.console)
 
+        # 게임 실행
         try:
             result = subprocess.run(cmd, cwd=self.root_dir)
             if result.returncode == 0:
-                print(f"\n{Color.GREEN}✓ 게임이 정상 종료되었습니다.{Color.ENDC}")
+                self.show_message("게임이 정상 종료되었습니다.", Colors.GREEN)
             else:
-                print(f"\n{Color.RED}✗ 게임이 오류로 종료되었습니다. (코드: {result.returncode}){Color.ENDC}")
+                self.show_message(f"게임이 오류로 종료되었습니다. (코드: {result.returncode})", Colors.RED)
         except Exception as e:
-            print(f"\n{Color.RED}✗ 게임 실행 중 오류 발생: {e}{Color.ENDC}")
+            self.show_message(f"게임 실행 중 오류 발생: {e}", Colors.RED)
 
-        input(f"\n{Color.YELLOW}Press Enter to continue...{Color.ENDC}")
-
-    def manage_saves(self):
-        """세이브 파일 관리"""
-        while True:
-            self.print_header()
-            print(f"\n{Color.BOLD}[ 💾 세이브 파일 관리 ]{Color.ENDC}\n")
-
-            # 세이브 파일 목록
-            save_files = sorted(self.saves_dir.glob("*.json"), key=os.path.getmtime, reverse=True)
-
-            if not save_files:
-                print(f"{Color.YELLOW}세이브 파일이 없습니다.{Color.ENDC}\n")
-            else:
-                print(f"{Color.CYAN}총 {len(save_files)}개의 세이브 파일:{Color.ENDC}\n")
-                for i, save_file in enumerate(save_files, 1):
-                    size = save_file.stat().st_size
-                    mtime = datetime.fromtimestamp(save_file.stat().st_mtime)
-                    print(f"{i}. {Color.GREEN}{save_file.name}{Color.ENDC}")
-                    print(f"   크기: {size:,} bytes | 수정: {mtime.strftime('%Y-%m-%d %H:%M:%S')}")
-
-                    # 세이브 정보 미리보기
-                    try:
-                        with open(save_file, 'r', encoding='utf-8') as f:
-                            data = json.load(f)
-                            if 'party' in data:
-                                party_names = [char.get('name', 'Unknown') for char in data['party']]
-                                print(f"   파티: {', '.join(party_names)}")
-                            if 'floor' in data:
-                                print(f"   층수: {data['floor']}층")
-                    except Exception:
-                        pass
-                    print()
-
-            print(f"\n{Color.GREEN}1.{Color.ENDC} 세이브 파일 백업")
-            print(f"{Color.GREEN}2.{Color.ENDC} 세이브 파일 삭제")
-            print(f"{Color.GREEN}3.{Color.ENDC} 세이브 파일 정보 상세보기")
-            print(f"{Color.RED}0.{Color.ENDC} 뒤로 가기")
-            print()
-
-            choice = input(f"{Color.YELLOW}선택: {Color.ENDC}").strip()
-
-            if choice == "0":
-                break
-            elif choice == "1":
-                self.backup_saves()
-            elif choice == "2":
-                self.delete_save(save_files)
-            elif choice == "3":
-                self.show_save_info(save_files)
-
-    def backup_saves(self):
-        """세이브 파일 백업"""
+    def backup_all_saves(self):
+        """모든 세이브 백업"""
         backup_dir = self.root_dir / "saves_backup"
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         backup_path = backup_dir / f"backup_{timestamp}"
@@ -167,375 +335,248 @@ class GameLauncher:
                 shutil.copy2(save_file, backup_path / save_file.name)
                 count += 1
 
-            print(f"\n{Color.GREEN}✓ {count}개의 세이브 파일을 백업했습니다.{Color.ENDC}")
-            print(f"{Color.CYAN}위치: {backup_path}{Color.ENDC}")
+            self.show_message(f"✓ {count}개의 세이브 파일을 백업했습니다.", Colors.GREEN)
+            self.current_menu = self.create_save_menu()
         except Exception as e:
-            print(f"\n{Color.RED}✗ 백업 중 오류 발생: {e}{Color.ENDC}")
+            self.show_message(f"✗ 백업 중 오류 발생: {e}", Colors.RED)
 
-        input(f"\n{Color.YELLOW}Press Enter to continue...{Color.ENDC}")
-
-    def delete_save(self, save_files: List[Path]):
-        """세이브 파일 삭제"""
-        if not save_files:
+    def delete_selected_save(self):
+        """선택한 세이브 삭제"""
+        if not self.submenu_data:
             return
 
-        print(f"\n{Color.YELLOW}삭제할 파일 번호 입력 (0: 취소): {Color.ENDC}", end="")
-        choice = input().strip()
-
-        try:
-            idx = int(choice)
-            if idx == 0:
-                return
-            if 1 <= idx <= len(save_files):
-                file_to_delete = save_files[idx - 1]
-                confirm = input(f"{Color.RED}정말로 '{file_to_delete.name}'을(를) 삭제하시겠습니까? (y/N): {Color.ENDC}").strip().lower()
-                if confirm == 'y':
-                    file_to_delete.unlink()
-                    print(f"\n{Color.GREEN}✓ 파일이 삭제되었습니다.{Color.ENDC}")
-                else:
-                    print(f"\n{Color.YELLOW}취소되었습니다.{Color.ENDC}")
-            else:
-                print(f"\n{Color.RED}✗ 잘못된 번호입니다.{Color.ENDC}")
-        except ValueError:
-            print(f"\n{Color.RED}✗ 숫자를 입력해주세요.{Color.ENDC}")
-        except Exception as e:
-            print(f"\n{Color.RED}✗ 오류 발생: {e}{Color.ENDC}")
-
-        input(f"\n{Color.YELLOW}Press Enter to continue...{Color.ENDC}")
-
-    def show_save_info(self, save_files: List[Path]):
-        """세이브 파일 상세 정보"""
-        if not save_files:
+        selected = self.current_menu.get_selected_item()
+        if not selected or not isinstance(selected.value, int):
+            self.show_message("삭제할 파일을 선택하세요", Colors.YELLOW)
             return
 
-        print(f"\n{Color.YELLOW}확인할 파일 번호 입력 (0: 취소): {Color.ENDC}", end="")
-        choice = input().strip()
-
         try:
-            idx = int(choice)
-            if idx == 0:
-                return
-            if 1 <= idx <= len(save_files):
-                save_file = save_files[idx - 1]
-                with open(save_file, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-
-                print(f"\n{Color.CYAN}{'=' * 60}{Color.ENDC}")
-                print(f"{Color.BOLD}{save_file.name}{Color.ENDC}")
-                print(f"{Color.CYAN}{'=' * 60}{Color.ENDC}\n")
-                print(json.dumps(data, indent=2, ensure_ascii=False))
-            else:
-                print(f"\n{Color.RED}✗ 잘못된 번호입니다.{Color.ENDC}")
+            save_file = self.submenu_data[selected.value]
+            save_file.unlink()
+            self.show_message(f"✓ '{save_file.name}' 파일이 삭제되었습니다.", Colors.GREEN)
+            self.current_menu = self.create_save_menu()
         except Exception as e:
-            print(f"\n{Color.RED}✗ 오류 발생: {e}{Color.ENDC}")
+            self.show_message(f"✗ 삭제 중 오류 발생: {e}", Colors.RED)
 
-        input(f"\n{Color.YELLOW}Press Enter to continue...{Color.ENDC}")
-
-    def view_logs(self):
-        """로그 확인"""
-        while True:
-            self.print_header()
-            print(f"\n{Color.BOLD}[ 📋 로그 확인 ]{Color.ENDC}\n")
-
-            # 최근 로그 파일 목록
-            log_files = sorted(self.logs_dir.glob("*.log"), key=os.path.getmtime, reverse=True)[:20]
-
-            if not log_files:
-                print(f"{Color.YELLOW}로그 파일이 없습니다.{Color.ENDC}\n")
-            else:
-                print(f"{Color.CYAN}최근 20개 로그 파일:{Color.ENDC}\n")
-                for i, log_file in enumerate(log_files, 1):
-                    size = log_file.stat().st_size
-                    mtime = datetime.fromtimestamp(log_file.stat().st_mtime)
-                    print(f"{i}. {Color.GREEN}{log_file.name}{Color.ENDC}")
-                    print(f"   크기: {size:,} bytes | 수정: {mtime.strftime('%Y-%m-%d %H:%M:%S')}\n")
-
-            print(f"{Color.GREEN}1.{Color.ENDC} 로그 파일 보기")
-            print(f"{Color.GREEN}2.{Color.ENDC} 로그 파일 삭제")
-            print(f"{Color.GREEN}3.{Color.ENDC} 모든 로그 삭제")
-            print(f"{Color.RED}0.{Color.ENDC} 뒤로 가기")
-            print()
-
-            choice = input(f"{Color.YELLOW}선택: {Color.ENDC}").strip()
-
-            if choice == "0":
-                break
-            elif choice == "1":
-                self.show_log(log_files)
-            elif choice == "2":
-                self.delete_log(log_files)
-            elif choice == "3":
-                self.clear_all_logs()
-
-    def show_log(self, log_files: List[Path]):
-        """로그 파일 내용 표시"""
-        if not log_files:
+    def show_save_info(self, index: int):
+        """세이브 정보 표시"""
+        if not self.submenu_data or index >= len(self.submenu_data):
             return
 
-        print(f"\n{Color.YELLOW}확인할 로그 번호 입력 (0: 취소): {Color.ENDC}", end="")
-        choice = input().strip()
-
         try:
-            idx = int(choice)
-            if idx == 0:
-                return
-            if 1 <= idx <= len(log_files):
-                log_file = log_files[idx - 1]
-                print(f"\n{Color.CYAN}{'=' * 60}{Color.ENDC}")
-                print(f"{Color.BOLD}{log_file.name}{Color.ENDC}")
-                print(f"{Color.CYAN}{'=' * 60}{Color.ENDC}\n")
+            save_file = self.submenu_data[index]
+            with open(save_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
 
-                with open(log_file, 'r', encoding='utf-8') as f:
-                    lines = f.readlines()
-                    # 마지막 50줄만 표시
-                    for line in lines[-50:]:
-                        print(line.rstrip())
-            else:
-                print(f"\n{Color.RED}✗ 잘못된 번호입니다.{Color.ENDC}")
+            info = f"파일: {save_file.name}"
+            if 'floor' in data:
+                info += f" | 층수: {data['floor']}층"
+            if 'party' in data:
+                party_count = len(data['party'])
+                info += f" | 파티: {party_count}명"
+
+            self.show_message(info, Colors.CYAN, duration=300)
         except Exception as e:
-            print(f"\n{Color.RED}✗ 오류 발생: {e}{Color.ENDC}")
+            self.show_message(f"✗ 정보 읽기 오류: {e}", Colors.RED)
 
-        input(f"\n{Color.YELLOW}Press Enter to continue...{Color.ENDC}")
-
-    def delete_log(self, log_files: List[Path]):
-        """로그 파일 삭제"""
-        if not log_files:
+    def delete_selected_log(self):
+        """선택한 로그 삭제"""
+        if not self.submenu_data:
             return
 
-        print(f"\n{Color.YELLOW}삭제할 로그 번호 입력 (0: 취소): {Color.ENDC}", end="")
-        choice = input().strip()
+        selected = self.current_menu.get_selected_item()
+        if not selected or not isinstance(selected.value, int):
+            self.show_message("삭제할 로그를 선택하세요", Colors.YELLOW)
+            return
 
         try:
-            idx = int(choice)
-            if idx == 0:
-                return
-            if 1 <= idx <= len(log_files):
-                log_file = log_files[idx - 1]
-                log_file.unlink()
-                print(f"\n{Color.GREEN}✓ 로그 파일이 삭제되었습니다.{Color.ENDC}")
-            else:
-                print(f"\n{Color.RED}✗ 잘못된 번호입니다.{Color.ENDC}")
+            log_file = self.submenu_data[selected.value]
+            log_file.unlink()
+            self.show_message(f"✓ '{log_file.name}' 로그가 삭제되었습니다.", Colors.GREEN)
+            self.current_menu = self.create_log_menu()
         except Exception as e:
-            print(f"\n{Color.RED}✗ 오류 발생: {e}{Color.ENDC}")
+            self.show_message(f"✗ 삭제 중 오류 발생: {e}", Colors.RED)
 
-        input(f"\n{Color.YELLOW}Press Enter to continue...{Color.ENDC}")
-
-    def clear_all_logs(self):
+    def delete_all_logs(self):
         """모든 로그 삭제"""
-        confirm = input(f"{Color.RED}정말로 모든 로그를 삭제하시겠습니까? (y/N): {Color.ENDC}").strip().lower()
-        if confirm == 'y':
-            try:
-                count = 0
-                for log_file in self.logs_dir.glob("*.log"):
-                    log_file.unlink()
-                    count += 1
-                print(f"\n{Color.GREEN}✓ {count}개의 로그 파일이 삭제되었습니다.{Color.ENDC}")
-            except Exception as e:
-                print(f"\n{Color.RED}✗ 오류 발생: {e}{Color.ENDC}")
-        else:
-            print(f"\n{Color.YELLOW}취소되었습니다.{Color.ENDC}")
+        try:
+            count = 0
+            for log_file in self.logs_dir.glob("*.log"):
+                log_file.unlink()
+                count += 1
+            self.show_message(f"✓ {count}개의 로그 파일이 삭제되었습니다.", Colors.GREEN)
+            self.current_menu = self.create_log_menu()
+        except Exception as e:
+            self.show_message(f"✗ 삭제 중 오류 발생: {e}", Colors.RED)
 
-        input(f"\n{Color.YELLOW}Press Enter to continue...{Color.ENDC}")
-
-    def run_tests(self):
-        """테스트 실행"""
-        self.print_header()
-        print(f"\n{Color.BOLD}[ 🧪 테스트 실행 ]{Color.ENDC}\n")
-        print(f"{Color.GREEN}1.{Color.ENDC} 전체 테스트")
-        print(f"{Color.GREEN}2.{Color.ENDC} 유닛 테스트만")
-        print(f"{Color.GREEN}3.{Color.ENDC} 통합 테스트만")
-        print(f"{Color.GREEN}4.{Color.ENDC} 커버리지 포함")
-        print(f"{Color.RED}0.{Color.ENDC} 뒤로 가기")
-        print()
-
-        choice = input(f"{Color.YELLOW}선택: {Color.ENDC}").strip()
-
-        if choice == "0":
+    def show_log_info(self, index: int):
+        """로그 정보 표시"""
+        if not self.submenu_data or index >= len(self.submenu_data):
             return
 
-        cmd = [sys.executable, "-m", "pytest"]
+        log_file = self.submenu_data[index]
+        size = log_file.stat().st_size
+        self.show_message(f"{log_file.name} | 크기: {size:,} bytes", Colors.CYAN, duration=300)
 
-        if choice == "2":
-            cmd.append("tests/unit")
-        elif choice == "3":
-            cmd.append("tests/integration")
-        elif choice == "4":
-            cmd.extend(["--cov=src", "--cov-report=html"])
+    def render(self):
+        """화면 렌더링"""
+        self.console.clear()
 
-        cmd.append("-v")
+        # 배경
+        for y in range(self.screen_height):
+            for x in range(self.screen_width):
+                self.console.print(x, y, " ", bg=(10, 10, 30))
 
-        print(f"\n{Color.YELLOW}테스트를 실행합니다...{Color.ENDC}\n")
-        print(f"{Color.CYAN}명령어: {' '.join(cmd)}{Color.ENDC}\n")
+        # 헤더
+        self.render_header()
 
-        try:
-            subprocess.run(cmd, cwd=self.root_dir)
-        except Exception as e:
-            print(f"\n{Color.RED}✗ 테스트 실행 중 오류 발생: {e}{Color.ENDC}")
+        # 상태별 렌더링
+        if self.state in [LauncherState.MAIN_MENU, LauncherState.SAVE_MANAGER, LauncherState.LOG_VIEWER]:
+            if self.current_menu:
+                self.current_menu.render(self.console)
+        elif self.state == LauncherState.SETTINGS:
+            self.render_settings()
+        elif self.state == LauncherState.GAME_INFO:
+            self.render_game_info()
+        elif self.state == LauncherState.SYSTEM_CHECK:
+            self.render_system_check()
 
-        input(f"\n{Color.YELLOW}Press Enter to continue...{Color.ENDC}")
+        # 메시지 표시
+        if self.message_timer > 0:
+            self.console.print(
+                self.screen_width // 2 - len(self.message) // 2,
+                self.screen_height - 3,
+                self.message,
+                fg=self.message_color
+            )
+            self.message_timer -= 1
 
-    def show_settings(self):
-        """설정 확인"""
-        self.print_header()
-        print(f"\n{Color.BOLD}[ ⚙️  설정 ]{Color.ENDC}\n")
+        # 하단 도움말
+        help_text = "↑↓: 이동 | Enter/Z: 선택 | ESC/X: 뒤로"
+        self.console.print(
+            self.screen_width // 2 - len(help_text) // 2,
+            self.screen_height - 1,
+            help_text,
+            fg=Colors.GRAY
+        )
+
+    def render_header(self):
+        """헤더 렌더링"""
+        title = "⭐ Dawn of Stellar - 별빛의 여명 ⭐"
+        subtitle = "Game Launcher v2.0.0"
+
+        # 타이틀
+        self.console.print(
+            self.screen_width // 2 - len(title) // 2,
+            2,
+            title,
+            fg=Colors.YELLOW
+        )
+
+        # 서브타이틀
+        self.console.print(
+            self.screen_width // 2 - len(subtitle) // 2,
+            3,
+            subtitle,
+            fg=Colors.CYAN
+        )
+
+        # 구분선
+        line = "─" * (self.screen_width - 4)
+        self.console.print(2, 5, line, fg=Colors.GRAY)
+
+    def render_settings(self):
+        """설정 화면"""
+        y = 10
+        self.console.print(10, y, "⚙️  설정", fg=Colors.YELLOW)
+        y += 2
 
         if self.config_file.exists():
-            print(f"{Color.CYAN}설정 파일: {self.config_file}{Color.ENDC}\n")
-            with open(self.config_file, 'r', encoding='utf-8') as f:
-                content = f.read()
-                # 처음 30줄만 표시
-                lines = content.split('\n')[:30]
-                for line in lines:
-                    print(line)
-                if len(content.split('\n')) > 30:
-                    print(f"\n{Color.YELLOW}... (이하 생략){Color.ENDC}")
+            self.console.print(10, y, f"설정 파일: {self.config_file}", fg=Colors.CYAN)
+            y += 2
+            self.console.print(10, y, "설정 파일을 직접 편집하세요.", fg=Colors.WHITE)
         else:
-            print(f"{Color.RED}설정 파일이 없습니다.{Color.ENDC}")
+            self.console.print(10, y, "설정 파일이 없습니다.", fg=Colors.RED)
 
-        print(f"\n{Color.GREEN}1.{Color.ENDC} 설정 파일 편집 (기본 편집기)")
-        print(f"{Color.GREEN}2.{Color.ENDC} 설정 파일 위치 열기")
-        print(f"{Color.RED}0.{Color.ENDC} 뒤로 가기")
-        print()
+        y += 3
+        self.console.print(10, y, "ESC: 뒤로 가기", fg=Colors.GRAY)
 
-        choice = input(f"{Color.YELLOW}선택: {Color.ENDC}").strip()
+    def render_game_info(self):
+        """게임 정보 화면"""
+        y = 10
+        info_lines = [
+            ("게임 이름:", "Dawn of Stellar - 별빛의 여명"),
+            ("버전:", "5.0.0 (재구조화)"),
+            ("장르:", "로그라이크 RPG + JRPG 퓨전"),
+            ("엔진:", "Python 3.10+ / TCOD"),
+            ("", ""),
+            ("주요 기능:", ""),
+            ("", "• 28개 직업 시스템"),
+            ("", "• ATB + Brave 전투 시스템"),
+            ("", "• AI 동료 시스템"),
+            ("", "• 절차적 던전 생성"),
+        ]
 
-        if choice == "1":
-            try:
-                if os.name == 'nt':  # Windows
-                    os.startfile(str(self.config_file))
-                else:  # Unix/Linux/Mac
-                    subprocess.run(['xdg-open', str(self.config_file)])
-            except Exception as e:
-                print(f"\n{Color.RED}✗ 편집기 실행 중 오류: {e}{Color.ENDC}")
-                input(f"\n{Color.YELLOW}Press Enter to continue...{Color.ENDC}")
-        elif choice == "2":
-            try:
-                if os.name == 'nt':  # Windows
-                    os.startfile(str(self.config_file.parent))
-                else:  # Unix/Linux/Mac
-                    subprocess.run(['xdg-open', str(self.config_file.parent)])
-            except Exception as e:
-                print(f"\n{Color.RED}✗ 폴더 열기 중 오류: {e}{Color.ENDC}")
-                input(f"\n{Color.YELLOW}Press Enter to continue...{Color.ENDC}")
+        self.console.print(10, y, "ℹ️  게임 정보", fg=Colors.YELLOW)
+        y += 2
 
-    def show_game_info(self):
-        """게임 정보 표시"""
-        self.print_header()
-        print(f"\n{Color.BOLD}[ ℹ️  게임 정보 ]{Color.ENDC}\n")
+        for label, value in info_lines:
+            if label:
+                self.console.print(12, y, label, fg=Colors.CYAN)
+                self.console.print(12 + len(label) + 1, y, value, fg=Colors.WHITE)
+            else:
+                self.console.print(12, y, value, fg=Colors.WHITE)
+            y += 1
 
-        print(f"{Color.CYAN}게임 이름:{Color.ENDC} Dawn of Stellar - 별빛의 여명")
-        print(f"{Color.CYAN}버전:{Color.ENDC} 5.0.0 (재구조화)")
-        print(f"{Color.CYAN}장르:{Color.ENDC} 로그라이크 RPG + JRPG 퓨전")
-        print(f"{Color.CYAN}엔진:{Color.ENDC} Python 3.10+ / TCOD")
-        print()
-        print(f"{Color.YELLOW}[ 주요 기능 ]{Color.ENDC}")
-        print(f"  • 28개 직업 시스템")
-        print(f"  • ATB + Brave 전투 시스템")
-        print(f"  • AI 동료 시스템")
-        print(f"  • 절차적 던전 생성")
-        print(f"  • 멀티플레이어 지원")
-        print()
-        print(f"{Color.YELLOW}[ 프로젝트 구조 ]{Color.ENDC}")
-        print(f"  • src/         : 소스 코드")
-        print(f"  • data/        : 게임 데이터 (YAML)")
-        print(f"  • assets/      : 에셋 (오디오, 폰트)")
-        print(f"  • saves/       : 세이브 파일")
-        print(f"  • logs/        : 로그 파일")
-        print(f"  • tests/       : 테스트")
-        print()
-        print(f"{Color.YELLOW}[ 문서 ]{Color.ENDC}")
-        print(f"  • .claude/CLAUDE.md  : 프로젝트 가이드")
-        print(f"  • README.md          : 프로젝트 설명")
+        y += 2
+        self.console.print(10, y, "ESC: 뒤로 가기", fg=Colors.GRAY)
 
-        input(f"\n{Color.YELLOW}Press Enter to continue...{Color.ENDC}")
-
-    def system_check(self):
-        """시스템 체크"""
-        self.print_header()
-        print(f"\n{Color.BOLD}[ 🔍 시스템 체크 ]{Color.ENDC}\n")
+    def render_system_check(self):
+        """시스템 체크 화면"""
+        y = 10
+        self.console.print(10, y, "🔍 시스템 체크", fg=Colors.YELLOW)
+        y += 2
 
         # Python 버전
         python_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
-        print(f"{Color.CYAN}Python 버전:{Color.ENDC} {python_version}", end="")
-        if sys.version_info >= (3, 10):
-            print(f" {Color.GREEN}✓{Color.ENDC}")
-        else:
-            print(f" {Color.RED}✗ (3.10+ 필요){Color.ENDC}")
+        self.console.print(12, y, "Python 버전:", fg=Colors.CYAN)
+        self.console.print(30, y, python_version, fg=Colors.GREEN if sys.version_info >= (3, 10) else Colors.RED)
+        y += 2
 
-        # 필수 파일 확인
-        print(f"\n{Color.YELLOW}[ 필수 파일 확인 ]{Color.ENDC}")
+        # 필수 파일
+        self.console.print(12, y, "필수 파일:", fg=Colors.CYAN)
+        y += 1
+
         essential_files = [
             ("main.py", self.main_script),
             ("config.yaml", self.config_file),
             ("src/", self.root_dir / "src"),
-            ("data/", self.root_dir / "data"),
         ]
 
         for name, path in essential_files:
             exists = path.exists()
-            status = f"{Color.GREEN}✓{Color.ENDC}" if exists else f"{Color.RED}✗{Color.ENDC}"
-            print(f"  {name:20} {status}")
+            status = "✓" if exists else "✗"
+            color = Colors.GREEN if exists else Colors.RED
+            self.console.print(14, y, f"{name:20} {status}", fg=color)
+            y += 1
 
-        # 디렉토리 용량
-        print(f"\n{Color.YELLOW}[ 디렉토리 용량 ]{Color.ENDC}")
-        dirs_to_check = [
-            ("세이브", self.saves_dir),
-            ("로그", self.logs_dir),
-        ]
-
-        for name, dir_path in dirs_to_check:
-            if dir_path.exists():
-                total_size = sum(f.stat().st_size for f in dir_path.rglob('*') if f.is_file())
-                file_count = len(list(dir_path.rglob('*')))
-                print(f"  {name:10} {total_size:>12,} bytes ({file_count}개 파일)")
-            else:
-                print(f"  {name:10} {Color.RED}디렉토리 없음{Color.ENDC}")
-
-        # 필수 라이브러리 확인
-        print(f"\n{Color.YELLOW}[ 필수 라이브러리 ]{Color.ENDC}")
-        required_libs = ["tcod", "yaml", "pytest"]
-
-        for lib in required_libs:
-            try:
-                __import__(lib)
-                print(f"  {lib:15} {Color.GREEN}✓{Color.ENDC}")
-            except ImportError:
-                print(f"  {lib:15} {Color.RED}✗ (설치 필요: pip install {lib}){Color.ENDC}")
-
-        input(f"\n{Color.YELLOW}Press Enter to continue...{Color.ENDC}")
+        y += 2
+        self.console.print(10, y, "ESC: 뒤로 가기", fg=Colors.GRAY)
 
     def run(self):
-        """런처 메인 루프"""
-        while True:
-            self.print_header()
-            self.print_menu()
+        """메인 루프"""
+        self.current_menu = self.create_main_menu()
 
-            choice = input(f"{Color.YELLOW}선택: {Color.ENDC}").strip()
+        while self.running:
+            # 렌더링
+            self.render()
+            self.context.present(self.console)
 
-            if choice == "1":
-                self.run_game("normal")
-            elif choice == "2":
-                self.run_game("dev")
-            elif choice == "3":
-                self.run_game("debug")
-            elif choice == "4":
-                self.manage_saves()
-            elif choice == "5":
-                self.view_logs()
-            elif choice == "6":
-                self.run_tests()
-            elif choice == "7":
-                self.show_settings()
-            elif choice == "8":
-                self.show_game_info()
-            elif choice == "9":
-                self.system_check()
-            elif choice == "0":
-                print(f"\n{Color.CYAN}게임 런처를 종료합니다. 안녕히 가세요!{Color.ENDC}\n")
-                break
-            else:
-                print(f"\n{Color.RED}잘못된 선택입니다. 다시 선택해주세요.{Color.ENDC}")
-                input(f"\n{Color.YELLOW}Press Enter to continue...{Color.ENDC}")
+            # 이벤트 처리
+            for event in tcod.event.wait():
+                self.handle_input(event)
+
+        self.context.close()
 
 
 def main():
@@ -544,9 +585,9 @@ def main():
         launcher = GameLauncher()
         launcher.run()
     except KeyboardInterrupt:
-        print(f"\n\n{Color.CYAN}게임 런처를 종료합니다.{Color.ENDC}\n")
+        print("\n게임 런처를 종료합니다.")
     except Exception as e:
-        print(f"\n{Color.RED}오류 발생: {e}{Color.ENDC}\n")
+        print(f"\n오류 발생: {e}")
         import traceback
         traceback.print_exc()
 

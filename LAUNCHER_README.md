@@ -1,32 +1,57 @@
 # 🎮 Dawn of Stellar 게임 런처
 
+## 런처 버전
+
+### GUI 런처 (v2.0) - **추천!** ⭐
+- **launcher.py** - TCOD 기반 그래픽 런처
+- 게임과 동일한 스타일의 GUI 창
+- 마우스 없이 키보드만으로 조작
+- 메뉴 방식의 직관적인 인터페이스
+
+### CLI 런처 (v1.0)
+- **launcher_cli.py** - 터미널 기반 런처
+- 텍스트 메뉴 방식
+- 가벼운 실행
+
 ## 실행 방법
 
 ### Windows
 ```bash
-# 1. 런처 실행 (추천)
+# 1. GUI 런처 실행 (추천)
 launcher.bat
 # 또는
 python launcher.py
 
-# 2. 게임 직접 실행
+# 2. CLI 런처 실행
+python launcher_cli.py
+
+# 3. 게임 직접 실행
 start_game.bat
 
-# 3. 개발 모드로 실행
+# 4. 개발 모드로 실행
 start_game_dev.bat
 ```
 
 ### Linux / Mac
 ```bash
-# 1. 런처 실행
+# 1. GUI 런처 실행
 python3 launcher.py
 
-# 2. 게임 직접 실행
+# 2. CLI 런처 실행
+python3 launcher_cli.py
+
+# 3. 게임 직접 실행
 python3 main.py
 
-# 3. 개발 모드로 실행
+# 4. 개발 모드로 실행
 python3 main.py --dev
 ```
+
+## GUI 런처 조작법
+
+- **↑↓ / K/J**: 커서 이동
+- **Enter / Z**: 선택
+- **ESC / X**: 뒤로 가기 / 취소
 
 ## 런처 기능
 
@@ -99,7 +124,8 @@ python main.py --config=custom_config.yaml
 
 ```
 Dawn of Stellar/
-├── launcher.py          # 게임 런처 (Python)
+├── launcher.py          # GUI 런처 (TCOD, v2.0) ⭐
+├── launcher_cli.py      # CLI 런처 (터미널, v1.0)
 ├── launcher.bat         # 런처 실행 파일 (Windows)
 ├── start_game.bat       # 게임 직접 실행 (Windows)
 ├── start_game_dev.bat   # 개발 모드 실행 (Windows)
