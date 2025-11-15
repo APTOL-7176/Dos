@@ -229,11 +229,14 @@ def get_shop_items() -> List[ShopItem]:
 class ShopUI:
     """상점 UI"""
 
+    ITEMS_PER_PAGE = 12  # 페이지당 표시할 아이템 수
+
     def __init__(self, screen_width: int, screen_height: int):
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.selected_index = 0
         self.category_index = 0
+        self.page_index = 0  # 현재 페이지
         self.categories = list(ShopCategory)
 
         # 메타 진행 가져오기
@@ -247,6 +250,26 @@ class ShopUI:
         current_category = self.categories[self.category_index]
         return [item for item in self.all_items if item.category == current_category]
 
+    def get_paged_items(self) -> Tuple[List[ShopItem], int, int]:
+        """
+        현재 페이지의 아이템 가져오기
+
+        Returns:
+            (페이지 아이템 목록, 현재 페이지, 총 페이지 수)
+        """
+        all_items = self.get_items_by_category()
+        total_pages = max(1, (len(all_items) + self.ITEMS_PER_PAGE - 1) // self.ITEMS_PER_PAGE)
+
+        # 페이지 인덱스 범위 체크
+        self.page_index = max(0, min(self.page_index, total_pages - 1))
+
+        # 현재 페이지의 아이템만 반환
+        start_idx = self.page_index * self.ITEMS_PER_PAGE
+        end_idx = start_idx + self.ITEMS_PER_PAGE
+        paged_items = all_items[start_idx:end_idx]
+
+        return paged_items, self.page_index + 1, total_pages
+
     def handle_input(self, action: GameAction) -> Optional[str]:
         """
         입력 처리
@@ -256,18 +279,28 @@ class ShopUI:
             "close" - 상점 닫기
             None - 계속
         """
-        items = self.get_items_by_category()
+        paged_items, current_page, total_pages = self.get_paged_items()
 
         if action == GameAction.MOVE_UP:
             self.selected_index = max(0, self.selected_index - 1)
         elif action == GameAction.MOVE_DOWN:
-            self.selected_index = min(len(items) - 1, self.selected_index + 1)
+            self.selected_index = min(len(paged_items) - 1, self.selected_index + 1)
         elif action == GameAction.MOVE_LEFT:
             self.category_index = max(0, self.category_index - 1)
             self.selected_index = 0  # 카테고리 변경 시 선택 초기화
+            self.page_index = 0  # 페이지도 초기화
         elif action == GameAction.MOVE_RIGHT:
             self.category_index = min(len(self.categories) - 1, self.category_index + 1)
             self.selected_index = 0
+            self.page_index = 0
+        elif action == GameAction.PAGE_UP:  # 이전 페이지
+            if self.page_index > 0:
+                self.page_index -= 1
+                self.selected_index = 0
+        elif action == GameAction.PAGE_DOWN:  # 다음 페이지
+            if self.page_index < total_pages - 1:
+                self.page_index += 1
+                self.selected_index = 0
         elif action == GameAction.CONFIRM:
             return "purchase"
         elif action == GameAction.ESCAPE or action == GameAction.MENU:
@@ -360,17 +393,20 @@ class ShopUI:
             else:
                 console.print(tab_x + i * 18, tab_y, f" {name} ", fg=(150, 150, 150))
 
-        # 아이템 목록
-        items = self.get_items_by_category()
+        # 아이템 목록 (페이징)
+        paged_items, current_page, total_pages = self.get_paged_items()
+        all_items = self.get_items_by_category()
         list_y = 7
 
-        if not items:
+        # 페이지 정보 표시
+        if total_pages > 1:
+            page_info = f"페이지 {current_page}/{total_pages} (총 {len(all_items)}개)"
+            console.print(self.screen_width - len(page_info) - 5, 5, page_info, fg=(200, 200, 200))
+
+        if not paged_items:
             console.print(10, list_y, "이 카테고리에는 아이템이 없습니다.", fg=(150, 150, 150))
         else:
-            for i, item in enumerate(items):
-                if i >= 15:  # 화면에 표시할 수 있는 최대 아이템 수
-                    break
-
+            for i, item in enumerate(paged_items):
                 y = list_y + i * 3
 
                 # 선택 커서
@@ -401,10 +437,15 @@ class ShopUI:
                 console.print(7, y + 1, item.description[:65], fg=(150, 150, 150))
 
         # 조작법
+        controls = "↑↓: 선택  ←→: 카테고리  "
+        if total_pages > 1:
+            controls += "PgUp/PgDn: 페이지  "
+        controls += "Enter: 구매/해금  ESC: 닫기"
+
         console.print(
             5,
             self.screen_height - 4,
-            "↑↓: 선택  ←→: 카테고리  Enter: 구매/해금  ESC: 닫기",
+            controls,
             fg=(180, 180, 180)
         )
 
@@ -450,9 +491,9 @@ def open_shop(
                 result = shop.handle_input(action)
 
                 if result == "purchase":
-                    items = shop.get_items_by_category()
-                    if items and 0 <= shop.selected_index < len(items):
-                        selected_item = items[shop.selected_index]
+                    paged_items, _, _ = shop.get_paged_items()
+                    if paged_items and 0 <= shop.selected_index < len(paged_items):
+                        selected_item = paged_items[shop.selected_index]
                         success, msg = shop.purchase_item(selected_item)
                         message = msg
                         message_timer = 60  # 60 프레임 동안 표시

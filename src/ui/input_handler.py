@@ -42,6 +42,10 @@ class GameAction(Enum):
     CANCEL = "cancel"
     MENU = "menu"
 
+    # 페이징
+    PAGE_UP = "page_up"
+    PAGE_DOWN = "page_down"
+
     # 인벤토리 전용
     INVENTORY_DESTROY = "inventory_destroy"
 
@@ -82,6 +86,10 @@ class InputHandler(tcod.event.EventDispatch[Optional[GameAction]]):
             # 시스템
             tcod.event.KeySym.ESCAPE: GameAction.ESCAPE,
             tcod.event.KeySym.RETURN: GameAction.MENU,  # Enter: 메뉴/확정
+
+            # 페이징
+            tcod.event.KeySym.PAGEUP: GameAction.PAGE_UP,
+            tcod.event.KeySym.PAGEDOWN: GameAction.PAGE_DOWN,
         }
 
         # 문자 키 바인딩 (소문자 ord 값)
