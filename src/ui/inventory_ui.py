@@ -129,8 +129,9 @@ class InventoryUI:
                     self.selected_item_index = self.cursor
 
                     if isinstance(item, Equipment):
-                        # 장비 아이템: 비교 모드 토글
-                        self.show_comparison = not self.show_comparison
+                        # 장비 아이템: 장착 모드로 전환
+                        self.mode = InventoryMode.EQUIP
+                        self.show_comparison = False
                     elif isinstance(item, Consumable):
                         self.mode = InventoryMode.USE_ITEM
         elif action == GameAction.CANCEL or action == GameAction.ESCAPE:
