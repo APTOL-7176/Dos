@@ -15,6 +15,8 @@ from src.ui.cursor_menu import CursorMenu, MenuItem, TextInputBox
 from src.ui.tcod_display import Colors
 from src.ui.input_handler import GameAction, InputHandler
 from src.core.logger import get_logger
+from src.core.config import get_config
+from src.persistence.meta_progress import get_meta_progress
 from src.audio import play_bgm
 import random
 
@@ -78,22 +80,34 @@ class PartySetup:
             self.logger.error("캐릭터 디렉토리 없음: data/characters")
             return jobs
 
+        # 메타 진행 정보 가져오기
+        meta = get_meta_progress()
+
+        # 개발 모드 확인
+        config = get_config()
+        dev_mode = config.get("development.unlock_all_classes", False)
+
         for yaml_file in sorted(characters_dir.glob("*.yaml")):
             try:
                 with open(yaml_file, 'r', encoding='utf-8') as f:
                     data = yaml.safe_load(f)
+                    job_id = yaml_file.stem
+
+                    # 개발 모드이거나 메타 진행에서 해금된 직업인지 확인
+                    is_unlocked = dev_mode or meta.is_job_unlocked(job_id)
+
                     jobs.append({
-                        'id': yaml_file.stem,
-                        'name': data.get('class_name', yaml_file.stem),
+                        'id': job_id,
+                        'name': data.get('class_name', job_id),
                         'description': data.get('description', ''),
                         'archetype': data.get('archetype', ''),
                         'stats': data.get('base_stats', {}),
-                        'unlocked': True  # TODO: 잠금 시스템 구현
+                        'unlocked': is_unlocked
                     })
             except Exception as e:
                 self.logger.error(f"직업 로드 실패: {yaml_file.name}: {e}")
 
-        self.logger.info(f"직업 {len(jobs)}개 로드 완료")
+        self.logger.info(f"직업 {len(jobs)}개 로드 완료 (해금된 직업: {sum(1 for j in jobs if j['unlocked'])}개)")
         return jobs
 
     def _load_random_names(self) -> List[str]:

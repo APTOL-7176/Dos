@@ -16,6 +16,7 @@ from src.ui.cursor_menu import CursorMenu, MenuItem
 from src.ui.tcod_display import Colors
 from src.ui.input_handler import GameAction, InputHandler
 from src.core.logger import get_logger
+from src.core.config import get_config
 from src.persistence.meta_progress import get_meta_progress
 
 
@@ -126,11 +127,15 @@ class TraitSelection:
         job_id = member.job_id
         meta = get_meta_progress()
 
+        # 개발 모드 확인
+        config = get_config()
+        dev_mode = config.get("development.unlock_all_classes", False)
+
         menu_items = []
 
         for trait in self.available_traits:
-            # 해금 여부 확인
-            is_unlocked = meta.is_trait_unlocked(job_id, trait.id)
+            # 해금 여부 확인 (개발 모드이면 모두 해금)
+            is_unlocked = dev_mode or meta.is_trait_unlocked(job_id, trait.id)
 
             # 이미 선택된 특성 표시
             already_selected = trait in self.temp_selected
@@ -202,8 +207,12 @@ class TraitSelection:
                 job_id = member.job_id
                 meta = get_meta_progress()
 
-                # 해금 여부 재확인
-                if not meta.is_trait_unlocked(job_id, trait.id):
+                # 개발 모드 확인
+                config = get_config()
+                dev_mode = config.get("development.unlock_all_classes", False)
+
+                # 해금 여부 재확인 (개발 모드이면 통과)
+                if not dev_mode and not meta.is_trait_unlocked(job_id, trait.id):
                     self.logger.warning(f"잠긴 특성 선택 시도: {trait.name}")
                     return False
 

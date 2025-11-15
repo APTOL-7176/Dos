@@ -20,6 +20,7 @@ logger = get_logger(Loggers.UI)
 
 class ShopCategory(Enum):
     """상점 카테고리"""
+    JOB_UNLOCKS = "jobs"  # 직업 해금
     PERMANENT_UPGRADES = "permanent"  # 영구 업그레이드
     TRAIT_UNLOCKS = "traits"  # 특성 해금
     CONSUMABLES = "consumables"  # 소모품
@@ -36,7 +37,7 @@ class ShopItem:
         price: int,
         category: ShopCategory,
         item_id: str = None,
-        job_id: str = None,  # 특성 해금용
+        job_id: str = None,  # 특성 해금용 또는 직업 해금용
         trait_id: str = None  # 특성 해금용
     ):
         self.name = name
@@ -46,6 +47,54 @@ class ShopItem:
         self.item_id = item_id or name.lower().replace(" ", "_").replace("(", "").replace(")", "")
         self.job_id = job_id
         self.trait_id = trait_id
+
+
+def get_job_unlock_items() -> List[ShopItem]:
+    """직업 해금 아이템 동적 생성"""
+    meta = get_meta_progress()
+    items = []
+
+    # 모든 직업 목록 (한글 이름 포함)
+    all_jobs = [
+        ("alchemist", "연금술사"), ("archmage", "대마법사"), ("assassin", "암살자"),
+        ("bard", "바드"), ("battle_mage", "배틀메이지"), ("berserker", "광전사"),
+        ("breaker", "브레이커"), ("dark_knight", "다크나이트"),
+        ("dimensionist", "차원술사"), ("dragon_knight", "드래곤 나이트"),
+        ("druid", "드루이드"), ("elementalist", "정령사"), ("engineer", "기계공학자"),
+        ("gladiator", "검투사"), ("hacker", "해커"), ("monk", "무승"),
+        ("necromancer", "네크로맨서"), ("paladin", "성기사"),
+        ("philosopher", "철학자"), ("pirate", "해적"), ("priest", "사제"),
+        ("samurai", "사무라이"), ("shaman", "무당"), ("sniper", "스나이퍼"),
+        ("spellblade", "마검사"), ("sword_saint", "검성"), ("time_mage", "시간술사"),
+        ("vampire", "뱀파이어")
+    ]
+
+    for job_id, job_name_kr in all_jobs:
+        # 이미 해금되었는지 확인
+        if meta.is_job_unlocked(job_id):
+            continue
+
+        # YAML 파일에서 직업 정보 로드
+        yaml_path = Path(f"data/characters/{job_id}.yaml")
+        if yaml_path.exists():
+            try:
+                with open(yaml_path, 'r', encoding='utf-8') as f:
+                    data = yaml.safe_load(f)
+                    description = data.get('description', '')
+                    archetype = data.get('archetype', '')
+
+                    items.append(ShopItem(
+                        name=f"[직업] {job_name_kr}",
+                        description=f"{archetype} - {description}",
+                        price=1000,  # 직업 해금 가격
+                        category=ShopCategory.JOB_UNLOCKS,
+                        item_id=f"job_{job_id}",
+                        job_id=job_id
+                    ))
+            except Exception as e:
+                logger.error(f"직업 정보 로드 실패 ({job_id}): {e}")
+
+    return items
 
 
 def get_trait_unlock_items() -> List[ShopItem]:
@@ -105,6 +154,9 @@ def get_trait_unlock_items() -> List[ShopItem]:
 def get_shop_items() -> List[ShopItem]:
     """상점 아이템 목록 생성"""
     items = []
+
+    # === 직업 해금 (동적 생성) ===
+    items.extend(get_job_unlock_items())
 
     # === 영구 업그레이드 ===
     items.extend([
@@ -315,8 +367,26 @@ class ShopUI:
         Returns:
             (성공 여부, 메시지)
         """
+        # 직업 해금인지 확인
+        if item.category == ShopCategory.JOB_UNLOCKS:
+            # 이미 해금되었는지 확인
+            if self.meta.is_job_unlocked(item.job_id):
+                return False, "이미 해금된 직업입니다."
+
+            # 별의 파편 확인
+            if self.meta.star_fragments < item.price:
+                return False, f"별의 파편이 부족합니다. (필요: {item.price}, 보유: {self.meta.star_fragments})"
+
+            # 구매 처리
+            self.meta.spend_star_fragments(item.price)
+            self.meta.unlock_job(item.job_id)
+            save_meta_progress()
+
+            logger.info(f"직업 해금: {item.job_id} ({item.price} 별의 파편)")
+            return True, f"{item.name} 해금 완료!"
+
         # 특성 해금인지 확인
-        if item.category == ShopCategory.TRAIT_UNLOCKS:
+        elif item.category == ShopCategory.TRAIT_UNLOCKS:
             # 이미 해금되었는지 확인
             if self.meta.is_trait_unlocked(item.job_id, item.trait_id):
                 return False, "이미 해금된 특성입니다."
@@ -380,6 +450,7 @@ class ShopUI:
         tab_y = 4
         tab_x = 5
         category_names = {
+            ShopCategory.JOB_UNLOCKS: "직업 해금",
             ShopCategory.PERMANENT_UPGRADES: "영구 업그레이드",
             ShopCategory.TRAIT_UNLOCKS: "특성 해금",
             ShopCategory.CONSUMABLES: "소모품",

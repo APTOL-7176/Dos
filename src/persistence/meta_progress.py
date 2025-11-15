@@ -29,6 +29,9 @@ class MetaProgress:
     # 구매한 패시브 (passives.yaml의 ID)
     purchased_passives: Set[str] = field(default_factory=set)
 
+    # 해금된 직업 (job_id 목록)
+    unlocked_jobs: Set[str] = field(default_factory=set)
+
     def __post_init__(self):
         """초기화 후 처리"""
         # Set을 list로 변환되어 저장된 것을 다시 Set으로 복원
@@ -36,9 +39,31 @@ class MetaProgress:
             self.purchased_upgrades = set(self.purchased_upgrades)
         if isinstance(self.purchased_passives, list):
             self.purchased_passives = set(self.purchased_passives)
+        if isinstance(self.unlocked_jobs, list):
+            self.unlocked_jobs = set(self.unlocked_jobs)
 
-        # 기본 해금 특성 설정 (각 직업당 처음 2개)
+        # 기본 해금 직업 및 특성 설정
+        self._ensure_default_unlocked_jobs()
         self._ensure_default_unlocked_traits()
+
+    def _ensure_default_unlocked_jobs(self):
+        """기본 해금 직업 확인 및 설정"""
+        # 초기 해금 직업 (초보자용 쉬운 직업들)
+        default_jobs = {
+            "warrior",    # 전사 - 기본 물리 딜러
+            "mage",       # 마법사 - 기본 마법 딜러
+            "cleric",     # 성직자 - 기본 힐러
+            "rogue",      # 도적 - 기본 빠른 딜러
+            "knight",     # 기사 - 기본 탱커
+            "archer"      # 궁수 - 기본 원거리 딜러
+        }
+
+        # 아직 해금되지 않았으면 기본 직업 해금
+        if not self.unlocked_jobs:
+            self.unlocked_jobs = default_jobs.copy()
+        else:
+            # 기존에 해금된 직업이 있어도 기본 직업은 항상 포함
+            self.unlocked_jobs.update(default_jobs)
 
     def _ensure_default_unlocked_traits(self):
         """기본 해금 특성 확인 및 설정"""
@@ -117,13 +142,25 @@ class MetaProgress:
         """패시브 구매 여부"""
         return passive_id in self.purchased_passives
 
+    def unlock_job(self, job_id: str) -> bool:
+        """직업 해금"""
+        if job_id not in self.unlocked_jobs:
+            self.unlocked_jobs.add(job_id)
+            return True
+        return False
+
+    def is_job_unlocked(self, job_id: str) -> bool:
+        """직업 해금 여부 확인"""
+        return job_id in self.unlocked_jobs
+
     def to_dict(self) -> Dict[str, Any]:
         """딕셔너리로 변환 (저장용)"""
         return {
             "star_fragments": self.star_fragments,
             "unlocked_traits": self.unlocked_traits,
             "purchased_upgrades": list(self.purchased_upgrades),
-            "purchased_passives": list(self.purchased_passives)
+            "purchased_passives": list(self.purchased_passives),
+            "unlocked_jobs": list(self.unlocked_jobs)
         }
 
     @classmethod
@@ -133,7 +170,8 @@ class MetaProgress:
             star_fragments=data.get("star_fragments", 0),
             unlocked_traits=data.get("unlocked_traits", {}),
             purchased_upgrades=set(data.get("purchased_upgrades", [])),
-            purchased_passives=set(data.get("purchased_passives", []))
+            purchased_passives=set(data.get("purchased_passives", [])),
+            unlocked_jobs=set(data.get("unlocked_jobs", []))
         )
 
 
