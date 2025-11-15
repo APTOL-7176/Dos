@@ -11,7 +11,10 @@ import tcod
 
 from src.ui.input_handler import InputHandler, GameAction
 from src.core.logger import get_logger, Loggers
-from src.equipment.item_generator import ItemGenerator
+from src.equipment.item_system import (
+    Consumable, Equipment, ItemType, ItemRarity, EquipSlot,
+    CONSUMABLE_TEMPLATES, WEAPON_TEMPLATES, ARMOR_TEMPLATES, ACCESSORY_TEMPLATES
+)
 
 
 logger = get_logger(Loggers.UI)
@@ -45,11 +48,6 @@ def get_gold_shop_items(floor_level: int = 1) -> dict:
     Returns:
         탭별 아이템 딕셔너리
     """
-    from src.equipment.item_system import (
-        Consumable, Equipment, ItemType, ItemRarity, EquipSlot,
-        CONSUMABLE_TEMPLATES, WEAPON_TEMPLATES, ARMOR_TEMPLATES, ACCESSORY_TEMPLATES
-    )
-
     items = {
         GoldShopTab.CONSUMABLES: [],
         GoldShopTab.EQUIPMENT: [],
