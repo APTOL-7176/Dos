@@ -13,7 +13,7 @@ def create_cleric_skills():
     # 1. 기본 BRV: 기도
     pray = Skill("cleric_pray", "기도", "신앙 포인트 획득")
     pray.effects = [
-        DamageEffect(DamageType.BRV, 1.3),
+        DamageEffect(DamageType.BRV, 1.3, stat_type="magical"),
         GimmickEffect(GimmickOperation.ADD, "faith_points", 1, max_value=8)
     ]
     pray.costs = []  # 기본 공격은 MP 소모 없음
@@ -21,7 +21,7 @@ def create_cleric_skills():
     # 2. 기본 HP: 신성 공격
     holy_attack = Skill("cleric_holy_attack", "신성 공격", "신앙 포인트 소비 공격")
     holy_attack.effects = [
-        DamageEffect(DamageType.HP, 0.9, gimmick_bonus={"field": "faith_points", "multiplier": 0.2}),
+        DamageEffect(DamageType.HP, 0.9, gimmick_bonus={"field": "faith_points", "multiplier": 0.2}, stat_type="magical"),
         GimmickEffect(GimmickOperation.CONSUME, "faith_points", 1)
     ]
     holy_attack.costs = []  # 기본 공격은 MP 소모 없음
@@ -96,7 +96,7 @@ def create_cleric_skills():
         HealEffect(HealType.HP, percentage=0.8, is_party_wide=True),
         BuffEffect(BuffType.DEFENSE_UP, 0.6, duration=5),
         BuffEffect(BuffType.REGEN, 0.5, duration=5),
-        DamageEffect(DamageType.BRV, 2.0, gimmick_bonus={"field": "faith_points", "multiplier": 0.3}),
+        DamageEffect(DamageType.BRV, 2.0, gimmick_bonus={"field": "faith_points", "multiplier": 0.3}, stat_type="magical"),
         GimmickEffect(GimmickOperation.SET, "faith_points", 0)
     ]
     ultimate.costs = [MPCost(25), StackCost("faith_points", 1)]

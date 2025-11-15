@@ -112,6 +112,15 @@ def main() -> int:
             logger.error("스킬 초기화 실패 - 게임을 종료합니다")
             return 1
 
+        # 인트로 스토리 표시 (최초 1회)
+        intro_shown = False
+        if not intro_shown:
+            from src.ui.intro_story import show_intro_story
+            logger.info("인트로 스토리 시작")
+            show_intro_story(display.console, display.context)
+            intro_shown = True
+            logger.info("인트로 스토리 완료")
+
         # 메인 게임 루프
         while True:
             # 메인 메뉴 실행
@@ -181,6 +190,18 @@ def main() -> int:
                     # BGM 제어 플래그 (첫 탐험 시작 및 층 변경 시에만 재생)
                     play_dungeon_bgm = True
 
+                    # 게임 통계 초기화 (불러온 게임용)
+                    game_stats = {
+                        "enemies_defeated": loaded_state.get("enemies_defeated", 0),
+                        "max_floor_reached": loaded_state.get("max_floor_reached", floor_number),
+                        "total_gold_earned": loaded_state.get("total_gold_earned", 0),
+                        "total_exp_earned": loaded_state.get("total_exp_earned", 0),
+                        "save_slot": loaded_state.get("save_slot", None)
+                    }
+
+                    # 탐험 시스템에 게임 통계 전달
+                    exploration.game_stats = game_stats
+
                     # 탐험 계속 (새 게임과 동일한 루프)
                     while True:
                         result, data = run_exploration(
@@ -222,10 +243,11 @@ def main() -> int:
                                 logger.info("✅ 승리!")
 
                                 if data:
+                                    exploration.game_stats["enemies_defeated"] += len(data)  # 통계 업데이트
                                     for enemy_entity in data:
                                         if enemy_entity in exploration.enemies:
                                             exploration.enemies.remove(enemy_entity)
-                                    logger.info(f"적 {len(data)}명 제거됨")
+                                    logger.info(f"적 {len(data)}명 제거됨 (총 {exploration.game_stats['enemies_defeated']}마리)")
 
                                 rewards = RewardCalculator.calculate_combat_rewards(
                                     enemies,
@@ -237,6 +259,10 @@ def main() -> int:
                                     party,
                                     rewards["experience"]
                                 )
+
+                                # 통계 업데이트
+                                exploration.game_stats["total_gold_earned"] += rewards.get("gold", 0)
+                                exploration.game_stats["total_exp_earned"] += rewards["experience"]
 
                                 show_reward_screen(
                                     display.console,
@@ -251,6 +277,8 @@ def main() -> int:
 
                                 inventory.add_gold(rewards.get("gold", 0))
 
+                                # 별의 파편은 게임 정산 시에만 지급 (로그라이크 방식)
+
                                 # 전투 후 필드 BGM 재생
                                 from src.audio import play_bgm
                                 play_bgm("field", loop=True, fade_in=True)
@@ -259,6 +287,19 @@ def main() -> int:
                                 continue
                             elif combat_result == CombatState.DEFEAT:
                                 logger.info("❌ 패배... 게임 오버")
+
+                                # 게임 정산 (패배)
+                                from src.ui.game_result_ui import show_game_result
+                                show_game_result(
+                                    display.console,
+                                    display.context,
+                                    is_victory=False,
+                                    max_floor=exploration.game_stats["max_floor_reached"],
+                                    enemies_defeated=exploration.game_stats["enemies_defeated"],
+                                    total_gold=exploration.game_stats["total_gold_earned"],
+                                    total_exp=exploration.game_stats["total_exp_earned"],
+                                    save_slot=exploration.game_stats.get("save_slot", None)
+                                )
                                 break
                             else:
                                 logger.info("🏃 도망쳤다")
@@ -271,11 +312,12 @@ def main() -> int:
 
                         elif result == "floor_down":
                             floor_number += 1
-                            logger.info(f"⬇ 다음 층: {floor_number}층")
+                            exploration.game_stats["max_floor_reached"] = max(exploration.game_stats["max_floor_reached"], floor_number)
+                            logger.info(f"⬇ 다음 층: {floor_number}층 (최대: {exploration.game_stats['max_floor_reached']}층)")
                             from src.world.dungeon_generator import DungeonGenerator
                             dungeon_gen = DungeonGenerator(width=80, height=50)
                             dungeon = dungeon_gen.generate(floor_number)
-                            exploration = ExplorationSystem(dungeon, party, floor_number, inventory)
+                            exploration = ExplorationSystem(dungeon, party, floor_number, inventory, game_stats)
                             # 층 변경 시 BGM 재생
                             play_dungeon_bgm = True
                             continue
@@ -286,12 +328,25 @@ def main() -> int:
                                 from src.world.dungeon_generator import DungeonGenerator
                                 dungeon_gen = DungeonGenerator(width=80, height=50)
                                 dungeon = dungeon_gen.generate(floor_number)
-                                exploration = ExplorationSystem(dungeon, party, floor_number, inventory)
+                                exploration = ExplorationSystem(dungeon, party, floor_number, inventory, game_stats)
                                 # 층 변경 시 BGM 재생
                                 play_dungeon_bgm = True
                                 continue
                             else:
                                 logger.info("🎉 던전 탈출 성공!")
+
+                                # 게임 정산 (승리)
+                                from src.ui.game_result_ui import show_game_result
+                                show_game_result(
+                                    display.console,
+                                    display.context,
+                                    is_victory=True,
+                                    max_floor=exploration.game_stats["max_floor_reached"],
+                                    enemies_defeated=exploration.game_stats["enemies_defeated"],
+                                    total_gold=exploration.game_stats["total_gold_earned"],
+                                    total_exp=exploration.game_stats["total_exp_earned"],
+                                    save_slot=exploration.game_stats.get("save_slot", None)
+                                )
                                 break
                 else:
                     logger.info("게임 불러오기 취소")
@@ -392,10 +447,19 @@ def main() -> int:
 
                             floor_number = 1
 
+                            # 게임 통계 초기화
+                            game_stats = {
+                                "enemies_defeated": 0,
+                                "max_floor_reached": 1,
+                                "total_gold_earned": 0,
+                                "total_exp_earned": 0,
+                                "save_slot": None
+                            }
+
                             # 던전 및 탐험 초기화 (층 변경 시에만 재생성)
                             dungeon_gen = DungeonGenerator(width=80, height=50)
                             dungeon = dungeon_gen.generate(floor_number)
-                            exploration = ExplorationSystem(dungeon, party, floor_number, inventory)
+                            exploration = ExplorationSystem(dungeon, party, floor_number, inventory, game_stats)
 
                             # BGM 제어 플래그 (첫 탐험 시작 및 층 변경 시에만 재생)
                             play_dungeon_bgm = True
@@ -446,10 +510,11 @@ def main() -> int:
 
                                         # 필드에서 해당 적들 제거
                                         if data:
+                                            exploration.game_stats["enemies_defeated"] += len(data)  # 통계 업데이트
                                             for enemy_entity in data:
                                                 if enemy_entity in exploration.enemies:
                                                     exploration.enemies.remove(enemy_entity)
-                                            logger.info(f"적 {len(data)}명 제거됨")
+                                            logger.info(f"적 {len(data)}명 제거됨 (총 {exploration.game_stats['enemies_defeated']}마리)")
 
                                         # 보상 계산
                                         rewards = RewardCalculator.calculate_combat_rewards(
@@ -463,6 +528,10 @@ def main() -> int:
                                             party,
                                             rewards["experience"]
                                         )
+
+                                        # 통계 업데이트
+                                        exploration.game_stats["total_gold_earned"] += rewards.get("gold", 0)
+                                        exploration.game_stats["total_exp_earned"] += rewards["experience"]
 
                                         # 보상 화면 표시
                                         show_reward_screen(
@@ -480,24 +549,46 @@ def main() -> int:
                                         # 골드 추가
                                         inventory.add_gold(rewards.get("gold", 0))
 
-                                        # 전투 후 복귀 시 BGM 재생 안 함
+                                        # 별의 파편은 게임 정산 시에만 지급 (로그라이크 방식)
+
+                                        # 전투 후 필드 BGM 재생
+                                        from src.audio import play_bgm
+                                        play_bgm("field", loop=True, fade_in=True)
+                                        logger.info("필드 BGM 재생")
                                         play_dungeon_bgm = False
                                         continue  # 탐험 계속
                                     elif combat_result == CombatState.DEFEAT:
                                         logger.info("❌ 패배... 게임 오버")
+
+                                        # 게임 정산
+                                        from src.ui.game_result_ui import show_game_result
+                                        show_game_result(
+                                            display.console,
+                                            display.context,
+                                            is_victory=False,
+                                            max_floor=exploration.game_stats["max_floor_reached"],
+                                            enemies_defeated=exploration.game_stats["enemies_defeated"],
+                                            total_gold=exploration.game_stats["total_gold_earned"],
+                                            total_exp=exploration.game_stats["total_exp_earned"],
+                                            save_slot=exploration.game_stats.get("save_slot", None)
+                                        )
                                         break
                                     else:
                                         logger.info("🏃 도망쳤다")
-                                        # 도망 후 복귀 시 BGM 재생 안 함
+                                        # 도망 후 필드 BGM 재생
+                                        from src.audio import play_bgm
+                                        play_bgm("field", loop=True, fade_in=True)
+                                        logger.info("필드 BGM 재생")
                                         play_dungeon_bgm = False
                                         continue
 
                                 elif result == "floor_down":
                                     floor_number += 1
-                                    logger.info(f"⬇ 다음 층: {floor_number}층")
+                                    exploration.game_stats["max_floor_reached"] = max(exploration.game_stats["max_floor_reached"], floor_number)
+                                    logger.info(f"⬇ 다음 층: {floor_number}층 (최대: {exploration.game_stats['max_floor_reached']}층)")
                                     # 새 던전 생성
                                     dungeon = dungeon_gen.generate(floor_number)
-                                    exploration = ExplorationSystem(dungeon, party, floor_number, inventory)
+                                    exploration = ExplorationSystem(dungeon, party, floor_number, inventory, game_stats)
                                     # 층 변경 시 BGM 재생
                                     play_dungeon_bgm = True
                                     continue
@@ -507,12 +598,25 @@ def main() -> int:
                                         logger.info(f"⬆ 이전 층: {floor_number}층")
                                         # 새 던전 생성
                                         dungeon = dungeon_gen.generate(floor_number)
-                                        exploration = ExplorationSystem(dungeon, party, floor_number, inventory)
+                                        exploration = ExplorationSystem(dungeon, party, floor_number, inventory, game_stats)
                                         # 층 변경 시 BGM 재생
                                         play_dungeon_bgm = True
                                         continue
                                     else:
                                         logger.info("🎉 던전 탈출 성공!")
+
+                                        # 게임 정산 (승리)
+                                        from src.ui.game_result_ui import show_game_result
+                                        show_game_result(
+                                            display.console,
+                                            display.context,
+                                            is_victory=True,
+                                            max_floor=exploration.game_stats["max_floor_reached"],
+                                            enemies_defeated=exploration.game_stats["enemies_defeated"],
+                                            total_gold=exploration.game_stats["total_gold_earned"],
+                                            total_exp=exploration.game_stats["total_exp_earned"],
+                                            save_slot=exploration.game_stats.get("save_slot", None)
+                                        )
                                         break
 
                             break

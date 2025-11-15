@@ -7,6 +7,7 @@ from src.character.skills.effects.lifesteal_effect import LifestealEffect
 from src.character.skills.effects.shield_effect import ShieldEffect
 from src.character.skills.effects.buff_effect import BuffEffect, BuffType
 from src.character.skills.costs.mp_cost import MPCost
+from src.character.skills.costs.stack_cost import StackCost
 
 def create_vampire_skills():
     """흡혈귀 9개 스킬"""
@@ -27,19 +28,17 @@ def create_vampire_skills():
     blood_lance = Skill("vampire_lance", "피의 창", "피를 소비한 공격")
     blood_lance.effects = [
         DamageEffect(DamageType.HP, 1.2, gimmick_bonus={"field": "blood_pool", "multiplier": 0.2}),
-        LifestealEffect(lifesteal_percent=0.5),
-        GimmickEffect(GimmickOperation.CONSUME, "blood_pool", 1)
+        LifestealEffect(lifesteal_percent=0.5)
     ]
-    blood_lance.costs = []  # 기본 공격은 MP 소모 없음
+    blood_lance.costs = [StackCost("blood_pool", 1)]  # blood_pool 1 필요
     skills.append(blood_lance)
     
     # 3. 피의 갑옷
     blood_armor = Skill("vampire_armor", "피의 갑옷", "피로 보호막")
     blood_armor.effects = [
-        ShieldEffect(base_amount=0, multiplier=1.5, stat_name="blood_pool"),
-        GimmickEffect(GimmickOperation.CONSUME, "blood_pool", 3)
+        ShieldEffect(base_amount=0, multiplier=1.5, stat_name="blood_pool")
     ]
-    blood_armor.costs = [MPCost(8)]
+    blood_armor.costs = [MPCost(8), StackCost("blood_pool", 3)]
     blood_armor.target_type = "self"
     blood_armor.cooldown = 4
     skills.append(blood_armor)
@@ -59,10 +58,9 @@ def create_vampire_skills():
     blood_explosion = Skill("vampire_explosion", "피의 폭발", "피 폭발 광역")
     blood_explosion.effects = [
         DamageEffect(DamageType.BRV_HP, 1.8, gimmick_bonus={"field": "blood_pool", "multiplier": 0.3}),
-        LifestealEffect(lifesteal_percent=0.4),
-        GimmickEffect(GimmickOperation.CONSUME, "blood_pool", 2)
+        LifestealEffect(lifesteal_percent=0.4)
     ]
-    blood_explosion.costs = [MPCost(9)]
+    blood_explosion.costs = [MPCost(9), StackCost("blood_pool", 2)]
     blood_explosion.cooldown = 3
     skills.append(blood_explosion)
     
@@ -81,10 +79,9 @@ def create_vampire_skills():
     immortal = Skill("vampire_immortal", "불사", "일시 무적")
     immortal.effects = [
         ShieldEffect(base_amount=200),
-        HealEffect(HealType.HP, percentage=0.3),
-        GimmickEffect(GimmickOperation.CONSUME, "blood_pool", 5)
+        HealEffect(HealType.HP, percentage=0.3)
     ]
-    immortal.costs = [MPCost(12)]
+    immortal.costs = [MPCost(12), StackCost("blood_pool", 5)]
     immortal.target_type = "self"
     immortal.cooldown = 7
     skills.append(immortal)
@@ -93,10 +90,9 @@ def create_vampire_skills():
     blood_control = Skill("vampire_control", "피의 지배", "피로 적 조종")
     blood_control.effects = [
         DamageEffect(DamageType.BRV_HP, 2.2, gimmick_bonus={"field": "blood_pool", "multiplier": 0.35}),
-        LifestealEffect(lifesteal_percent=0.8),
-        GimmickEffect(GimmickOperation.CONSUME, "blood_pool", 4)
+        LifestealEffect(lifesteal_percent=0.8)
     ]
-    blood_control.costs = [MPCost(14)]
+    blood_control.costs = [MPCost(14), StackCost("blood_pool", 4)]
     blood_control.cooldown = 6
     skills.append(blood_control)
     

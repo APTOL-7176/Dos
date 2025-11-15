@@ -197,6 +197,10 @@ def open_game_menu(
                         )
 
                         # 게임 상태 직렬화
+                        # 디버그: 인벤토리 확인
+                        logger.warning(f"[SAVE] 저장 전 인벤토리: {inventory}")
+                        logger.warning(f"[SAVE] 인벤토리 골드: {inventory.gold if inventory and hasattr(inventory, 'gold') else 'N/A'}G")
+
                         game_state = {
                             "party": [serialize_party_member(m) for m in party] if party else [],
                             "floor_number": exploration.floor_number,
@@ -210,7 +214,15 @@ def open_game_menu(
                                 "items": [serialize_item(slot.item) for slot in inventory.slots] if inventory and hasattr(inventory, 'slots') else []
                             },
                             "keys": exploration.player_keys if hasattr(exploration, 'player_keys') else [],
+                            # 게임 통계 (로그라이크 정산용)
+                            "enemies_defeated": exploration.game_stats.get("enemies_defeated", 0),
+                            "max_floor_reached": exploration.game_stats.get("max_floor_reached", exploration.floor_number),
+                            "total_gold_earned": exploration.game_stats.get("total_gold_earned", 0),
+                            "total_exp_earned": exploration.game_stats.get("total_exp_earned", 0),
+                            "save_slot": exploration.game_stats.get("save_slot", None),
                         }
+
+                        logger.warning(f"[SAVE] game_state['inventory']: {game_state['inventory']}")
 
                         success = show_save_screen(console, context, game_state)
                         if success:

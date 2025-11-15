@@ -13,7 +13,7 @@ def create_hacker_skills():
     # 1. 기본 BRV: 해킹 시도
     hack_attempt = Skill("hacker_hack", "해킹 시도", "시스템 침투")
     hack_attempt.effects = [
-        DamageEffect(DamageType.BRV, 1.3),
+        DamageEffect(DamageType.BRV, 1.3, stat_type="magical"),
         GimmickEffect(GimmickOperation.ADD, "hack_stacks", 1, max_value=10)
     ]
     hack_attempt.costs = []  # 기본 공격은 MP 소모 없음
@@ -22,7 +22,7 @@ def create_hacker_skills():
     # 2. 기본 HP: 시스템 오버로드
     overload = Skill("hacker_overload", "시스템 오버로드", "해킹 완료 후 폭발")
     overload.effects = [
-        DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "hack_stacks", "multiplier": 0.25}),
+        DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "hack_stacks", "multiplier": 0.25}, stat_type="magical"),
         GimmickEffect(GimmickOperation.CONSUME, "hack_stacks", 1)
     ]
     overload.costs = []  # 기본 공격은 MP 소모 없음
@@ -31,7 +31,7 @@ def create_hacker_skills():
     # 3. 디버프 설치
     install_debuff = Skill("hacker_debuff", "디버프 설치", "적 약화")
     install_debuff.effects = [
-        DamageEffect(DamageType.BRV, 1.0),
+        DamageEffect(DamageType.BRV, 1.0, stat_type="magical"),
         GimmickEffect(GimmickOperation.ADD, "debuff_count", 1, max_value=5),
         GimmickEffect(GimmickOperation.ADD, "hack_stacks", 2, max_value=10)
     ]
@@ -42,7 +42,7 @@ def create_hacker_skills():
     # 4. 시스템 교란
     disrupt = Skill("hacker_disrupt", "시스템 교란", "적 능력 감소")
     disrupt.effects = [
-        DamageEffect(DamageType.BRV, 1.5, gimmick_bonus={"field": "hack_stacks", "multiplier": 0.2}),
+        DamageEffect(DamageType.BRV, 1.5, gimmick_bonus={"field": "hack_stacks", "multiplier": 0.2}, stat_type="magical"),
         GimmickEffect(GimmickOperation.ADD, "hack_stacks", 1, max_value=10)
     ]
     disrupt.costs = [MPCost(7)]
@@ -52,10 +52,10 @@ def create_hacker_skills():
     # 5. 바이러스 유포
     virus = Skill("hacker_virus", "바이러스 유포", "지속 피해")
     virus.effects = [
-        DamageEffect(DamageType.BRV, 1.2),
-        DamageEffect(DamageType.BRV, 1.0),
-        DamageEffect(DamageType.BRV, 1.0),
-        DamageEffect(DamageType.BRV, 0.8),
+        DamageEffect(DamageType.BRV, 1.2, stat_type="magical"),
+        DamageEffect(DamageType.BRV, 1.0, stat_type="magical"),
+        DamageEffect(DamageType.BRV, 1.0, stat_type="magical"),
+        DamageEffect(DamageType.BRV, 0.8, stat_type="magical"),
         GimmickEffect(GimmickOperation.ADD, "hack_stacks", 2, max_value=10)
     ]
     virus.costs = [MPCost(9)]
@@ -76,7 +76,7 @@ def create_hacker_skills():
     # 7. 시스템 다운
     system_down = Skill("hacker_system_down", "시스템 다운", "강제 종료")
     system_down.effects = [
-        DamageEffect(DamageType.BRV_HP, 2.0, gimmick_bonus={"field": "hack_stacks", "multiplier": 0.35}),
+        DamageEffect(DamageType.BRV_HP, 2.0, gimmick_bonus={"field": "hack_stacks", "multiplier": 0.35}, stat_type="magical"),
         GimmickEffect(GimmickOperation.CONSUME, "hack_stacks", 3)
     ]
     system_down.costs = [MPCost(11), StackCost("hack_stacks", 3)]
@@ -86,7 +86,7 @@ def create_hacker_skills():
     # 8. 루트킷
     rootkit = Skill("hacker_rootkit", "루트킷", "완전 장악")
     rootkit.effects = [
-        DamageEffect(DamageType.BRV_HP, 2.2, gimmick_bonus={"field": "hack_stacks", "multiplier": 0.4}),
+        DamageEffect(DamageType.BRV_HP, 2.2, gimmick_bonus={"field": "hack_stacks", "multiplier": 0.4}, stat_type="magical"),
         BuffEffect(BuffType.MAGIC_UP, 0.4, duration=4),
         GimmickEffect(GimmickOperation.CONSUME, "hack_stacks", 5)
     ]
@@ -97,8 +97,8 @@ def create_hacker_skills():
     # 9. 궁극기: 제로데이
     ultimate = Skill("hacker_ultimate", "제로데이", "완벽한 해킹")
     ultimate.effects = [
-        DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "hack_stacks", "multiplier": 0.5}),
-        DamageEffect(DamageType.HP, 3.5, gimmick_bonus={"field": "debuff_count", "multiplier": 0.6}),
+        DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "hack_stacks", "multiplier": 0.5}, stat_type="magical"),
+        DamageEffect(DamageType.HP, 3.5, gimmick_bonus={"field": "debuff_count", "multiplier": 0.6}, stat_type="magical"),
         BuffEffect(BuffType.MAGIC_UP, 0.6, duration=5),
         GimmickEffect(GimmickOperation.SET, "hack_stacks", 10),
         GimmickEffect(GimmickOperation.SET, "debuff_count", 0)

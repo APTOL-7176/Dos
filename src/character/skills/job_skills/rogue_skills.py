@@ -5,6 +5,7 @@ from src.character.skills.effects.gimmick_effect import GimmickEffect, GimmickOp
 from src.character.skills.effects.heal_effect import HealEffect, HealType
 from src.character.skills.effects.buff_effect import BuffEffect, BuffType
 from src.character.skills.costs.mp_cost import MPCost
+from src.character.skills.costs.stack_cost import StackCost
 
 def create_rogue_skills():
     """도적 9개 스킬"""
@@ -52,10 +53,9 @@ def create_rogue_skills():
     # 5. 아이템 활용
     use_item = Skill("rogue_use_item", "아이템 활용", "훔친 아이템으로 공격")
     use_item.effects = [
-        DamageEffect(DamageType.BRV_HP, 1.8, gimmick_bonus={"field": "stolen_items", "multiplier": 0.25}),
-        GimmickEffect(GimmickOperation.CONSUME, "stolen_items", 2)
+        DamageEffect(DamageType.BRV_HP, 1.8, gimmick_bonus={"field": "stolen_items", "multiplier": 0.25})
     ]
-    use_item.costs = [MPCost(8)]
+    use_item.costs = [MPCost(8), StackCost("stolen_items", 2)]
     use_item.cooldown = 2
     skills.append(use_item)
     
@@ -85,10 +85,9 @@ def create_rogue_skills():
     # 8. 배신자의 일격
     backstab = Skill("rogue_backstab", "배신자의 일격", "아이템 소비 초강타")
     backstab.effects = [
-        DamageEffect(DamageType.BRV_HP, 2.5, gimmick_bonus={"field": "stolen_items", "multiplier": 0.4}),
-        GimmickEffect(GimmickOperation.CONSUME, "stolen_items", 4)
+        DamageEffect(DamageType.BRV_HP, 2.5, gimmick_bonus={"field": "stolen_items", "multiplier": 0.4})
     ]
-    backstab.costs = [MPCost(12)]
+    backstab.costs = [MPCost(12), StackCost("stolen_items", 4)]
     backstab.cooldown = 5
     skills.append(backstab)
     

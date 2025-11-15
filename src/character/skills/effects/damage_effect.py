@@ -11,12 +11,13 @@ class DamageType(Enum):
 
 class DamageEffect(SkillEffect):
     """데미지 효과"""
-    def __init__(self, damage_type=DamageType.BRV, multiplier=1.0, gimmick_bonus=None, hp_scaling=False):
+    def __init__(self, damage_type=DamageType.BRV, multiplier=1.0, gimmick_bonus=None, hp_scaling=False, stat_type="physical"):
         super().__init__(EffectType.DAMAGE)
         self.damage_type = damage_type
         self.multiplier = multiplier
         self.gimmick_bonus = gimmick_bonus or {}
         self.hp_scaling = hp_scaling
+        self.stat_type = stat_type  # "physical" 또는 "magical"
         self.brave_system = get_brave_system()
         self.damage_calculator = get_damage_calculator()
     
@@ -65,7 +66,12 @@ class DamageEffect(SkillEffect):
                 final_mult *= 1.5
         
         if self.damage_type == DamageType.BRV:
-            dmg_result = self.damage_calculator.calculate_brv_damage(user, target, final_mult)
+            # 물리/마법 구분
+            if self.stat_type == "magical":
+                dmg_result = self.damage_calculator.calculate_magic_damage(user, target, final_mult)
+            else:
+                dmg_result = self.damage_calculator.calculate_brv_damage(user, target, final_mult)
+
             brv_result = self.brave_system.brv_attack(user, target, dmg_result.final_damage)
             result.brv_damage = brv_result['brv_stolen']
             result.brv_gained = brv_result['actual_gain']
@@ -74,7 +80,8 @@ class DamageEffect(SkillEffect):
             result.message = f"BRV 공격! {result.brv_damage}"
         
         elif self.damage_type == DamageType.HP:
-            hp_result = self.brave_system.hp_attack(user, target, final_mult)
+            # 물리/마법 구분하여 HP 공격
+            hp_result = self.brave_system.hp_attack(user, target, final_mult, damage_type=self.stat_type)
             result.hp_damage = hp_result['hp_damage']
             result.damage_dealt = hp_result['hp_damage']
             result.message = f"HP 공격! {result.hp_damage}"
@@ -82,12 +89,18 @@ class DamageEffect(SkillEffect):
                 context['last_damage'] = result.hp_damage
         
         elif self.damage_type == DamageType.BRV_HP:
-            dmg_result = self.damage_calculator.calculate_brv_damage(user, target, final_mult)
+            # 물리/마법 구분
+            if self.stat_type == "magical":
+                dmg_result = self.damage_calculator.calculate_magic_damage(user, target, final_mult)
+            else:
+                dmg_result = self.damage_calculator.calculate_brv_damage(user, target, final_mult)
+
             brv_result = self.brave_system.brv_attack(user, target, dmg_result.final_damage)
             result.brv_damage = brv_result['brv_stolen']
             result.brv_gained = brv_result['actual_gain']
             result.brv_broken = brv_result['is_break']
-            hp_result = self.brave_system.hp_attack(user, target, 1.0)
+            # HP 공격도 물리/마법 구분
+            hp_result = self.brave_system.hp_attack(user, target, 1.0, damage_type=self.stat_type)
             result.hp_damage = hp_result['hp_damage']
             result.damage_dealt = hp_result['hp_damage']
             result.message = f"BRV+HP 공격! BRV:{result.brv_damage} HP:{result.hp_damage}"

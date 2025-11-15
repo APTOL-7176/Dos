@@ -15,7 +15,7 @@ def create_alchemist_skills():
     # 1. 기본 BRV: 포션 투척
     throw_potion = Skill("alchemist_throw_potion", "포션 투척", "포션을 던져 공격, 재료 획득")
     throw_potion.effects = [
-        DamageEffect(DamageType.BRV, 1.4),
+        DamageEffect(DamageType.BRV, 1.4, stat_type="magical"),
         GimmickEffect(GimmickOperation.ADD, "potion_stock", 1, max_value=10)
     ]
     throw_potion.costs = []  # 기본 공격은 MP 소모 없음
@@ -24,7 +24,7 @@ def create_alchemist_skills():
     # 2. 기본 HP: 폭발 포션
     explosive_potion = Skill("alchemist_explosive", "폭발 포션", "포션 소비 폭발")
     explosive_potion.effects = [
-        DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "potion_stock", "multiplier": 0.2}),
+        DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "potion_stock", "multiplier": 0.2}, stat_type="magical"),
         GimmickEffect(GimmickOperation.CONSUME, "potion_stock", 1)
     ]
     explosive_potion.costs = []  # 기본 공격은 MP 소모 없음
@@ -57,9 +57,9 @@ def create_alchemist_skills():
     # 5. 독 폭탄
     poison_bomb = Skill("alchemist_poison_bomb", "독 폭탄", "지속 피해 폭탄")
     poison_bomb.effects = [
-        DamageEffect(DamageType.BRV, 1.5),
-        DamageEffect(DamageType.BRV, 1.0),
-        DamageEffect(DamageType.BRV, 1.0),
+        DamageEffect(DamageType.BRV, 1.5, stat_type="magical"),
+        DamageEffect(DamageType.BRV, 1.0, stat_type="magical"),
+        DamageEffect(DamageType.BRV, 1.0, stat_type="magical"),
         GimmickEffect(GimmickOperation.ADD, "potion_stock", 1, max_value=10)
     ]
     poison_bomb.costs = [MPCost(8)]
@@ -90,7 +90,7 @@ def create_alchemist_skills():
     # 8. 폭발 연쇄
     chain_explosion = Skill("alchemist_chain", "폭발 연쇄", "연쇄 폭발")
     chain_explosion.effects = [
-        DamageEffect(DamageType.BRV_HP, 2.0, gimmick_bonus={"field": "potion_stock", "multiplier": 0.35}),
+        DamageEffect(DamageType.BRV_HP, 2.0, gimmick_bonus={"field": "potion_stock", "multiplier": 0.35}, stat_type="magical"),
         GimmickEffect(GimmickOperation.CONSUME, "potion_stock", 4)
     ]
     chain_explosion.costs = [MPCost(12), StackCost("potion_stock", 4)]

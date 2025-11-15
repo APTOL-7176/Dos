@@ -13,7 +13,7 @@ def create_battle_mage_skills():
     # 1. 기본 BRV: 룬 새기기
     engrave_rune = Skill("bmage_engrave", "룬 새기기", "룬 각인")
     engrave_rune.effects = [
-        DamageEffect(DamageType.BRV, 1.5),
+        DamageEffect(DamageType.BRV, 1.5, stat_type="magical"),
         GimmickEffect(GimmickOperation.ADD, "rune_stacks", 1, max_value=8)
     ]
     engrave_rune.costs = []  # 기본 공격은 MP 소모 없음
@@ -22,7 +22,7 @@ def create_battle_mage_skills():
     # 2. 기본 HP: 룬 폭발
     rune_burst = Skill("bmage_burst", "룬 폭발", "룬 폭발 공격")
     rune_burst.effects = [
-        DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "rune_stacks", "multiplier": 0.25}),
+        DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "rune_stacks", "multiplier": 0.25}, stat_type="magical"),
         GimmickEffect(GimmickOperation.CONSUME, "rune_stacks", 1)
     ]
     rune_burst.costs = []  # 기본 공격은 MP 소모 없음
@@ -42,7 +42,7 @@ def create_battle_mage_skills():
     # 4. 연쇄 폭발
     chain_burst = Skill("bmage_chain", "연쇄 폭발", "다중 룬 폭발")
     chain_burst.effects = [
-        DamageEffect(DamageType.BRV_HP, 1.8, gimmick_bonus={"field": "rune_stacks", "multiplier": 0.3}),
+        DamageEffect(DamageType.BRV_HP, 1.8, gimmick_bonus={"field": "rune_stacks", "multiplier": 0.3}, stat_type="magical"),
         GimmickEffect(GimmickOperation.CONSUME, "rune_stacks", 2)
     ]
     chain_burst.costs = [MPCost(9), StackCost("rune_stacks", 2)]
@@ -52,8 +52,8 @@ def create_battle_mage_skills():
     # 5. 마법검
     magic_blade = Skill("bmage_blade", "마법검", "룬 부여 검격")
     magic_blade.effects = [
-        DamageEffect(DamageType.BRV, 1.6, gimmick_bonus={"field": "rune_stacks", "multiplier": 0.2}),
-        DamageEffect(DamageType.HP, 1.0),
+        DamageEffect(DamageType.BRV, 1.6, gimmick_bonus={"field": "rune_stacks", "multiplier": 0.2}, stat_type="magical"),
+        DamageEffect(DamageType.HP, 1.0, stat_type="magical"),
         GimmickEffect(GimmickOperation.ADD, "rune_stacks", 1, max_value=8)
     ]
     magic_blade.costs = [MPCost(8)]
@@ -75,7 +75,7 @@ def create_battle_mage_skills():
     # 7. 룬 폭풍
     rune_storm = Skill("bmage_storm", "룬 폭풍", "광역 룬 공격")
     rune_storm.effects = [
-        DamageEffect(DamageType.BRV_HP, 2.0, gimmick_bonus={"field": "rune_stacks", "multiplier": 0.35}),
+        DamageEffect(DamageType.BRV_HP, 2.0, gimmick_bonus={"field": "rune_stacks", "multiplier": 0.35}, stat_type="magical"),
         GimmickEffect(GimmickOperation.CONSUME, "rune_stacks", 3)
     ]
     rune_storm.costs = [MPCost(11), StackCost("rune_stacks", 3)]
@@ -96,9 +96,9 @@ def create_battle_mage_skills():
     # 9. 궁극기: 룬 대폭발
     ultimate = Skill("bmage_ultimate", "룬 대폭발", "모든 룬 폭발")
     ultimate.effects = [
-        DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "rune_stacks", "multiplier": 0.5}),
-        DamageEffect(DamageType.BRV, 2.0, gimmick_bonus={"field": "rune_stacks", "multiplier": 0.4}),
-        DamageEffect(DamageType.HP, 3.5),
+        DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "rune_stacks", "multiplier": 0.5}, stat_type="magical"),
+        DamageEffect(DamageType.BRV, 2.0, gimmick_bonus={"field": "rune_stacks", "multiplier": 0.4}, stat_type="magical"),
+        DamageEffect(DamageType.HP, 3.5, stat_type="magical"),
         BuffEffect(BuffType.MAGIC_UP, 0.6, duration=5),
         GimmickEffect(GimmickOperation.SET, "rune_stacks", 0)
     ]

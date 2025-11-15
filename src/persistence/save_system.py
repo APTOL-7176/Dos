@@ -427,6 +427,11 @@ def deserialize_inventory(inventory_data: Dict[str, Any], party: List[Any] = Non
     # 파티 정보와 함께 인벤토리 생성 (최대 무게 계산용)
     inventory = Inventory(base_weight=50.0, party=party)
 
+    # 디버그: 인벤토리 데이터 확인
+    logger.warning(f"[DESERIALIZE] inventory_data 타입: {type(inventory_data)}")
+    logger.warning(f"[DESERIALIZE] inventory_data 내용: {inventory_data}")
+    logger.warning(f"[DESERIALIZE] 골드 값: {inventory_data.get('gold', 0)}")
+
     # 골드 복원
     inventory.gold = inventory_data.get("gold", 0)
 
@@ -434,5 +439,7 @@ def deserialize_inventory(inventory_data: Dict[str, Any], party: List[Any] = Non
     for item_data in inventory_data.get("items", []):
         item = deserialize_item(item_data)
         inventory.add_item(item)
+
+    logger.warning(f"[DESERIALIZE] 복원 후 인벤토리 골드: {inventory.gold}G")
 
     return inventory

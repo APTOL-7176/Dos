@@ -28,7 +28,7 @@ def create_spellblade_skills():
     # 3. 화염 주입
     fire_infusion = Skill("spellblade_fire_infusion", "화염 주입", "마력 2스택 획득 + 화염 버프")
     fire_infusion.effects = [
-        DamageEffect(DamageType.BRV, 1.7),
+        DamageEffect(DamageType.BRV, 1.7, stat_type="magical"),  # 마법 주입
         BuffEffect(BuffType.ATTACK_UP, 0.4, duration=4),
         GimmickEffect(GimmickOperation.ADD, "mana_blade", 2, max_value=6)
     ]
@@ -39,7 +39,7 @@ def create_spellblade_skills():
     # 4. 빙결 주입
     ice_infusion = Skill("spellblade_ice_infusion", "빙결 주입", "마력 2스택 획득 + 빙결 버프")
     ice_infusion.effects = [
-        DamageEffect(DamageType.BRV, 1.6),
+        DamageEffect(DamageType.BRV, 1.6, stat_type="magical"),  # 마법 주입
         BuffEffect(BuffType.DEFENSE_UP, 0.4, duration=4),
         GimmickEffect(GimmickOperation.ADD, "mana_blade", 2, max_value=6)
     ]
@@ -50,7 +50,7 @@ def create_spellblade_skills():
     # 5. 번개 주입
     lightning_infusion = Skill("spellblade_lightning_infusion", "번개 주입", "마력 2스택 획득 + 번개 버프")
     lightning_infusion.effects = [
-        DamageEffect(DamageType.BRV, 1.5),
+        DamageEffect(DamageType.BRV, 1.5, stat_type="magical"),  # 마법 주입
         BuffEffect(BuffType.SPEED_UP, 0.5, duration=4),
         GimmickEffect(GimmickOperation.ADD, "mana_blade", 2, max_value=6)
     ]

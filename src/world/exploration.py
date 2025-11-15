@@ -91,7 +91,7 @@ class ExplorationResult:
 class ExplorationSystem:
     """탐험 시스템"""
 
-    def __init__(self, dungeon: DungeonMap, party: List[Any], floor_number: int = 1, inventory=None):
+    def __init__(self, dungeon: DungeonMap, party: List[Any], floor_number: int = 1, inventory=None, game_stats=None):
         self.dungeon = dungeon
         self.player = Player(
             x=dungeon.stairs_up[0] if dungeon.stairs_up else 5,
@@ -104,10 +104,19 @@ class ExplorationSystem:
         self.enemies: List[Enemy] = []  # 적 리스트
         self.inventory = inventory  # 인벤토리 추가
 
+        # 게임 통계 (로그라이크 정산용)
+        self.game_stats = game_stats if game_stats is not None else {
+            "enemies_defeated": 0,
+            "max_floor_reached": floor_number,
+            "total_gold_earned": 0,
+            "total_exp_earned": 0,
+            "save_slot": None
+        }
+
         # 인벤토리 초기화 확인 로그
         logger.error(f"[INIT] ExplorationSystem 초기화 - 인벤토리: {self.inventory}")
-        if self.inventory:
-            logger.error(f"[INIT] 인벤토리 타입: {type(self.inventory)}, 슬롯: {len(self.inventory.slots)}")
+        if self.inventory is not None:
+            logger.error(f"[INIT] 인벤토리 타입: {type(self.inventory)}, 슬롯: {len(self.inventory.slots)}, 골드: {self.inventory.gold}G")
         else:
             logger.error(f"[INIT] ⚠️ 인벤토리가 None입니다!")
 
@@ -337,12 +346,12 @@ class ExplorationSystem:
         # 디버그 로그
         logger.warning(f"[CHEST] 보물상자 처리 시작: {item.name}")
         logger.warning(f"[CHEST] 인벤토리 존재 여부: {self.inventory is not None}")
-        if self.inventory:
+        if self.inventory is not None:
             logger.warning(f"[CHEST] 인벤토리 슬롯 수: {len(self.inventory.slots)}")
             logger.warning(f"[CHEST] 현재 무게: {self.inventory.current_weight}kg / {self.inventory.max_weight}kg")
 
         # 인벤토리에 추가
-        if self.inventory:
+        if self.inventory is not None:
             success = self.inventory.add_item(item)
             logger.warning(f"[CHEST] add_item 결과: {success}")
             if not success:
@@ -378,12 +387,12 @@ class ExplorationSystem:
         # 디버그 로그
         logger.warning(f"[ITEM] 아이템 처리 시작: {item.name}")
         logger.warning(f"[ITEM] 인벤토리 존재 여부: {self.inventory is not None}")
-        if self.inventory:
+        if self.inventory is not None:
             logger.warning(f"[ITEM] 인벤토리 슬롯 수: {len(self.inventory.slots)}")
             logger.warning(f"[ITEM] 현재 무게: {self.inventory.current_weight}kg / {self.inventory.max_weight}kg")
 
         # 인벤토리에 추가
-        if not self.inventory:
+        if self.inventory is None:
             logger.error(f"[ITEM] 인벤토리가 None입니다!")
             return ExplorationResult(
                 success=False,

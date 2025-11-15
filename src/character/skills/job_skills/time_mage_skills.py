@@ -12,7 +12,7 @@ def create_time_mage_skills():
     # 1. 기본 BRV: 시간 가속
     time_accel = Skill("time_mage_time_accel", "시간 가속", "시간 포인트 획득")
     time_accel.effects = [
-        DamageEffect(DamageType.BRV, 1.4),
+        DamageEffect(DamageType.BRV, 1.4, stat_type="magical"),
         GimmickEffect(GimmickOperation.ADD, "time_points", 1, max_value=6)
     ]
     time_accel.costs = []  # 기본 공격은 MP 소모 없음
@@ -20,7 +20,7 @@ def create_time_mage_skills():
     # 2. 기본 HP: 시간 충격
     time_shock = Skill("time_mage_time_shock", "시간 충격", "시간 포인트 소비 공격")
     time_shock.effects = [
-        DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "time_points", "multiplier": 0.25}),
+        DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "time_points", "multiplier": 0.25}, stat_type="magical"),
         GimmickEffect(GimmickOperation.CONSUME, "time_points", 1)
     ]
     time_shock.costs = []  # 기본 공격은 MP 소모 없음
@@ -38,7 +38,7 @@ def create_time_mage_skills():
     # 4. 슬로우
     slow = Skill("time_mage_slow", "슬로우", "적 속도 감소")
     slow.effects = [
-        DamageEffect(DamageType.BRV, 1.2),
+        DamageEffect(DamageType.BRV, 1.2, stat_type="magical"),
         BuffEffect(BuffType.SPEED_DOWN, 0.4, duration=4),
         GimmickEffect(GimmickOperation.ADD, "time_points", 1, max_value=6)
     ]
@@ -58,7 +58,7 @@ def create_time_mage_skills():
     # 6. 시간 정지
     time_stop = Skill("time_mage_time_stop", "시간 정지", "시간 3포인트 소비, 적 스턴")
     time_stop.effects = [
-        DamageEffect(DamageType.BRV, 1.8, gimmick_bonus={"field": "time_points", "multiplier": 0.3}),
+        DamageEffect(DamageType.BRV, 1.8, gimmick_bonus={"field": "time_points", "multiplier": 0.3}, stat_type="magical"),
         GimmickEffect(GimmickOperation.CONSUME, "time_points", 3)
     ]
     time_stop.costs = [MPCost(11), StackCost("time_points", 3)]
@@ -78,7 +78,7 @@ def create_time_mage_skills():
     # 8. 시간 왜곡
     time_warp = Skill("time_mage_time_warp", "시간 왜곡", "시간 5포인트 소비, 차원 왜곡 공격")
     time_warp.effects = [
-        DamageEffect(DamageType.BRV_HP, 2.5, gimmick_bonus={"field": "time_points", "multiplier": 0.5}),
+        DamageEffect(DamageType.BRV_HP, 2.5, gimmick_bonus={"field": "time_points", "multiplier": 0.5}, stat_type="magical"),
         GimmickEffect(GimmickOperation.CONSUME, "time_points", 5)
     ]
     time_warp.costs = [MPCost(15), StackCost("time_points", 5)]
@@ -88,9 +88,9 @@ def create_time_mage_skills():
     # 9. 궁극기: 시간의 지배자
     ultimate = Skill("time_mage_ultimate", "시간의 지배자", "모든 시간을 지배")
     ultimate.effects = [
-        DamageEffect(DamageType.BRV, 2.2, gimmick_bonus={"field": "time_points", "multiplier": 0.4}),
-        DamageEffect(DamageType.BRV, 2.2, gimmick_bonus={"field": "time_points", "multiplier": 0.4}),
-        DamageEffect(DamageType.HP, 2.5, gimmick_bonus={"field": "time_points", "multiplier": 0.6}),
+        DamageEffect(DamageType.BRV, 2.2, gimmick_bonus={"field": "time_points", "multiplier": 0.4}, stat_type="magical"),
+        DamageEffect(DamageType.BRV, 2.2, gimmick_bonus={"field": "time_points", "multiplier": 0.4}, stat_type="magical"),
+        DamageEffect(DamageType.HP, 2.5, gimmick_bonus={"field": "time_points", "multiplier": 0.6}, stat_type="magical"),
         BuffEffect(BuffType.SPEED_UP, 0.8, duration=5),
         GimmickEffect(GimmickOperation.SET, "time_points", 0)
     ]

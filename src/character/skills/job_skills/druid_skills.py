@@ -13,7 +13,7 @@ def create_druid_skills():
     # 1. 기본 BRV: 자연의 힘
     nature_power = Skill("druid_nature_power", "자연의 힘", "자연 포인트 획득")
     nature_power.effects = [
-        DamageEffect(DamageType.BRV, 1.4),
+        DamageEffect(DamageType.BRV, 1.4, stat_type="magical"),
         GimmickEffect(GimmickOperation.ADD, "nature_points", 1, max_value=5)
     ]
     nature_power.costs = []  # 기본 공격은 MP 소모 없음
@@ -21,7 +21,7 @@ def create_druid_skills():
     # 2. 기본 HP: 가시 덩굴
     thorn_vine = Skill("druid_thorn_vine", "가시 덩굴", "자연 포인트 소비 공격")
     thorn_vine.effects = [
-        DamageEffect(DamageType.HP, 1.1, gimmick_bonus={"field": "nature_points", "multiplier": 0.3}),
+        DamageEffect(DamageType.HP, 1.1, gimmick_bonus={"field": "nature_points", "multiplier": 0.3}, stat_type="magical"),
         GimmickEffect(GimmickOperation.CONSUME, "nature_points", 1)
     ]
     thorn_vine.costs = []  # 기본 공격은 MP 소모 없음
@@ -29,7 +29,7 @@ def create_druid_skills():
     # 3. 곰 변신
     bear_form = Skill("druid_bear_form", "곰 변신", "방어 태세 변신")
     bear_form.effects = [
-        DamageEffect(DamageType.BRV, 1.8),
+        DamageEffect(DamageType.BRV, 1.8, stat_type="magical"),
         BuffEffect(BuffType.DEFENSE_UP, 0.6, duration=4),
         BuffEffect(BuffType.ATTACK_UP, 0.3, duration=4),
         GimmickEffect(GimmickOperation.ADD, "nature_points", 1, max_value=5)
@@ -41,7 +41,7 @@ def create_druid_skills():
     # 4. 표범 변신
     cat_form = Skill("druid_cat_form", "표범 변신", "속도 태세 변신")
     cat_form.effects = [
-        DamageEffect(DamageType.BRV, 1.6),
+        DamageEffect(DamageType.BRV, 1.6, stat_type="magical"),
         BuffEffect(BuffType.SPEED_UP, 0.7, duration=4),
         BuffEffect(BuffType.EVASION_UP, 0.4, duration=4),
         GimmickEffect(GimmickOperation.ADD, "nature_points", 1, max_value=5)
@@ -74,7 +74,7 @@ def create_druid_skills():
     # 7. 독수리 변신
     eagle_form = Skill("druid_eagle_form", "독수리 변신", "자연 3포인트 소비, 공중 공격")
     eagle_form.effects = [
-        DamageEffect(DamageType.BRV_HP, 2.2, gimmick_bonus={"field": "nature_points", "multiplier": 0.4}),
+        DamageEffect(DamageType.BRV_HP, 2.2, gimmick_bonus={"field": "nature_points", "multiplier": 0.4}, stat_type="magical"),
         BuffEffect(BuffType.SPEED_UP, 0.5, duration=3),
         GimmickEffect(GimmickOperation.CONSUME, "nature_points", 3)
     ]
@@ -84,8 +84,8 @@ def create_druid_skills():
     # 8. 늑대 변신
     wolf_form = Skill("druid_wolf_form", "늑대 변신", "자연 4포인트 소비, 광역 공격")
     wolf_form.effects = [
-        DamageEffect(DamageType.BRV, 2.0, gimmick_bonus={"field": "nature_points", "multiplier": 0.35}),
-        DamageEffect(DamageType.HP, 1.5),
+        DamageEffect(DamageType.BRV, 2.0, gimmick_bonus={"field": "nature_points", "multiplier": 0.35}, stat_type="magical"),
+        DamageEffect(DamageType.HP, 1.5, stat_type="magical"),
         BuffEffect(BuffType.ATTACK_UP, 0.4, duration=4),
         GimmickEffect(GimmickOperation.CONSUME, "nature_points", 4)
     ]
@@ -96,9 +96,9 @@ def create_druid_skills():
     # 9. 궁극기: 진 변신
     ultimate = Skill("druid_ultimate", "진 변신", "완전한 변신으로 자연과 하나")
     ultimate.effects = [
-        DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "nature_points", "multiplier": 0.5}),
-        DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "nature_points", "multiplier": 0.5}),
-        DamageEffect(DamageType.HP, 2.8),
+        DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "nature_points", "multiplier": 0.5}, stat_type="magical"),
+        DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "nature_points", "multiplier": 0.5}, stat_type="magical"),
+        DamageEffect(DamageType.HP, 2.8, stat_type="magical"),
         BuffEffect(BuffType.ATTACK_UP, 0.6, duration=5),
         BuffEffect(BuffType.DEFENSE_UP, 0.6, duration=5),
         BuffEffect(BuffType.SPEED_UP, 0.6, duration=5),

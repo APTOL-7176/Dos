@@ -391,7 +391,7 @@ def show_save_screen(
     game_state: Dict[str, Any]
 ) -> bool:
     """
-    저장 화면 표시
+    저장 화면 표시 (로그라이크 방식 - 현재 파일만 덮어쓰기)
 
     Args:
         console: TCOD 콘솔
@@ -402,36 +402,31 @@ def show_save_screen(
         저장 성공 여부
     """
     save_system = SaveSystem()
-    ui = SaveLoadUI(console.width, console.height, SaveLoadMode.SAVE, save_system)
-    handler = InputHandler()
 
-    logger.info("저장 화면 표시")
+    # 현재 세이브 슬롯 가져오기 (없으면 새 슬롯 생성)
+    current_slot = game_state.get("save_slot", None)
 
-    while not ui.closed:
-        # 렌더링
-        ui.render(console)
-        context.present(console)
+    if current_slot is None:
+        # 새 게임이면 빈 슬롯 찾기
+        for i in range(1, 11):  # 최대 10개 슬롯
+            if not save_system.save_exists(i):
+                current_slot = i
+                game_state["save_slot"] = i
+                break
 
-        # 입력 처리
-        for event in tcod.event.wait():
-            action = handler.dispatch(event)
-            key_event = event if isinstance(event, tcod.event.KeyDown) else None
+        if current_slot is None:
+            # 빈 슬롯이 없으면 슬롯 1 사용
+            current_slot = 1
+            game_state["save_slot"] = 1
 
-            if action:
-                if ui.handle_input(action, key_event):
-                    # 저장 실행
-                    if ui.selected_save:
-                        success = save_system.save_game(ui.selected_save, game_state)
-                        if success:
-                            logger.info(f"게임 저장 완료: {ui.selected_save}")
-                        return success
-                    return False
+    # 현재 슬롯에 바로 저장 (UI 없이)
+    success = save_system.save_game(current_slot, game_state)
+    if success:
+        logger.info(f"게임 저장 완료: 슬롯 {current_slot}")
+    else:
+        logger.error(f"게임 저장 실패: 슬롯 {current_slot}")
 
-            # 윈도우 닫기
-            if isinstance(event, tcod.event.Quit):
-                return False
-
-    return False
+    return success
 
 
 def show_load_screen(

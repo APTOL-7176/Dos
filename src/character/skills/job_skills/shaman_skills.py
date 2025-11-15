@@ -12,7 +12,7 @@ def create_shaman_skills():
     # 1. 기본 BRV: 저주 걸기
     curse = Skill("shaman_curse", "저주 걸기", "저주 스택 획득")
     curse.effects = [
-        DamageEffect(DamageType.BRV, 1.4),
+        DamageEffect(DamageType.BRV, 1.4, stat_type="magical"),
         GimmickEffect(GimmickOperation.ADD, "curse_stacks", 1, max_value=8)
     ]
     curse.costs = []  # 기본 공격은 MP 소모 없음
@@ -20,7 +20,7 @@ def create_shaman_skills():
     # 2. 기본 HP: 저주 폭발
     curse_burst = Skill("shaman_curse_burst", "저주 폭발", "저주 소비 공격")
     curse_burst.effects = [
-        DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "curse_stacks", "multiplier": 0.25}),
+        DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "curse_stacks", "multiplier": 0.25}, stat_type="magical"),
         GimmickEffect(GimmickOperation.CONSUME, "curse_stacks", 1)
     ]
     curse_burst.costs = []  # 기본 공격은 MP 소모 없음
@@ -28,7 +28,7 @@ def create_shaman_skills():
     # 3. 역병
     plague = Skill("shaman_plague", "역병", "저주 2스택 획득, 광역 디버프")
     plague.effects = [
-        DamageEffect(DamageType.BRV, 1.6),
+        DamageEffect(DamageType.BRV, 1.6, stat_type="magical"),
         BuffEffect(BuffType.ATTACK_DOWN, 0.3, duration=3),
         GimmickEffect(GimmickOperation.ADD, "curse_stacks", 2, max_value=8)
     ]
@@ -39,7 +39,7 @@ def create_shaman_skills():
     # 4. 저주 전이
     curse_transfer = Skill("shaman_curse_transfer", "저주 전이", "저주 2스택 소비, 광역 공격")
     curse_transfer.effects = [
-        DamageEffect(DamageType.BRV_HP, 1.7, gimmick_bonus={"field": "curse_stacks", "multiplier": 0.2}),
+        DamageEffect(DamageType.BRV_HP, 1.7, gimmick_bonus={"field": "curse_stacks", "multiplier": 0.2}, stat_type="magical"),
         GimmickEffect(GimmickOperation.CONSUME, "curse_stacks", 2)
     ]
     curse_transfer.costs = [MPCost(8), StackCost("curse_stacks", 2)]
@@ -59,7 +59,7 @@ def create_shaman_skills():
     # 6. 사술
     dark_magic = Skill("shaman_dark_magic", "사술", "저주 3스택 소비, 강력한 디버프")
     dark_magic.effects = [
-        DamageEffect(DamageType.BRV, 2.0, gimmick_bonus={"field": "curse_stacks", "multiplier": 0.3}),
+        DamageEffect(DamageType.BRV, 2.0, gimmick_bonus={"field": "curse_stacks", "multiplier": 0.3}, stat_type="magical"),
         BuffEffect(BuffType.DEFENSE_DOWN, 0.4, duration=4),
         BuffEffect(BuffType.SPEED_DOWN, 0.3, duration=4),
         GimmickEffect(GimmickOperation.CONSUME, "curse_stacks", 3)
@@ -70,7 +70,7 @@ def create_shaman_skills():
     # 7. 영혼 흡수
     soul_drain = Skill("shaman_soul_drain", "영혼 흡수", "저주 4스택 소비, 흡혈 공격")
     soul_drain.effects = [
-        DamageEffect(DamageType.BRV_HP, 2.2, gimmick_bonus={"field": "curse_stacks", "multiplier": 0.35}),
+        DamageEffect(DamageType.BRV_HP, 2.2, gimmick_bonus={"field": "curse_stacks", "multiplier": 0.35}, stat_type="magical"),
         GimmickEffect(GimmickOperation.CONSUME, "curse_stacks", 4)
     ]
     soul_drain.costs = [MPCost(12), StackCost("curse_stacks", 4)]
@@ -79,8 +79,8 @@ def create_shaman_skills():
     # 8. 저주의 낙인
     curse_mark = Skill("shaman_curse_mark", "저주의 낙인", "저주 6스택 소비, 절대 저주")
     curse_mark.effects = [
-        DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "curse_stacks", "multiplier": 0.4}),
-        DamageEffect(DamageType.HP, 1.8),
+        DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "curse_stacks", "multiplier": 0.4}, stat_type="magical"),
+        DamageEffect(DamageType.HP, 1.8, stat_type="magical"),
         BuffEffect(BuffType.ATTACK_DOWN, 0.5, duration=5),
         BuffEffect(BuffType.DEFENSE_DOWN, 0.5, duration=5),
         GimmickEffect(GimmickOperation.CONSUME, "curse_stacks", 6)
@@ -91,9 +91,9 @@ def create_shaman_skills():
     # 9. 궁극기: 대저주
     ultimate = Skill("shaman_ultimate", "대저주", "모든 저주를 폭발시켜 파멸")
     ultimate.effects = [
-        DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "curse_stacks", "multiplier": 0.4}),
-        DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "curse_stacks", "multiplier": 0.4}),
-        DamageEffect(DamageType.HP, 2.8, gimmick_bonus={"field": "curse_stacks", "multiplier": 0.5}),
+        DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "curse_stacks", "multiplier": 0.4}, stat_type="magical"),
+        DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "curse_stacks", "multiplier": 0.4}, stat_type="magical"),
+        DamageEffect(DamageType.HP, 2.8, gimmick_bonus={"field": "curse_stacks", "multiplier": 0.5}, stat_type="magical"),
         BuffEffect(BuffType.ATTACK_DOWN, 0.6, duration=5),
         BuffEffect(BuffType.DEFENSE_DOWN, 0.6, duration=5),
         GimmickEffect(GimmickOperation.SET, "curse_stacks", 0)

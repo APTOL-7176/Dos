@@ -13,7 +13,7 @@ def create_necromancer_skills():
     # 1. 기본 BRV: 시체의 손길
     corpse_touch = Skill("necro_corpse_touch", "시체의 손길", "죽음의 에너지로 공격, 시체 획득")
     corpse_touch.effects = [
-        DamageEffect(DamageType.BRV, 1.4),
+        DamageEffect(DamageType.BRV, 1.4, stat_type="magical"),
         GimmickEffect(GimmickOperation.ADD, "corpse_count", 1, max_value=10)
     ]
     corpse_touch.costs = []  # 기본 공격은 MP 소모 없음
@@ -21,7 +21,7 @@ def create_necromancer_skills():
     # 2. 기본 HP: 영혼 흡수
     soul_drain = Skill("necro_soul_drain", "영혼 흡수", "시체를 소비하여 HP 공격")
     soul_drain.effects = [
-        DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "corpse_count", "multiplier": 0.2}),
+        DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "corpse_count", "multiplier": 0.2}, stat_type="magical"),
         GimmickEffect(GimmickOperation.CONSUME, "corpse_count", 1)
     ]
     soul_drain.costs = []  # 기본 공격은 MP 소모 없음
@@ -40,7 +40,7 @@ def create_necromancer_skills():
     # 4. 죽음의 화살
     death_bolt = Skill("necro_death_bolt", "죽음의 화살", "시체에 비례한 마법 공격")
     death_bolt.effects = [
-        DamageEffect(DamageType.BRV, 1.8, gimmick_bonus={"field": "corpse_count", "multiplier": 0.15}),
+        DamageEffect(DamageType.BRV, 1.8, gimmick_bonus={"field": "corpse_count", "multiplier": 0.15}, stat_type="magical"),
         GimmickEffect(GimmickOperation.ADD, "corpse_count", 1, max_value=10)
     ]
     death_bolt.costs = [MPCost(6)]
@@ -49,7 +49,7 @@ def create_necromancer_skills():
     # 5. 시체 폭발
     corpse_explosion = Skill("necro_corpse_explosion", "시체 폭발", "모든 시체 폭발, 범위 공격")
     corpse_explosion.effects = [
-        DamageEffect(DamageType.BRV_HP, 1.5, gimmick_bonus={"field": "corpse_count", "multiplier": 0.3}),
+        DamageEffect(DamageType.BRV_HP, 1.5, gimmick_bonus={"field": "corpse_count", "multiplier": 0.3}, stat_type="magical"),
         GimmickEffect(GimmickOperation.SET, "corpse_count", 0)
     ]
     corpse_explosion.costs = [MPCost(10), StackCost("corpse_count", 1)]
@@ -58,7 +58,7 @@ def create_necromancer_skills():
     # 6. 생명 흡수
     life_tap = Skill("necro_life_tap", "생명 흡수", "적의 생명력을 흡수")
     life_tap.effects = [
-        DamageEffect(DamageType.BRV, 1.2),
+        DamageEffect(DamageType.BRV, 1.2, stat_type="magical"),
         HealEffect(HealType.HP, percentage=0.2),
         GimmickEffect(GimmickOperation.ADD, "corpse_count", 2, max_value=10)
     ]
@@ -90,9 +90,9 @@ def create_necromancer_skills():
     # 9. 궁극기: 언데드 군단
     ultimate = Skill("necro_ultimate", "언데드 군단", "모든 시체로 군단 소환, 적 섬멸")
     ultimate.effects = [
-        DamageEffect(DamageType.BRV, 2.0, gimmick_bonus={"field": "corpse_count", "multiplier": 0.4}),
-        DamageEffect(DamageType.BRV, 1.5, gimmick_bonus={"field": "minion_count", "multiplier": 0.5}),
-        DamageEffect(DamageType.HP, 3.0),
+        DamageEffect(DamageType.BRV, 2.0, gimmick_bonus={"field": "corpse_count", "multiplier": 0.4}, stat_type="magical"),
+        DamageEffect(DamageType.BRV, 1.5, gimmick_bonus={"field": "minion_count", "multiplier": 0.5}, stat_type="magical"),
+        DamageEffect(DamageType.HP, 3.0, stat_type="magical"),
         GimmickEffect(GimmickOperation.SET, "minion_count", 5),
         GimmickEffect(GimmickOperation.SET, "corpse_count", 0),
         BuffEffect(BuffType.MAGIC_UP, 0.5, duration=5),

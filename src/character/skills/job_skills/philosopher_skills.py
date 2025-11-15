@@ -12,7 +12,7 @@ def create_philosopher_skills():
     # 1. 기본 BRV: 분석
     analyze = Skill("philosopher_analyze", "분석", "지식 스택 획득")
     analyze.effects = [
-        DamageEffect(DamageType.BRV, 1.4),
+        DamageEffect(DamageType.BRV, 1.4, stat_type="magical"),
         GimmickEffect(GimmickOperation.ADD, "knowledge_stacks", 1, max_value=10)
     ]
     analyze.costs = []  # 기본 공격은 MP 소모 없음
@@ -20,7 +20,7 @@ def create_philosopher_skills():
     # 2. 기본 HP: 논리적 공격
     logic_strike = Skill("philosopher_logic_strike", "논리적 공격", "지식 소비 공격")
     logic_strike.effects = [
-        DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "knowledge_stacks", "multiplier": 0.15}),
+        DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "knowledge_stacks", "multiplier": 0.15}, stat_type="magical"),
         GimmickEffect(GimmickOperation.CONSUME, "knowledge_stacks", 1)
     ]
     logic_strike.costs = []  # 기본 공격은 MP 소모 없음
@@ -38,7 +38,7 @@ def create_philosopher_skills():
     # 4. 패턴 인식
     pattern_recognition = Skill("philosopher_pattern_recognition", "패턴 인식", "지식 2스택 소비, 약점 공격")
     pattern_recognition.effects = [
-        DamageEffect(DamageType.BRV, 2.0, gimmick_bonus={"field": "knowledge_stacks", "multiplier": 0.2}),
+        DamageEffect(DamageType.BRV, 2.0, gimmick_bonus={"field": "knowledge_stacks", "multiplier": 0.2}, stat_type="magical"),
         BuffEffect(BuffType.DEFENSE_DOWN, 0.3, duration=3),
         GimmickEffect(GimmickOperation.CONSUME, "knowledge_stacks", 2)
     ]
@@ -69,7 +69,7 @@ def create_philosopher_skills():
     # 7. 논리 폭발
     logic_burst = Skill("philosopher_logic_burst", "논리 폭발", "지식 5스택 소비, 광역 공격")
     logic_burst.effects = [
-        DamageEffect(DamageType.BRV_HP, 2.0, gimmick_bonus={"field": "knowledge_stacks", "multiplier": 0.25}),
+        DamageEffect(DamageType.BRV_HP, 2.0, gimmick_bonus={"field": "knowledge_stacks", "multiplier": 0.25}, stat_type="magical"),
         GimmickEffect(GimmickOperation.CONSUME, "knowledge_stacks", 5)
     ]
     logic_burst.costs = [MPCost(12), StackCost("knowledge_stacks", 5)]
@@ -79,8 +79,8 @@ def create_philosopher_skills():
     # 8. 완벽한 분석
     perfect_analysis = Skill("philosopher_perfect_analysis", "완벽한 분석", "지식 7스택 소비, 치명타 확정")
     perfect_analysis.effects = [
-        DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "knowledge_stacks", "multiplier": 0.3}),
-        DamageEffect(DamageType.HP, 2.0),
+        DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "knowledge_stacks", "multiplier": 0.3}, stat_type="magical"),
+        DamageEffect(DamageType.HP, 2.0, stat_type="magical"),
         GimmickEffect(GimmickOperation.CONSUME, "knowledge_stacks", 7)
     ]
     perfect_analysis.costs = [MPCost(15), StackCost("knowledge_stacks", 7)]
@@ -89,9 +89,9 @@ def create_philosopher_skills():
     # 9. 궁극기: 진리 도달
     ultimate = Skill("philosopher_ultimate", "진리 도달", "모든 지식으로 진리 공격")
     ultimate.effects = [
-        DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "knowledge_stacks", "multiplier": 0.25}),
-        DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "knowledge_stacks", "multiplier": 0.25}),
-        DamageEffect(DamageType.HP, 3.0, gimmick_bonus={"field": "knowledge_stacks", "multiplier": 0.35}),
+        DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "knowledge_stacks", "multiplier": 0.25}, stat_type="magical"),
+        DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "knowledge_stacks", "multiplier": 0.25}, stat_type="magical"),
+        DamageEffect(DamageType.HP, 3.0, gimmick_bonus={"field": "knowledge_stacks", "multiplier": 0.35}, stat_type="magical"),
         BuffEffect(BuffType.ATTACK_UP, 0.6, duration=5),
         BuffEffect(BuffType.MAGIC_UP, 0.6, duration=5),
         GimmickEffect(GimmickOperation.SET, "knowledge_stacks", 0)

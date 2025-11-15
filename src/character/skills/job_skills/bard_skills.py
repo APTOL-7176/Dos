@@ -5,6 +5,7 @@ from src.character.skills.effects.gimmick_effect import GimmickEffect, GimmickOp
 from src.character.skills.effects.heal_effect import HealEffect, HealType
 from src.character.skills.effects.buff_effect import BuffEffect, BuffType
 from src.character.skills.costs.mp_cost import MPCost
+from src.character.skills.costs.stack_cost import StackCost
 
 def create_bard_skills():
     """바드 9개 스킬 생성"""
@@ -12,7 +13,7 @@ def create_bard_skills():
     # 1. 기본 BRV: 음표 공격
     note_attack = Skill("bard_note_attack", "음표 공격", "음표로 적을 공격하고 멜로디 1음 획득")
     note_attack.effects = [
-        DamageEffect(DamageType.BRV, 1.3),
+        DamageEffect(DamageType.BRV, 1.3, stat_type="magical"),
         GimmickEffect(GimmickOperation.ADD, "melody_stacks", 1, max_value=7)
     ]
     note_attack.costs = []  # 기본 공격은 MP 소모 없음
@@ -21,10 +22,9 @@ def create_bard_skills():
     # 2. 기본 HP: 화음 타격
     chord_strike = Skill("bard_chord_strike", "화음 타격", "멜로디를 소비하여 HP 공격")
     chord_strike.effects = [
-        DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "melody_stacks", "multiplier": 0.15}),
-        GimmickEffect(GimmickOperation.CONSUME, "melody_stacks", 1)
+        DamageEffect(DamageType.HP, 1.0, gimmick_bonus={"field": "melody_stacks", "multiplier": 0.15})
     ]
-    chord_strike.costs = []  # 기본 공격은 MP 소모 없음
+    chord_strike.costs = [StackCost("melody_stacks", 1)]  # 멜로디 1음 필요
     chord_strike.sfx = ("combat", "attack_magic")
 
     # 3. 음계 상승
@@ -52,7 +52,7 @@ def create_bard_skills():
     # 5. 전율 (크레센도)
     crescendo = Skill("bard_crescendo", "전율", "멜로디에 비례한 BRV 공격")
     crescendo.effects = [
-        DamageEffect(DamageType.BRV, 1.5, gimmick_bonus={"field": "melody_stacks", "multiplier": 0.3}),
+        DamageEffect(DamageType.BRV, 1.5, gimmick_bonus={"field": "melody_stacks", "multiplier": 0.3}, stat_type="magical"),
         GimmickEffect(GimmickOperation.ADD, "melody_stacks", 1, max_value=7)
     ]
     crescendo.costs = [MPCost(6)]
@@ -76,10 +76,9 @@ def create_bard_skills():
         BuffEffect(BuffType.ATTACK_UP, 0.4, duration=4, is_party_wide=True),
         BuffEffect(BuffType.MAGIC_UP, 0.4, duration=4, is_party_wide=True),
         BuffEffect(BuffType.SPEED_UP, 0.3, duration=4, is_party_wide=True),
-        GimmickEffect(GimmickOperation.SET, "melody_stacks", 0),
         GimmickEffect(GimmickOperation.ADD, "octave_completed", 1)
     ]
-    perfect_harmony.costs = [MPCost(12)]
+    perfect_harmony.costs = [MPCost(12), StackCost("melody_stacks", 7)]  # 멜로디 7음 필요
     perfect_harmony.target_type = "party"
     perfect_harmony.cooldown = 5
     perfect_harmony.cast_time = 0.4  # ATB 40% 캐스팅
@@ -88,18 +87,17 @@ def create_bard_skills():
     # 8. 불협화음 (디버프 공격)
     discord = Skill("bard_discord", "불협화음", "멜로디 2음 소비, 적 약화 공격")
     discord.effects = [
-        DamageEffect(DamageType.BRV_HP, 1.8),
-        GimmickEffect(GimmickOperation.CONSUME, "melody_stacks", 2)
+        DamageEffect(DamageType.BRV_HP, 1.8, stat_type="magical")
     ]
-    discord.costs = [MPCost(10)]
+    discord.costs = [MPCost(10), StackCost("melody_stacks", 2)]  # 멜로디 2음 필요
     discord.cooldown = 3
     discord.sfx = ("combat", "attack_magic")
 
     # 9. 궁극기: 교향곡
     ultimate = Skill("bard_ultimate", "교향곡", "모든 멜로디로 파티 강화 + 적 섬멸")
     ultimate.effects = [
-        DamageEffect(DamageType.BRV, 2.0, gimmick_bonus={"field": "melody_stacks", "multiplier": 0.5}),
-        DamageEffect(DamageType.BRV, 2.0, gimmick_bonus={"field": "octave_completed", "multiplier": 0.3}),
+        DamageEffect(DamageType.BRV, 2.0, gimmick_bonus={"field": "melody_stacks", "multiplier": 0.5}, stat_type="magical"),
+        DamageEffect(DamageType.BRV, 2.0, gimmick_bonus={"field": "octave_completed", "multiplier": 0.3}, stat_type="magical"),
         DamageEffect(DamageType.HP, 2.5),
         BuffEffect(BuffType.ATTACK_UP, 0.5, duration=5, is_party_wide=True),
         BuffEffect(BuffType.MAGIC_UP, 0.5, duration=5, is_party_wide=True),

@@ -81,8 +81,10 @@ class DamageCalculator:
         attacker_atk = self._get_attack_stat(attacker)
         defender_def = self._get_defense_stat(defender)
 
-        # 기본 데미지 계산
-        base_damage = max(1, attacker_atk - defender_def)
+        # 기본 데미지 계산 (비율 방식: 공격력 / (방어력 + 1))
+        # 방어력이 0일 때를 방지하기 위해 +1
+        stat_modifier = attacker_atk / (defender_def + 1.0)
+        base_damage = max(1, int(attacker_atk * stat_modifier))
 
         # 스킬 배율 적용
         damage = base_damage * skill_multiplier * self.brv_damage_multiplier
@@ -160,9 +162,9 @@ class DamageCalculator:
             attacker_stat = self._get_attack_stat(attacker)
             defender_stat = self._get_defense_stat(defender)
 
-        # 스탯 보정 계산: 공격자 스탯 / (방어자 스탯 + 100)
-        # +100은 기본값으로 0으로 나누는 것 방지
-        stat_modifier = attacker_stat / (defender_stat + 100.0)
+        # 스탯 보정 계산: 공격자 스탯 / (방어자 스탯 + 1)
+        # +1은 기본값으로 0으로 나누는 것 방지
+        stat_modifier = attacker_stat / (defender_stat + 1.0)
 
         damage = int(base_damage * stat_modifier)
 
@@ -258,8 +260,9 @@ class DamageCalculator:
         attacker_mag = self._get_magic_stat(attacker)
         defender_spr = self._get_spirit_stat(defender)
 
-        # 기본 데미지 계산
-        base_damage = max(1, attacker_mag - defender_spr)
+        # 기본 데미지 계산 (비율 방식: 마법력 / (정신력 + 1))
+        stat_modifier = attacker_mag / (defender_spr + 1.0)
+        base_damage = max(1, int(attacker_mag * stat_modifier))
 
         # 속성 보너스 (TODO: 속성 시스템 연동)
         element_bonus = 1.0

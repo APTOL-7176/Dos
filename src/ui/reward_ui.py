@@ -239,6 +239,11 @@ def show_reward_screen(
         rewards: 보상 정보
         level_ups: 레벨업 정보
     """
+    # 승리 BGM 재생
+    from src.audio import play_bgm
+    play_bgm("victory", loop=False, fade_in=False)
+    logger.info("승리 BGM 재생")
+
     display = RewardDisplay(
         console.width,
         console.height,

@@ -13,7 +13,7 @@ def create_priest_skills():
     # 1. 기본 BRV: 성스러운 일격
     holy_smite = Skill("priest_holy_smite", "성스러운 일격", "심판 포인트 획득")
     holy_smite.effects = [
-        DamageEffect(DamageType.BRV, 1.5),
+        DamageEffect(DamageType.BRV, 1.5, stat_type="magical"),
         GimmickEffect(GimmickOperation.ADD, "judgment_points", 1, max_value=6)
     ]
     holy_smite.costs = []  # 기본 공격은 MP 소모 없음
@@ -21,7 +21,7 @@ def create_priest_skills():
     # 2. 기본 HP: 신성한 심판
     divine_judgment = Skill("priest_divine_judgment", "신성한 심판", "심판 포인트 소비 공격")
     divine_judgment.effects = [
-        DamageEffect(DamageType.HP, 1.1, gimmick_bonus={"field": "judgment_points", "multiplier": 0.3}),
+        DamageEffect(DamageType.HP, 1.1, gimmick_bonus={"field": "judgment_points", "multiplier": 0.3}, stat_type="magical"),
         GimmickEffect(GimmickOperation.CONSUME, "judgment_points", 1)
     ]
     divine_judgment.costs = []  # 기본 공격은 MP 소모 없음
@@ -29,7 +29,7 @@ def create_priest_skills():
     # 3. 빛의 속박
     light_bind = Skill("priest_light_bind", "빛의 속박", "심판 포인트 획득, 디버프")
     light_bind.effects = [
-        DamageEffect(DamageType.BRV, 1.6),
+        DamageEffect(DamageType.BRV, 1.6, stat_type="magical"),
         BuffEffect(BuffType.SPEED_DOWN, 0.4, duration=3),
         GimmickEffect(GimmickOperation.ADD, "judgment_points", 1, max_value=6)
     ]
@@ -70,7 +70,7 @@ def create_priest_skills():
     # 7. 신성한 광선
     holy_beam = Skill("priest_holy_beam", "신성한 광선", "심판 3포인트 소비, 광역 공격")
     holy_beam.effects = [
-        DamageEffect(DamageType.BRV_HP, 2.0, gimmick_bonus={"field": "judgment_points", "multiplier": 0.35}),
+        DamageEffect(DamageType.BRV_HP, 2.0, gimmick_bonus={"field": "judgment_points", "multiplier": 0.35}, stat_type="magical"),
         GimmickEffect(GimmickOperation.CONSUME, "judgment_points", 3)
     ]
     holy_beam.costs = [MPCost(11), StackCost("judgment_points", 3)]
@@ -80,8 +80,8 @@ def create_priest_skills():
     # 8. 신의 분노
     divine_wrath = Skill("priest_divine_wrath", "신의 분노", "심판 5포인트 소비, 절대 심판")
     divine_wrath.effects = [
-        DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "judgment_points", "multiplier": 0.4}),
-        DamageEffect(DamageType.HP, 2.0),
+        DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "judgment_points", "multiplier": 0.4}, stat_type="magical"),
+        DamageEffect(DamageType.HP, 2.0, stat_type="magical"),
         BuffEffect(BuffType.ATTACK_DOWN, 0.5, duration=4),
         GimmickEffect(GimmickOperation.CONSUME, "judgment_points", 5)
     ]
@@ -91,9 +91,9 @@ def create_priest_skills():
     # 9. 궁극기: 최후의 심판
     ultimate = Skill("priest_ultimate", "최후의 심판", "모든 심판을 내림")
     ultimate.effects = [
-        DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "judgment_points", "multiplier": 0.45}),
-        DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "judgment_points", "multiplier": 0.45}),
-        DamageEffect(DamageType.HP, 3.0, gimmick_bonus={"field": "judgment_points", "multiplier": 0.6}),
+        DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "judgment_points", "multiplier": 0.45}, stat_type="magical"),
+        DamageEffect(DamageType.BRV, 2.5, gimmick_bonus={"field": "judgment_points", "multiplier": 0.45}, stat_type="magical"),
+        DamageEffect(DamageType.HP, 3.0, gimmick_bonus={"field": "judgment_points", "multiplier": 0.6}, stat_type="magical"),
         HealEffect(HealType.HP, percentage=0.3, is_party_wide=True),
         GimmickEffect(GimmickOperation.SET, "judgment_points", 0)
     ]

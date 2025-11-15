@@ -2,6 +2,7 @@
 Trait Selection - 특성 선택 시스템
 
 각 캐릭터마다 5개 특성 중 2개를 선택하는 시스템
+기본 2개 해금, 나머지 3개는 상점에서 구매 필요
 """
 
 import tcod.console
@@ -15,6 +16,7 @@ from src.ui.cursor_menu import CursorMenu, MenuItem
 from src.ui.tcod_display import Colors
 from src.ui.input_handler import GameAction, InputHandler
 from src.core.logger import get_logger
+from src.persistence.meta_progress import get_meta_progress
 
 
 @dataclass
@@ -96,6 +98,8 @@ class TraitSelection:
                 traits_data = data.get('traits', [])
 
                 self.available_traits = []
+                meta = get_meta_progress()
+
                 for trait_data in traits_data[:5]:  # 최대 5개
                     trait = Trait(
                         id=trait_data.get('id', ''),
@@ -103,6 +107,9 @@ class TraitSelection:
                         description=trait_data.get('description', ''),
                         type=trait_data.get('type', 'passive')
                     )
+
+                    # 해금 여부 확인 및 추가
+                    # (메타 진행에서 해금 여부를 확인하되, 여기선 모든 특성 로드)
                     self.available_traits.append(trait)
 
                 self.logger.info(
@@ -116,12 +123,17 @@ class TraitSelection:
     def _create_trait_menu(self):
         """특성 선택 메뉴 생성"""
         member = self.party_members[self.current_member_index]
+        job_id = member.job_id
+        meta = get_meta_progress()
+
         menu_items = []
 
         for trait in self.available_traits:
+            # 해금 여부 확인
+            is_unlocked = meta.is_trait_unlocked(job_id, trait.id)
+
             # 이미 선택된 특성 표시
             already_selected = trait in self.temp_selected
-            prefix = "[✓] " if already_selected else ""
 
             # 특성 타입 표시
             type_str = {
@@ -130,11 +142,25 @@ class TraitSelection:
                 'conditional': '조건부'
             }.get(trait.type, '기타')
 
+            # 잠금/해금/선택 상태 표시
+            if not is_unlocked:
+                prefix = "[🔒] "
+                description = trait.description + " (상점에서 해금 필요)"
+                enabled = False
+            elif already_selected:
+                prefix = "[✓] "
+                description = trait.description
+                enabled = True
+            else:
+                prefix = ""
+                description = trait.description
+                enabled = True
+
             menu_items.append(MenuItem(
                 text=f"{prefix}{trait.name} ({type_str})",
                 value=trait,
-                enabled=True,
-                description=trait.description
+                enabled=enabled,
+                description=description
             ))
 
         # 메뉴 생성
@@ -170,8 +196,16 @@ class TraitSelection:
         elif action == GameAction.CONFIRM:
             # 특성 선택/해제
             selected = self.trait_menu.get_selected_item()
-            if selected:
+            if selected and selected.enabled:  # enabled 확인
                 trait = selected.value
+                member = self.party_members[self.current_member_index]
+                job_id = member.job_id
+                meta = get_meta_progress()
+
+                # 해금 여부 재확인
+                if not meta.is_trait_unlocked(job_id, trait.id):
+                    self.logger.warning(f"잠긴 특성 선택 시도: {trait.name}")
+                    return False
 
                 if trait in self.temp_selected:
                     # 선택 해제

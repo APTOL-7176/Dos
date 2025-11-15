@@ -303,12 +303,12 @@ class GaugeRenderer:
         else:
             atb_ratio = min(2.0, atb_current / atb_threshold)
 
-        # ATB 색상 (파란색)
-        atb_fg = (100, 150, 255)
-        atb_bg = (50, 75, 125)
+        # ATB 색상 (연한 하늘색)
+        atb_fg = (135, 206, 235)
+        atb_bg = (67, 103, 117)
 
-        # 오버플로우 색상 (밝은 파란색)
-        overflow_fg = (150, 200, 255)
+        # 오버플로우 색상 (밝은 하늘색)
+        overflow_fg = (173, 216, 230)
 
         # 캐스팅 색상 (보라색/자홍색)
         cast_fg = (200, 100, 255)
