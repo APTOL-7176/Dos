@@ -349,6 +349,7 @@ audio:
       # 메인 메뉴 & UI
       intro: "02-Opening ~ Bombing Mission"                    # Opening ~ Bombing Mission (인트로 스토리)
       main_menu: "01-The Prelude"                              # The Prelude
+      menu: "01-The Prelude"                                   # Menu (런처 및 메뉴용)
       party_setup: "24-Holding My Thoughts in My Heart"        # Holding My Thoughts in My Heart
 
       # 월드 & 던전
