@@ -112,6 +112,11 @@ def main() -> int:
             logger.error("스킬 초기화 실패 - 게임을 종료합니다")
             return 1
 
+        # 장비 효과 시스템 초기화
+        from src.equipment.equipment_effects import get_equipment_effect_manager
+        effect_manager = get_equipment_effect_manager()
+        logger.info("장비 효과 시스템 초기화 완료")
+
         # 인트로 스토리 표시 (최초 1회)
         intro_shown = False
         if not intro_shown:

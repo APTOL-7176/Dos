@@ -218,14 +218,28 @@ class EquipmentEffectManager:
         if not character or not item:
             return
 
-        # 아이템의 특수 효과 파싱 및 적용
-        if hasattr(item, "special_effects"):
-            for effect in item.special_effects:
-                self.add_effect(character.id, effect)
+        # 캐릭터 ID (name 사용)
+        character_id = character.name
 
-                # ON_EQUIP 트리거 효과 즉시 실행
-                if effect.trigger == EffectTrigger.ON_EQUIP:
-                    self._execute_effect(character, effect, {})
+        # 아이템의 특수 효과 파싱 및 적용
+        effects = []
+
+        # 1. special_effects 리스트가 있으면 그것을 사용
+        if hasattr(item, "special_effects") and item.special_effects:
+            effects = item.special_effects
+        # 2. unique_effect 문자열이 있으면 파싱
+        elif hasattr(item, "unique_effect") and item.unique_effect:
+            effects = parse_unique_effects(item.unique_effect)
+
+        # 효과 적용
+        for effect in effects:
+            # 효과에 source_id 추가 (제거용)
+            effect.source_id = getattr(item, 'item_id', item.name)
+            self.add_effect(character_id, effect)
+
+            # ON_EQUIP 트리거 효과 즉시 실행
+            if effect.trigger == EffectTrigger.ON_EQUIP:
+                self._execute_effect(character, effect, {})
 
     def _on_equipment_unequipped(self, data: Dict[str, Any]):
         """장비 해제 이벤트"""
@@ -235,14 +249,23 @@ class EquipmentEffectManager:
         if not character or not item:
             return
 
+        # 캐릭터 ID (name 사용)
+        character_id = character.name
+        item_id = getattr(item, 'item_id', item.name)
+
         # ON_UNEQUIP 효과 실행
-        if hasattr(item, "special_effects"):
-            for effect in item.special_effects:
-                if effect.trigger == EffectTrigger.ON_UNEQUIP:
-                    self._execute_effect(character, effect, {})
+        effects = []
+        if hasattr(item, "special_effects") and item.special_effects:
+            effects = item.special_effects
+        elif hasattr(item, "unique_effect") and item.unique_effect:
+            effects = parse_unique_effects(item.unique_effect)
+
+        for effect in effects:
+            if effect.trigger == EffectTrigger.ON_UNEQUIP:
+                self._execute_effect(character, effect, {})
 
         # 효과 제거
-        self.remove_effects(character.id, item.item_id)
+        self.remove_effects(character_id, item_id)
 
     def _on_damage_dealt(self, data: Dict[str, Any]):
         """공격 성공 이벤트"""
@@ -253,7 +276,7 @@ class EquipmentEffectManager:
         if not attacker:
             return
 
-        effects = self.get_effects_by_trigger(attacker.id, EffectTrigger.ON_HIT)
+        effects = self.get_effects_by_trigger(attacker.name, EffectTrigger.ON_HIT)
         for effect in effects:
             context = {"character": attacker, "target": target, "damage": damage}
             if effect.check_condition(context):
@@ -268,7 +291,7 @@ class EquipmentEffectManager:
         if not defender:
             return
 
-        effects = self.get_effects_by_trigger(defender.id, EffectTrigger.ON_DAMAGED)
+        effects = self.get_effects_by_trigger(defender.name, EffectTrigger.ON_DAMAGED)
         for effect in effects:
             context = {"character": defender, "target": attacker, "damage": damage}
             if effect.check_condition(context):
@@ -280,7 +303,7 @@ class EquipmentEffectManager:
         if not character:
             return
 
-        effects = self.get_effects_by_trigger(character.id, EffectTrigger.ON_TURN_START)
+        effects = self.get_effects_by_trigger(character.name, EffectTrigger.ON_TURN_START)
         for effect in effects:
             self._execute_effect(character, effect, {"character": character})
 
@@ -290,7 +313,7 @@ class EquipmentEffectManager:
         if not character:
             return
 
-        effects = self.get_effects_by_trigger(character.id, EffectTrigger.ON_TURN_END)
+        effects = self.get_effects_by_trigger(character.name, EffectTrigger.ON_TURN_END)
         for effect in effects:
             self._execute_effect(character, effect, {"character": character})
 
@@ -452,3 +475,101 @@ def create_hp_regen_effect(percent_per_turn: float) -> EquipmentEffect:
         value=percent_per_turn,
         description=f"턴당 HP {int(percent_per_turn*100)}% 회복"
     )
+
+
+def parse_unique_effects(unique_effect_string: str) -> List[EquipmentEffect]:
+    """
+    unique_effect 문자열을 파싱하여 EquipmentEffect 리스트로 변환
+
+    형식: "effect_type:value|effect_type2:value2"
+    예시: "vision:2|wound_reduction:0.25|brv_bonus:0.15"
+
+    Args:
+        unique_effect_string: 효과 문자열
+
+    Returns:
+        EquipmentEffect 객체 리스트
+    """
+    if not unique_effect_string:
+        return []
+
+    effects = []
+
+    # | 로 분리
+    for effect_str in unique_effect_string.split("|"):
+        if ":" not in effect_str:
+            continue
+
+        effect_name, value_str = effect_str.split(":", 1)
+        effect_name = effect_name.strip()
+
+        try:
+            value = float(value_str)
+        except ValueError:
+            # 값이 숫자가 아니면 True/False일 수 있음
+            value = value_str.strip().lower() == "true" if value_str.strip().lower() in ["true", "false"] else value_str.strip()
+
+        # 효과 타입 매핑
+        effect_mapping = {
+            # Vision
+            "vision": (EffectType.VISION_BONUS, EffectTrigger.ON_EQUIP),
+            "night_vision": (EffectType.NIGHT_VISION, EffectTrigger.PASSIVE),
+            "true_sight": (EffectType.TRUE_SIGHT, EffectTrigger.PASSIVE),
+
+            # Wound
+            "wound_reduction": (EffectType.WOUND_REDUCTION, EffectTrigger.PASSIVE),
+            "wound_immunity": (EffectType.WOUND_IMMUNITY, EffectTrigger.PASSIVE),
+            "wound_regen": (EffectType.WOUND_REGEN, EffectTrigger.ON_TURN_END),
+
+            # BRV
+            "brv_bonus": (EffectType.BRV_BONUS, EffectTrigger.PASSIVE),
+            "brv_shield": (EffectType.BRV_SHIELD, EffectTrigger.ON_EQUIP),
+            "brv_regen": (EffectType.BRV_REGEN, EffectTrigger.ON_TURN_START),
+            "brv_steal": (EffectType.BRV_STEAL, EffectTrigger.ON_HIT),
+            "brv_break_bonus": (EffectType.BRV_BREAK_BONUS, EffectTrigger.PASSIVE),
+
+            # Combat
+            "lifesteal": (EffectType.LIFESTEAL, EffectTrigger.ON_HIT),
+            "thorns": (EffectType.THORNS, EffectTrigger.ON_DAMAGED),
+            "critical_damage": (EffectType.CRITICAL_DAMAGE, EffectTrigger.PASSIVE),
+            "critical_rate": (EffectType.CRITICAL_RATE, EffectTrigger.PASSIVE),
+            "dodge_chance": (EffectType.DODGE_CHANCE, EffectTrigger.PASSIVE),
+            "counter_attack": (EffectType.COUNTER_ATTACK, EffectTrigger.ON_DAMAGED),
+            "first_strike": (EffectType.FIRST_STRIKE, EffectTrigger.PASSIVE),
+
+            # Healing
+            "hp_regen": (EffectType.HP_REGEN, EffectTrigger.ON_TURN_END),
+            "mp_regen": (EffectType.MP_REGEN, EffectTrigger.ON_TURN_END),
+            "healing_bonus": (EffectType.HEALING_BONUS, EffectTrigger.PASSIVE),
+            "overheal_shield": (EffectType.OVERHEAL_SHIELD, EffectTrigger.PASSIVE),
+
+            # Status
+            "poison_immunity": (EffectType.POISON_IMMUNITY, EffectTrigger.PASSIVE),
+            "stun_immunity": (EffectType.STUN_IMMUNITY, EffectTrigger.PASSIVE),
+            "silence_immunity": (EffectType.SILENCE_IMMUNITY, EffectTrigger.PASSIVE),
+            "burn_immunity": (EffectType.BURN_IMMUNITY, EffectTrigger.PASSIVE),
+            "freeze_immunity": (EffectType.FREEZE_IMMUNITY, EffectTrigger.PASSIVE),
+
+            # Resource
+            "mp_cost_reduction": (EffectType.MP_COST_REDUCTION, EffectTrigger.PASSIVE),
+            "cooldown_reduction": (EffectType.COOLDOWN_REDUCTION, EffectTrigger.PASSIVE),
+            "skill_power": (EffectType.SKILL_POWER, EffectTrigger.PASSIVE),
+            "spell_power": (EffectType.SPELL_POWER, EffectTrigger.PASSIVE),
+            "spell_echo": (EffectType.SPELL_ECHO, EffectTrigger.PASSIVE),
+
+            # Gimmick specific
+            "hack_damage": (EffectType.HACK_DAMAGE_BONUS, EffectTrigger.PASSIVE),
+            "stance_power": (EffectType.STANCE_POWER, EffectTrigger.PASSIVE),
+            "element_power": (EffectType.ELEMENTAL_POWER, EffectTrigger.PASSIVE),
+        }
+
+        if effect_name in effect_mapping:
+            effect_type, trigger = effect_mapping[effect_name]
+            effects.append(EquipmentEffect(
+                effect_type=effect_type,
+                trigger=trigger,
+                value=value,
+                description=f"{effect_name}: {value}"
+            ))
+
+    return effects
