@@ -17,7 +17,6 @@ def create_monk_skills():
         GimmickEffect(GimmickOperation.ADD, "combo_count", 1, max_value=10)
     ]
     rapid_punch.costs = []  # 기본 공격은 MP 소모 없음
-    rapid_punch.cast_time = 0.5
     
     # 2. 기본 HP: 장타
     palm_strike = Skill("monk_palm_strike", "장타", "콤보 소비 강력한 장타")

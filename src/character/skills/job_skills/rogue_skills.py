@@ -18,7 +18,6 @@ def create_rogue_skills():
         GimmickEffect(GimmickOperation.ADD, "stolen_items", 1, max_value=10)
     ]
     ambush.costs = []  # 기본 공격은 MP 소모 없음
-    ambush.cast_time = 0.5
     skills.append(ambush)
     
     # 2. 기본 HP: 급소 공격

@@ -296,14 +296,19 @@ class GaugeRenderer:
             cast_progress: 캐스팅 진행도 (0.0 ~ 1.0)
             is_casting: 캐스팅 중 여부
         """
-        if atb_maximum <= 0:
+        # ATB를 임계값(threshold) 기준으로 표시 (0~threshold = 0~100%)
+        # threshold 이상은 오버플로우로 최대 2배까지 표시
+        if atb_threshold <= 0:
             atb_ratio = 0.0
         else:
-            atb_ratio = min(1.0, atb_current / atb_maximum)
+            atb_ratio = min(2.0, atb_current / atb_threshold)
 
         # ATB 색상 (파란색)
         atb_fg = (100, 150, 255)
         atb_bg = (50, 75, 125)
+
+        # 오버플로우 색상 (밝은 파란색)
+        overflow_fg = (150, 200, 255)
 
         # 캐스팅 색상 (보라색/자홍색)
         cast_fg = (200, 100, 255)
@@ -312,8 +317,9 @@ class GaugeRenderer:
         # 배경
         console.draw_rect(x, y, width, 1, ord(" "), bg=atb_bg)
 
-        # ATB 게이지 그리기
-        atb_filled_exact = atb_ratio * width
+        # ATB 게이지 그리기 (100%까지)
+        normal_ratio = min(1.0, atb_ratio)
+        atb_filled_exact = normal_ratio * width
         atb_filled_full = int(atb_filled_exact)
         atb_filled_partial = atb_filled_exact - atb_filled_full
 
@@ -329,6 +335,24 @@ class GaugeRenderer:
                 int(atb_bg[2] + (atb_fg[2] - atb_bg[2]) * atb_filled_partial)
             )
             console.draw_rect(x + atb_filled_full, y, 1, 1, ord(" "), bg=partial_color)
+
+        # 오버플로우 게이지 (100% 초과분, 최대 200%까지)
+        if atb_ratio > 1.0:
+            overflow_ratio = min(1.0, atb_ratio - 1.0)
+            overflow_filled_exact = overflow_ratio * width
+            overflow_filled_full = int(overflow_filled_exact)
+            overflow_filled_partial = overflow_filled_exact - overflow_filled_full
+
+            if overflow_filled_full > 0:
+                console.draw_rect(x, y, overflow_filled_full, 1, ord(" "), bg=overflow_fg)
+
+            if overflow_filled_partial > 0.0 and overflow_filled_full < width:
+                partial_color = (
+                    int(atb_fg[0] + (overflow_fg[0] - atb_fg[0]) * overflow_filled_partial),
+                    int(atb_fg[1] + (overflow_fg[1] - atb_fg[1]) * overflow_filled_partial),
+                    int(atb_fg[2] + (overflow_fg[2] - atb_fg[2]) * overflow_filled_partial)
+                )
+                console.draw_rect(x + overflow_filled_full, y, 1, 1, ord(" "), bg=partial_color)
 
         # 캐스팅 중이면 캐스팅 진행도를 오버레이
         if is_casting and cast_progress > 0.0:
@@ -349,17 +373,17 @@ class GaugeRenderer:
                 )
                 console.draw_rect(x + cast_filled_full, y, 1, 1, ord(" "), bg=partial_color)
 
-        # 행동 가능 임계값 표시 (세로선)
-        threshold_ratio = atb_threshold / atb_maximum
-        threshold_x = x + int(threshold_ratio * width)
-        if 0 <= threshold_x < x + width:
-            console.print(threshold_x, y, "|", fg=(255, 255, 100))
-
-        # 텍스트 표시
+        # 텍스트 표시 (threshold 기준, 100% = 행동 가능)
         if is_casting:
             text = f"캐스팅 {int(cast_progress * 100)}%"
         else:
-            text = f"{int(atb_ratio * 100)}%"
+            # atb_ratio는 threshold 기준 (1.0 = 100% = 행동 가능)
+            percentage = int(atb_ratio * 100)
+            if percentage > 100:
+                # 오버플로우는 밝게 표시
+                text = f"{percentage}%"
+            else:
+                text = f"{percentage}%"
         text_x = x + (width - len(text)) // 2
         console.print(text_x, y, text, fg=(255, 255, 255))
 
