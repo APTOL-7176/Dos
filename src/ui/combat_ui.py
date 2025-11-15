@@ -780,7 +780,7 @@ class CombatUI:
             fire = getattr(character, 'fire_element', 0)
             ice = getattr(character, 'ice_element', 0)
             lightning = getattr(character, 'lightning_element', 0)
-            return f"[🔥{fire} ❄{ice} ⚡{lightning}]"
+            return f"[화염{fire} 냉기{ice} 번개{lightning}]"
 
         elif gimmick_type == "aim_system":
             # 궁수/저격수 - 조준
