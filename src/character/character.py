@@ -117,15 +117,15 @@ class Character:
         for yaml_key, stat_enum in stat_mapping.items():
             base_value = base_stats.get(yaml_key, 50)
 
-            # 성장률 설정 (기초 스탯의 %로 선형 성장)
+            # 성장률 설정 (exponential로 레벨당 일정 %씩 성장)
             if yaml_key == "hp":
-                # HP: 기초 스탯의 8~15% (평균 11.5%)
-                growth_rate = base_value * 0.115
-                growth_type = "linear"
+                # HP: 레벨당 11.5% 성장 (8~15% 범위)
+                growth_rate = 0.115
+                growth_type = "exponential"
             elif yaml_key == "mp":
-                # MP: 기초 스탯의 8~15% (평균 11.5%)
-                growth_rate = base_value * 0.115
-                growth_type = "linear"
+                # MP: 레벨당 11.5% 성장 (8~15% 범위)
+                growth_rate = 0.115
+                growth_type = "exponential"
             elif yaml_key == "init_brv":
                 growth_rate = 50
                 growth_type = "linear"
@@ -133,20 +133,20 @@ class Character:
                 growth_rate = 75
                 growth_type = "linear"
             elif yaml_key in ["physical_attack", "magic_attack"]:
-                # 공격/마법: 기초 스탯의 15~25% (평균 20%)
-                growth_rate = base_value * 0.20
-                growth_type = "linear"
+                # 공격/마법: 레벨당 20% 성장 (15~25% 범위)
+                growth_rate = 0.20
+                growth_type = "exponential"
             elif yaml_key in ["physical_defense", "magic_defense"]:
-                # 방어: 기초 스탯의 15~25% (평균 20%)
-                growth_rate = base_value * 0.20
-                growth_type = "linear"
+                # 방어: 레벨당 20% 성장 (15~25% 범위)
+                growth_rate = 0.20
+                growth_type = "exponential"
             elif yaml_key == "speed":
-                # 속도: 기초 스탯의 15~25% (평균 20%)
-                growth_rate = base_value * 0.20
-                growth_type = "linear"
+                # 속도: 레벨당 20% 성장 (15~25% 범위)
+                growth_rate = 0.20
+                growth_type = "exponential"
             else:
-                growth_rate = base_value * 0.10
-                growth_type = "linear"
+                growth_rate = 0.10
+                growth_type = "exponential"
 
             stats_config[stat_enum] = {
                 "base_value": base_value,
